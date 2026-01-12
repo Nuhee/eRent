@@ -550,6 +550,68 @@ namespace eRent.Services.Database
                 }
             );
 
+            // Seed Rents
+            var rentFixedDate = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            
+            modelBuilder.Entity<Rent>().HasData(
+                // Daily rent for User 5 (Amel) - Property 1, 3 days in January 2025
+                new Rent
+                {
+                    Id = 1,
+                    PropertyId = 1, // Modern Apartment in Sarajevo Center
+                    UserId = 5, // Amel (regular user 1)
+                    StartDate = new DateTime(2025, 1, 15, 0, 0, 0, DateTimeKind.Utc),
+                    EndDate = new DateTime(2025, 1, 18, 0, 0, 0, DateTimeKind.Utc),
+                    IsDailyRental = true,
+                    TotalPrice = 105.00m, // 35.00 * 3 days
+                    Status = "Completed",
+                    IsActive = true,
+                    CreatedAt = rentFixedDate
+                },
+                // Monthly rent for User 6 (Nina) - Property 1, January 2025
+                new Rent
+                {
+                    Id = 2,
+                    PropertyId = 1, // Modern Apartment in Sarajevo Center
+                    UserId = 6, // Nina (regular user 2)
+                    StartDate = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    EndDate = new DateTime(2025, 1, 31, 23, 59, 59, DateTimeKind.Utc),
+                    IsDailyRental = false,
+                    TotalPrice = 800.00m, // Monthly price
+                    Status = "Completed",
+                    IsActive = true,
+                    CreatedAt = rentFixedDate
+                },
+                // Monthly rent for User 7 (Goran) - Property 2, February 2025
+                new Rent
+                {
+                    Id = 3,
+                    PropertyId = 2, // Spacious House in Mostar
+                    UserId = 7, // Goran (regular user 3)
+                    StartDate = new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc),
+                    EndDate = new DateTime(2025, 2, 28, 23, 59, 59, DateTimeKind.Utc),
+                    IsDailyRental = false,
+                    TotalPrice = 1200.00m, // Monthly price
+                    Status = "Active",
+                    IsActive = true,
+                    CreatedAt = rentFixedDate
+                },
+                // Monthly rent for User 6 (Nina) - Property 3, March-April 2025 (2 months)
+                new Rent
+                {
+                    Id = 4,
+                    PropertyId = 3, // Cozy Studio in Tuzla
+                    UserId = 6, // Nina (regular user 2)
+                    StartDate = new DateTime(2025, 3, 1, 0, 0, 0, DateTimeKind.Utc),
+                    EndDate = new DateTime(2025, 4, 30, 23, 59, 59, DateTimeKind.Utc),
+                    IsDailyRental = false,
+                    TotalPrice = 900.00m, // 450.00 * 2 months
+                    Status = "Pending",
+                    IsActive = true,
+                    CreatedAt = rentFixedDate
+                }
+            );
+
 
         }
     }

@@ -52,5 +52,8 @@ namespace eRent.Services.Database
         
         // Navigation property for the many-to-many relationship with Role
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+
+        // Navigation property for Rents (as tenant)
+        public ICollection<Rent> Rents { get; set; } = new List<Rent>();
     }
 } 

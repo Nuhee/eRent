@@ -66,5 +66,8 @@ namespace eRent.Services.Database
 
         // Navigation property for PropertyImages
         public ICollection<PropertyImage> PropertyImages { get; set; } = new List<PropertyImage>();
+
+        // Navigation property for Rents
+        public ICollection<Rent> Rents { get; set; } = new List<Rent>();
     }
 }

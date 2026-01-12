@@ -20,6 +20,7 @@ namespace eRent.Services.Database
         public DbSet<Property> Properties { get; set; }
         public DbSet<PropertyAmenity> PropertyAmenities { get; set; }
         public DbSet<PropertyImage> PropertyImages { get; set; }
+        public DbSet<Rent> Rents { get; set; }
     
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -148,6 +149,19 @@ namespace eRent.Services.Database
                 .WithMany(p => p.PropertyImages)
                 .HasForeignKey(pi => pi.PropertyId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure Rent entity relationships
+            modelBuilder.Entity<Rent>()
+                .HasOne(r => r.Property)
+                .WithMany(p => p.Rents)
+                .HasForeignKey(r => r.PropertyId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Rent>()
+                .HasOne(r => r.User)
+                .WithMany(u => u.Rents)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             // Seed initial data
             modelBuilder.SeedData();
