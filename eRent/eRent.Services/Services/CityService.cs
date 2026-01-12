@@ -60,6 +60,11 @@ namespace eRent.Services.Services
                 query = query.Where(x => x.CountryId == search.CountryId.Value);
             }
 
+            if (search.IsActive.HasValue)
+            {
+                query = query.Where(x => x.IsActive == search.IsActive.Value);
+            }
+
             return query;
         }
 

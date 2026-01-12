@@ -4,5 +4,6 @@ namespace eRent.Model.SearchObjects
     {
         public string? Name { get; set; }
         public int? CountryId { get; set; }
+        public bool? IsActive { get; set; }
     }
 } 

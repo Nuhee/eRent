@@ -10,5 +10,7 @@ namespace eRent.Model.Requests
         
         [Required]
         public int CountryId { get; set; }
+        
+        public bool IsActive { get; set; } = true;
     }
 } 
