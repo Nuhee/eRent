@@ -24,6 +24,7 @@ builder.Services.AddTransient<IPropertyService, PropertyService>();
 builder.Services.AddTransient<IPropertyAmenityService, PropertyAmenityService>();
 builder.Services.AddTransient<IPropertyImageService, PropertyImageService>();
 builder.Services.AddTransient<IRentService, RentService>();
+builder.Services.AddTransient<IRentStatusService, RentStatusService>();
 builder.Services.AddTransient<IChatService, ChatService>();
 
 

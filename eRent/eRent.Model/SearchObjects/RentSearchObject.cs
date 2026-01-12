@@ -7,7 +7,7 @@ namespace eRent.Model.SearchObjects
         public int? PropertyId { get; set; }
         public int? UserId { get; set; }
         public bool? IsDailyRental { get; set; }
-        public string? Status { get; set; }
+        public int? RentStatusId { get; set; }
         public DateTime? StartDateFrom { get; set; }
         public DateTime? StartDateTo { get; set; }
         public DateTime? EndDateFrom { get; set; }

@@ -22,6 +22,7 @@ namespace eRent.Services.Services
             var query = _context.Rents
                 .Include(x => x.Property)
                 .Include(x => x.User)
+                .Include(x => x.RentStatus)
                 .AsQueryable();
 
             query = ApplyFilter(query, search);
@@ -69,9 +70,9 @@ namespace eRent.Services.Services
                 query = query.Where(x => x.IsDailyRental == search.IsDailyRental.Value);
             }
 
-            if (!string.IsNullOrEmpty(search.Status))
+            if (search.RentStatusId.HasValue)
             {
-                query = query.Where(x => x.Status == search.Status);
+                query = query.Where(x => x.RentStatusId == search.RentStatusId.Value);
             }
 
             if (search.StartDateFrom.HasValue)
@@ -116,6 +117,11 @@ namespace eRent.Services.Services
                 response.UserName = $"{entity.User.FirstName} {entity.User.LastName}";
             }
 
+            if (entity.RentStatus != null)
+            {
+                response.RentStatusName = entity.RentStatus.Name;
+            }
+
             return response;
         }
 
@@ -124,6 +130,7 @@ namespace eRent.Services.Services
             var entity = await _context.Rents
                 .Include(x => x.Property)
                 .Include(x => x.User)
+                .Include(x => x.RentStatus)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (entity == null)
@@ -162,11 +169,17 @@ namespace eRent.Services.Services
                 }
             }
 
-            // Check for overlapping rentals
+            // Validate RentStatus exists
+            if (!await _context.RentStatuses.AnyAsync(rs => rs.Id == request.RentStatusId))
+            {
+                throw new InvalidOperationException("Rent status does not exist.");
+            }
+
+            // Check for overlapping rentals (only for Accepted or Paid statuses)
             var overlappingRents = await _context.Rents
                 .Where(r => r.PropertyId == request.PropertyId 
                     && r.IsActive 
-                    && r.Status != "Cancelled"
+                    && (r.RentStatusId == 4 || r.RentStatusId == 5) // Accepted (4) or Paid (5)
                     && ((r.StartDate <= request.StartDate && r.EndDate > request.StartDate) ||
                         (r.StartDate < request.EndDate && r.EndDate >= request.EndDate) ||
                         (r.StartDate >= request.StartDate && r.EndDate <= request.EndDate)))
@@ -208,12 +221,18 @@ namespace eRent.Services.Services
                 }
             }
 
-            // Check for overlapping rentals (excluding current rent)
+            // Validate RentStatus exists
+            if (!await _context.RentStatuses.AnyAsync(rs => rs.Id == request.RentStatusId))
+            {
+                throw new InvalidOperationException("Rent status does not exist.");
+            }
+
+            // Check for overlapping rentals (excluding current rent, only for Accepted or Paid statuses)
             var overlappingRents = await _context.Rents
                 .Where(r => r.Id != entity.Id
                     && r.PropertyId == request.PropertyId 
                     && r.IsActive 
-                    && r.Status != "Cancelled"
+                    && (r.RentStatusId == 4 || r.RentStatusId == 5) // Accepted (4) or Paid (5)
                     && ((r.StartDate <= request.StartDate && r.EndDate > request.StartDate) ||
                         (r.StartDate < request.EndDate && r.EndDate >= request.EndDate) ||
                         (r.StartDate >= request.StartDate && r.EndDate <= request.EndDate)))

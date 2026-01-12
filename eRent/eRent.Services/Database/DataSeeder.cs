@@ -550,6 +550,50 @@ namespace eRent.Services.Database
                 }
             );
 
+            // Seed RentStatuses
+            modelBuilder.Entity<RentStatus>().HasData(
+                new RentStatus
+                {
+                    Id = 1,
+                    Name = "Pending",
+                    Description = "Rent request is pending landlord approval",
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                },
+                new RentStatus
+                {
+                    Id = 2,
+                    Name = "Cancelled",
+                    Description = "Cancelled by user",
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                },
+                new RentStatus
+                {
+                    Id = 3,
+                    Name = "Rejected",
+                    Description = "Rejected by landlord",
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                },
+                new RentStatus
+                {
+                    Id = 4,
+                    Name = "Accepted",
+                    Description = "Accepted by landlord",
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                },
+                new RentStatus
+                {
+                    Id = 5,
+                    Name = "Paid",
+                    Description = "Accepted and paid by the user",
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                }
+            );
+
             // Seed Rents
             var rentFixedDate = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             
@@ -564,7 +608,7 @@ namespace eRent.Services.Database
                     EndDate = new DateTime(2025, 1, 18, 0, 0, 0, DateTimeKind.Utc),
                     IsDailyRental = true,
                     TotalPrice = 105.00m, // 35.00 * 3 days
-                    Status = "Completed",
+                    RentStatusId = 5, // Paid
                     IsActive = true,
                     CreatedAt = rentFixedDate
                 },
@@ -578,7 +622,7 @@ namespace eRent.Services.Database
                     EndDate = new DateTime(2025, 1, 31, 23, 59, 59, DateTimeKind.Utc),
                     IsDailyRental = false,
                     TotalPrice = 800.00m, // Monthly price
-                    Status = "Completed",
+                    RentStatusId = 5, // Paid
                     IsActive = true,
                     CreatedAt = rentFixedDate
                 },
@@ -592,7 +636,7 @@ namespace eRent.Services.Database
                     EndDate = new DateTime(2025, 2, 28, 23, 59, 59, DateTimeKind.Utc),
                     IsDailyRental = false,
                     TotalPrice = 1200.00m, // Monthly price
-                    Status = "Active",
+                    RentStatusId = 4, // Accepted
                     IsActive = true,
                     CreatedAt = rentFixedDate
                 },
@@ -606,7 +650,7 @@ namespace eRent.Services.Database
                     EndDate = new DateTime(2025, 4, 30, 23, 59, 59, DateTimeKind.Utc),
                     IsDailyRental = false,
                     TotalPrice = 900.00m, // 450.00 * 2 months
-                    Status = "Pending",
+                    RentStatusId = 1, // Pending
                     IsActive = true,
                     CreatedAt = rentFixedDate
                 }

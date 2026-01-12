@@ -13,7 +13,8 @@ namespace eRent.Model.Responses
         public DateTime EndDate { get; set; }
         public bool IsDailyRental { get; set; }
         public decimal TotalPrice { get; set; }
-        public string Status { get; set; } = string.Empty;
+        public int RentStatusId { get; set; }
+        public string RentStatusName { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

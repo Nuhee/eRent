@@ -21,6 +21,7 @@ namespace eRent.Services.Database
         public DbSet<PropertyAmenity> PropertyAmenities { get; set; }
         public DbSet<PropertyImage> PropertyImages { get; set; }
         public DbSet<Rent> Rents { get; set; }
+        public DbSet<RentStatus> RentStatuses { get; set; }
     
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -161,6 +162,18 @@ namespace eRent.Services.Database
                 .HasOne(r => r.User)
                 .WithMany(u => u.Rents)
                 .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Configure RentStatus entity
+            modelBuilder.Entity<RentStatus>()
+                .HasIndex(rs => rs.Name)
+                .IsUnique();
+
+            // Configure Rent-RentStatus relationship
+            modelBuilder.Entity<Rent>()
+                .HasOne(r => r.RentStatus)
+                .WithMany(rs => rs.Rents)
+                .HasForeignKey(r => r.RentStatusId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             // Seed initial data

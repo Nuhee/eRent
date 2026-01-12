@@ -28,8 +28,7 @@ namespace eRent.Services.Database
         public decimal TotalPrice { get; set; }
 
         [Required]
-        [MaxLength(50)]
-        public string Status { get; set; } = "Pending"; // Pending, Active, Completed, Cancelled
+        public int RentStatusId { get; set; } = 1; // FK to RentStatus (default: Pending)
 
         public bool IsActive { get; set; } = true;
 
@@ -43,5 +42,8 @@ namespace eRent.Services.Database
 
         [ForeignKey("UserId")]
         public User User { get; set; } = null!;
+
+        [ForeignKey("RentStatusId")]
+        public RentStatus RentStatus { get; set; } = null!;
     }
 }
