@@ -220,6 +220,28 @@ namespace eRent.Services.Database
                 new PropertyType { Id = 10, Name = "Loft", IsActive = true }
             );
 
+            // Seed Amenities
+            modelBuilder.Entity<Amenity>().HasData(
+                new Amenity { Id = 1, Name = "WiFi", IsActive = true },
+                new Amenity { Id = 2, Name = "Parking", IsActive = true },
+                new Amenity { Id = 3, Name = "Air Conditioning", IsActive = true },
+                new Amenity { Id = 4, Name = "TV", IsActive = true },
+                new Amenity { Id = 5, Name = "Washing Machine", IsActive = true },
+                new Amenity { Id = 6, Name = "Dishwasher", IsActive = true },
+                new Amenity { Id = 7, Name = "Heating", IsActive = true },
+                new Amenity { Id = 8, Name = "Kitchen", IsActive = true },
+                new Amenity { Id = 9, Name = "Balcony", IsActive = true },
+                new Amenity { Id = 10, Name = "Garden", IsActive = true },
+                new Amenity { Id = 11, Name = "Pool", IsActive = true },
+                new Amenity { Id = 12, Name = "Gym", IsActive = true },
+                new Amenity { Id = 13, Name = "Elevator", IsActive = true },
+                new Amenity { Id = 14, Name = "Pet Friendly", IsActive = true },
+                new Amenity { Id = 15, Name = "Smoking Allowed", IsActive = true },
+                new Amenity { Id = 16, Name = "Fireplace", IsActive = true },
+                new Amenity { Id = 17, Name = "Security System", IsActive = true },
+                new Amenity { Id = 18, Name = "Furnished", IsActive = true }
+            );
+
             // Seed Countries (Balkan countries)
             modelBuilder.Entity<Country>().HasData(
                 new Country { Id = 1, Name = "Bosnia and Herzegovina", Code = "BIH", IsActive = true },

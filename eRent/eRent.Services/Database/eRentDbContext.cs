@@ -16,6 +16,7 @@ namespace eRent.Services.Database
         public DbSet<Country> Countries { get; set; }
         public DbSet<City> Cities { get; set; }
         public DbSet<PropertyType> PropertyTypes { get; set; }
+        public DbSet<Amenity> Amenities { get; set; }
     
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -65,6 +66,11 @@ namespace eRent.Services.Database
             // Configure PropertyType entity
             modelBuilder.Entity<PropertyType>()
                 .HasIndex(pt => pt.Name)
+                .IsUnique();
+
+            // Configure Amenity entity
+            modelBuilder.Entity<Amenity>()
+                .HasIndex(a => a.Name)
                 .IsUnique();
 
             // Configure Country entity

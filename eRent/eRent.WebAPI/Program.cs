@@ -19,6 +19,7 @@ builder.Services.AddTransient<IGenderService, GenderService>();
 builder.Services.AddTransient<ICountryService, CountryService>();
 builder.Services.AddTransient<ICityService, CityService>();
 builder.Services.AddTransient<IPropertyTypeService, PropertyTypeService>();
+builder.Services.AddTransient<IAmenityService, AmenityService>();
 builder.Services.AddTransient<IChatService, ChatService>();
 
 
