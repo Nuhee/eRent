@@ -99,7 +99,7 @@ namespace eRent.Services.Services
         {
             var entity = new PropertyImage();
             MapInsertToEntity(entity, request);
-            entity.CreatedAt = DateTime.UtcNow;
+            entity.CreatedAt = DateTime.Now;
 
             _context.PropertyImages.Add(entity);
 

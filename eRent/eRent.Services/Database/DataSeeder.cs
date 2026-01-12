@@ -11,7 +11,7 @@ namespace eRent.Services.Database
         public static void SeedData(this ModelBuilder modelBuilder)
         {
             // Use a fixed date for all timestamps
-            var fixedDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var fixedDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Local);
 
             // Seed Roles
             modelBuilder.Entity<Role>().HasData(
@@ -595,7 +595,7 @@ namespace eRent.Services.Database
             );
 
             // Seed Rents
-            var rentFixedDate = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var rentFixedDate = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local);
             
             modelBuilder.Entity<Rent>().HasData(
                 // Daily rent for User 5 (Amel) - Property 1, 3 days in January 2025
@@ -604,8 +604,8 @@ namespace eRent.Services.Database
                     Id = 1,
                     PropertyId = 1, // Modern Apartment in Sarajevo Center
                     UserId = 5, // Amel (regular user 1)
-                    StartDate = new DateTime(2025, 1, 15, 0, 0, 0, DateTimeKind.Utc),
-                    EndDate = new DateTime(2025, 1, 18, 0, 0, 0, DateTimeKind.Utc),
+                    StartDate = new DateTime(2025, 1, 15, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 1, 18, 0, 0, 0, DateTimeKind.Local),
                     IsDailyRental = true,
                     TotalPrice = 105.00m, // 35.00 * 3 days
                     RentStatusId = 5, // Paid
@@ -618,8 +618,8 @@ namespace eRent.Services.Database
                     Id = 2,
                     PropertyId = 1, // Modern Apartment in Sarajevo Center
                     UserId = 6, // Nina (regular user 2)
-                    StartDate = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                    EndDate = new DateTime(2025, 1, 31, 23, 59, 59, DateTimeKind.Utc),
+                    StartDate = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 1, 31, 23, 59, 59, DateTimeKind.Local),
                     IsDailyRental = false,
                     TotalPrice = 800.00m, // Monthly price
                     RentStatusId = 5, // Paid
@@ -632,8 +632,8 @@ namespace eRent.Services.Database
                     Id = 3,
                     PropertyId = 2, // Spacious House in Mostar
                     UserId = 7, // Goran (regular user 3)
-                    StartDate = new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc),
-                    EndDate = new DateTime(2025, 2, 28, 23, 59, 59, DateTimeKind.Utc),
+                    StartDate = new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 2, 28, 23, 59, 59, DateTimeKind.Local),
                     IsDailyRental = false,
                     TotalPrice = 1200.00m, // Monthly price
                     RentStatusId = 4, // Accepted
@@ -646,13 +646,67 @@ namespace eRent.Services.Database
                     Id = 4,
                     PropertyId = 3, // Cozy Studio in Tuzla
                     UserId = 6, // Nina (regular user 2)
-                    StartDate = new DateTime(2025, 3, 1, 0, 0, 0, DateTimeKind.Utc),
-                    EndDate = new DateTime(2025, 4, 30, 23, 59, 59, DateTimeKind.Utc),
+                    StartDate = new DateTime(2025, 3, 1, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 4, 30, 23, 59, 59, DateTimeKind.Local),
                     IsDailyRental = false,
                     TotalPrice = 900.00m, // 450.00 * 2 months
                     RentStatusId = 1, // Pending
                     IsActive = true,
                     CreatedAt = rentFixedDate
+                }
+            );
+
+            // Seed ReviewRents
+            var reviewFixedDate = new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Local);
+            
+            modelBuilder.Entity<ReviewRent>().HasData(
+                // Review for Rent 1 - User 5 (Amel) reviewing Property 1
+                new ReviewRent
+                {
+                    Id = 1,
+                    RentId = 1,
+                    UserId = 5, // Amel (regular user 1)
+                    Rating = 5,
+                    Comment = "Excellent apartment! Very clean, well-located, and the landlord was very responsive. Highly recommend!",
+                    IsActive = true,
+                    CreatedAt = reviewFixedDate
+                },
+                // Review for Rent 2 - User 6 (Nina) reviewing Property 1
+                new ReviewRent
+                {
+                    Id = 2,
+                    RentId = 2,
+                    UserId = 6, // Nina (regular user 2)
+                    Rating = 4,
+                    Comment = "Great location and good value for money. The apartment was clean and had all the amenities promised. Minor issue with heating but overall satisfied.",
+                    IsActive = true,
+                    CreatedAt = reviewFixedDate.AddDays(5)
+                },
+                // Review for Rent 3 - User 7 (Goran) reviewing Property 2
+                // Note: This rent is "Accepted" but not "Paid", so normally wouldn't allow review
+                // Seeded for completeness as requested
+                new ReviewRent
+                {
+                    Id = 3,
+                    RentId = 3,
+                    UserId = 7, // Goran (regular user 3)
+                    Rating = 5,
+                    Comment = "Amazing house! Spacious, beautiful garden, and perfect for families. The landlord was very accommodating. Will definitely rent again!",
+                    IsActive = true,
+                    CreatedAt = reviewFixedDate.AddDays(10)
+                },
+                // Review for Rent 4 - User 6 (Nina) reviewing Property 3
+                // Note: This rent is "Pending", so normally wouldn't allow review
+                // Seeded for completeness as requested
+                new ReviewRent
+                {
+                    Id = 4,
+                    RentId = 4,
+                    UserId = 6, // Nina (regular user 2)
+                    Rating = 3,
+                    Comment = "Decent studio apartment. Good for students, close to university. Could use some updates but functional.",
+                    IsActive = true,
+                    CreatedAt = reviewFixedDate.AddDays(15)
                 }
             );
 

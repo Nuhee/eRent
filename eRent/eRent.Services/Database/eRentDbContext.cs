@@ -22,6 +22,7 @@ namespace eRent.Services.Database
         public DbSet<PropertyImage> PropertyImages { get; set; }
         public DbSet<Rent> Rents { get; set; }
         public DbSet<RentStatus> RentStatuses { get; set; }
+        public DbSet<ReviewRent> ReviewRents { get; set; }
     
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -175,6 +176,24 @@ namespace eRent.Services.Database
                 .WithMany(rs => rs.Rents)
                 .HasForeignKey(r => r.RentStatusId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // Configure ReviewRent entity relationships
+            modelBuilder.Entity<ReviewRent>()
+                .HasOne(rr => rr.Rent)
+                .WithMany(r => r.ReviewRents)
+                .HasForeignKey(rr => rr.RentId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ReviewRent>()
+                .HasOne(rr => rr.User)
+                .WithMany(u => u.ReviewRents)
+                .HasForeignKey(rr => rr.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Create a unique constraint on RentId and UserId (one review per user per rent)
+            modelBuilder.Entity<ReviewRent>()
+                .HasIndex(rr => new { rr.RentId, rr.UserId })
+                .IsUnique();
 
             // Seed initial data
             modelBuilder.SeedData();

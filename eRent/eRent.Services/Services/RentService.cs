@@ -247,7 +247,7 @@ namespace eRent.Services.Services
         protected override void MapUpdateToEntity(Rent entity, RentUpsertRequest request)
         {
             base.MapUpdateToEntity(entity, request);
-            entity.UpdatedAt = DateTime.UtcNow;
+            entity.UpdatedAt = DateTime.Now;
         }
     }
 }

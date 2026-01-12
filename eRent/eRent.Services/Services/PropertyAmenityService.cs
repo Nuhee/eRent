@@ -101,7 +101,7 @@ namespace eRent.Services.Services
         {
             var entity = new PropertyAmenity();
             MapInsertToEntity(entity, request);
-            entity.DateAdded = DateTime.UtcNow;
+            entity.DateAdded = DateTime.Now;
 
             _context.PropertyAmenities.Add(entity);
 

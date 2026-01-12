@@ -214,7 +214,7 @@ namespace eRent.Services.Services
                     {
                         PropertyId = entity.Id,
                         AmenityId = amenityId,
-                        DateAdded = DateTime.UtcNow
+                        DateAdded = DateTime.Now
                     };
                     _context.PropertyAmenities.Add(propertyAmenity);
                 }
@@ -248,7 +248,7 @@ namespace eRent.Services.Services
 
             MapUpdateToEntity(entity, request);
             entity.LandlordId = request.LandlordId;
-            entity.UpdatedAt = DateTime.UtcNow;
+            entity.UpdatedAt = DateTime.Now;
 
             // Update amenities
             if (request.AmenityIds != null)
@@ -263,7 +263,7 @@ namespace eRent.Services.Services
                     {
                         PropertyId = entity.Id,
                         AmenityId = amenityId,
-                        DateAdded = DateTime.UtcNow
+                        DateAdded = DateTime.Now
                     };
                     _context.PropertyAmenities.Add(propertyAmenity);
                 }

@@ -21,6 +21,6 @@ namespace eRent.Services.Database
         [ForeignKey("AmenityId")]
         public Amenity Amenity { get; set; } = null!;
 
-        public DateTime DateAdded { get; set; } = DateTime.UtcNow;
+        public DateTime DateAdded { get; set; } = DateTime.Now;
     }
 }

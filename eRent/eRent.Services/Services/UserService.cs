@@ -145,7 +145,7 @@ namespace eRent.Services.Services
                 GenderId = request.GenderId,
                 CityId = request.CityId,
                 IsActive = request.IsActive,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 Picture = request.Picture
             };
 
@@ -168,7 +168,7 @@ namespace eRent.Services.Services
                     {
                         UserId = user.Id,
                         RoleId = roleId,
-                        DateAssigned = DateTime.UtcNow
+                        DateAssigned = DateTime.Now
                     };
                     _context.UserRoles.Add(userRole);
                 }
@@ -229,7 +229,7 @@ namespace eRent.Services.Services
                     {
                         UserId = user.Id,
                         RoleId = roleId,
-                        DateAssigned = DateTime.UtcNow
+                        DateAssigned = DateTime.Now
                     };
                     _context.UserRoles.Add(userRole);
                 }
@@ -307,7 +307,7 @@ namespace eRent.Services.Services
                 return null;
 
             // Update last login time
-            user.LastLoginAt = DateTime.UtcNow;
+            user.LastLoginAt = DateTime.Now;
             await _context.SaveChangesAsync();
 
             return MapToResponse(user);

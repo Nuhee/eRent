@@ -32,7 +32,7 @@ namespace eRent.Services.Database
 
         public bool IsActive { get; set; } = true;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public DateTime? UpdatedAt { get; set; }
 
@@ -45,5 +45,8 @@ namespace eRent.Services.Database
 
         [ForeignKey("RentStatusId")]
         public RentStatus RentStatus { get; set; } = null!;
+
+        // Navigation property for ReviewRents
+        public ICollection<ReviewRent> ReviewRents { get; set; } = new List<ReviewRent>();
     }
 }

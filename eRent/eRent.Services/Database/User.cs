@@ -34,7 +34,7 @@ namespace eRent.Services.Database
         
         public bool IsActive { get; set; } = true;
         
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
         
         public DateTime? LastLoginAt { get; set; }
         
@@ -55,5 +55,8 @@ namespace eRent.Services.Database
 
         // Navigation property for Rents (as tenant)
         public ICollection<Rent> Rents { get; set; } = new List<Rent>();
+
+        // Navigation property for ReviewRents
+        public ICollection<ReviewRent> ReviewRents { get; set; } = new List<ReviewRent>();
     }
 } 

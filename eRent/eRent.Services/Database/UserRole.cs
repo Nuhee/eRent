@@ -22,6 +22,6 @@ namespace eRent.Services.Database
         [ForeignKey("RoleId")]
         public Role Role { get; set; } = null!;
 
-        public DateTime DateAssigned { get; set; } = DateTime.UtcNow;
+        public DateTime DateAssigned { get; set; } = DateTime.Now;
     }
 }
