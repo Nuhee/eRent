@@ -6,110 +6,198 @@ namespace eRent.Services.Database
 {
     public static class DataSeeder
     {
-        private const string DefaultPhoneNumber = "+387 00 000 000";
-        
-        private const string TestMailSender = "test.sender@gmail.com";
-        private const string TestMailReceiver = "test.receiver@gmail.com";
+        private const string DefaultPhoneNumber = "+387 61 111 111";
 
         public static void SeedData(this ModelBuilder modelBuilder)
         {
             // Use a fixed date for all timestamps
-            var fixedDate = new DateTime(2025, 5, 5, 0, 0, 0, DateTimeKind.Utc);
+            var fixedDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
             // Seed Roles
             modelBuilder.Entity<Role>().HasData(
-                new Role 
-                { 
-                    Id = 1, 
-                    Name = "Administrator", 
-                    Description = "System administrator with full access", 
-                    CreatedAt = fixedDate, 
-                    IsActive = true 
-                },
-                new Role 
-                { 
-                    Id = 2, 
-                    Name = "User", 
-                    Description = "Regular user role", 
-                    CreatedAt = fixedDate, 
-                    IsActive = true 
-                }
+                   new Role
+                   {
+                       Id = 1,
+                       Name = "Administrator",
+                       Description = "Full system access and administrative privileges",
+                       CreatedAt = fixedDate,
+                       IsActive = true
+                   },
+                   new Role
+                   {
+                       Id = 2,
+                       Name = "User",
+                       Description = "Standard user with limited system access",
+                       CreatedAt = fixedDate,
+                       IsActive = true
+                   },
+                   new Role
+                   {
+                       Id = 3,
+                       Name = "Landlord",
+                       Description = "Landlord with property management access",
+                       CreatedAt = fixedDate,
+                       IsActive = true
+                   }
             );
+
+
+            const string defaultPassword = "test";
+
+            // Admin user (desktop)
+            var desktopSalt = PasswordGenerator.GenerateDeterministicSalt("desktop");
+            var desktopHash = PasswordGenerator.GenerateHash(defaultPassword, desktopSalt);
+
+            // Landlord users
+            var landlord1Salt = PasswordGenerator.GenerateDeterministicSalt("landlord");
+            var landlord1Hash = PasswordGenerator.GenerateHash(defaultPassword, landlord1Salt);
+            var landlord2Salt = PasswordGenerator.GenerateDeterministicSalt("landlord2");
+            var landlord2Hash = PasswordGenerator.GenerateHash(defaultPassword, landlord2Salt);
+            var landlord3Salt = PasswordGenerator.GenerateDeterministicSalt("landlord3");
+            var landlord3Hash = PasswordGenerator.GenerateHash(defaultPassword, landlord3Salt);
+
+            // Regular users
+            var user1Salt = PasswordGenerator.GenerateDeterministicSalt("user");
+            var user1Hash = PasswordGenerator.GenerateHash(defaultPassword, user1Salt);
+            var user2Salt = PasswordGenerator.GenerateDeterministicSalt("user2");
+            var user2Hash = PasswordGenerator.GenerateHash(defaultPassword, user2Salt);
+            var user3Salt = PasswordGenerator.GenerateDeterministicSalt("user3");
+            var user3Hash = PasswordGenerator.GenerateHash(defaultPassword, user3Salt);
+
+
 
             // Seed Users
             modelBuilder.Entity<User>().HasData(
-                new User 
+                // Admin user (desktop)
+                new User
                 {
                     Id = 1,
-                    FirstName = "Denis",
-                    LastName = "Mušić",
-                    Email = TestMailReceiver,
-                    Username = "admin",
-                    PasswordHash = "3KbrBi5n9zdQnceWWOK5zaeAwfEjsluyhRQUbNkcgLQ=",
-                    PasswordSalt = "6raKZCuEsvnBBxPKHGpRtA==",
+                    FirstName = "Vedad",
+                    LastName = "Nuhić",
+                    Email = "admin@erent.com",
+                    Username = "desktop",
+                    PasswordHash = desktopHash,
+                    PasswordSalt = desktopSalt,
                     IsActive = true,
                     CreatedAt = fixedDate,
                     PhoneNumber = DefaultPhoneNumber,
-                    GenderId = 1, // Male
-                    CityId = 1, // Sarajevo
-                    Picture = ImageConversion.ConvertImageToByteArray("Assets", "denis.png")
+                    GenderId = 1, 
+                    CityId = 1, 
                 },
-                new User 
-                { 
-                    Id = 2, 
-                    FirstName = "Amel", 
-                    LastName = "Musić",
-                    Email = "example1@gmail.com",
-                    Username = "user", 
-                    PasswordHash = "kDPVcZaikiII7vXJbMEw6B0xZ245I29ocaxBjLaoAC0=", 
-                    PasswordSalt = "O5R9WmM6IPCCMci/BCG/eg==", 
-                    IsActive = true, 
-                    CreatedAt = fixedDate,
-                    PhoneNumber = DefaultPhoneNumber,
-                    GenderId = 1, // Male
-                    CityId = 5, // Mostar
-                    Picture = ImageConversion.ConvertImageToByteArray("Assets", "amel.png")
-                },
-                new User 
-                { 
-                    Id = 3, 
-                    FirstName = "Adil", 
+                // Landlord 1
+                new User
+                {
+                    Id = 2,
+                    FirstName = "Adil",
                     LastName = "Joldić",
-                    Email = "example2@gmail.com",
-                    Username = "admin2", 
-                    PasswordHash = "BiWDuil9svAKOYzii5wopQW3YqjVfQrzGE2iwH/ylY4=", 
-                    PasswordSalt = "pfNS+OLBaQeGqBIzXXcWuA==", 
-                    IsActive = true, 
+                    Email = "landlord1@erent.com",
+                    Username = "landlord",
+                    PasswordHash = landlord1Hash,
+                    PasswordSalt = landlord1Salt,
+                    IsActive = true,
                     CreatedAt = fixedDate,
                     PhoneNumber = DefaultPhoneNumber,
-                    GenderId = 1, // Male
-                    CityId = 3, // Tuzla
-                    Picture = ImageConversion.ConvertImageToByteArray("Assets", "adil.png")
+                    GenderId = 1, 
+                    CityId = 1, 
                 },
-                new User 
-                { 
-                    Id = 4, 
-                    FirstName = "Test", 
-                    LastName = "Test", 
-                    Email = TestMailSender, 
-                    Username = "user2", 
-                    PasswordHash = "KUF0Jsocq9AqdwR9JnT2OrAqm5gDj7ecQvNwh6fW/Bs=", 
-                    PasswordSalt = "c3ZKo0va3tYfnYuNKkHDbQ==", 
-                    IsActive = true, 
+                // Landlord 2
+                new User
+                {
+                    Id = 3,
+                    FirstName = "Elmir",
+                    LastName = "Babović",
+                    Email = "landlord2@erent.com",
+                    Username = "landlord2",
+                    PasswordHash = landlord2Hash,
+                    PasswordSalt = landlord2Salt,
+                    IsActive = true,
                     CreatedAt = fixedDate,
                     PhoneNumber = DefaultPhoneNumber,
-                    GenderId = 2, // Female
-                    CityId = 1, // Sarajevo
-                    //Picture = ImageConversion.ConvertImageToByteArray("Assets", "test.png")
+                    GenderId = 1, 
+                    CityId = 5, 
+                },
+                // Landlord 3
+                new User
+                {
+                    Id = 4,
+                    FirstName = "Denis",
+                    LastName = "Mušić",
+                    Email = "landlord3@erent.com",
+                    Username = "landlord3",
+                    PasswordHash = landlord3Hash,
+                    PasswordSalt = landlord3Salt,
+                    IsActive = true,
+                    CreatedAt = fixedDate,
+                    PhoneNumber = DefaultPhoneNumber,
+                    GenderId = 1,
+                    CityId = 3, 
+                },
+                // User 1
+                new User
+                {
+                    Id = 5,
+                    FirstName = "Amel",
+                    LastName = "Musić",
+                    Email = "test.vedadnuhic@gmail.com",
+                    Username = "user",
+                    PasswordHash = user1Hash,
+                    PasswordSalt = user1Salt,
+                    IsActive = true,
+                    CreatedAt = fixedDate,
+                    PhoneNumber = DefaultPhoneNumber,
+                    GenderId = 1, 
+                    CityId = 1, 
+                },
+                // User 2
+                new User
+                {
+                    Id = 6,
+                    FirstName = "Nina",
+                    LastName = "Bijedić",
+                    Email = "user2@erent.com",
+                    Username = "user2",
+                    PasswordHash = user2Hash,
+                    PasswordSalt = user2Salt,
+                    IsActive = true,
+                    CreatedAt = fixedDate,
+                    PhoneNumber = DefaultPhoneNumber,
+                    GenderId = 2, 
+                    CityId = 5, 
+                },
+                // User 3
+                new User
+                {
+                    Id = 7,
+                    FirstName = "Goran",
+                    LastName = "Škondrić",
+                    Email = "user3@erent.com",
+                    Username = "user3",
+                    PasswordHash = user3Hash,
+                    PasswordSalt = user3Salt,
+                    IsActive = true,
+                    CreatedAt = fixedDate,
+                    PhoneNumber = DefaultPhoneNumber,
+                    GenderId = 1, 
+                    CityId = 3, 
                 }
             );
 
             // Seed UserRoles
             modelBuilder.Entity<UserRole>().HasData(
-                new UserRole { Id = 1, UserId = 1, RoleId = 1, DateAssigned = fixedDate }, 
-                new UserRole { Id = 2, UserId = 2, RoleId = 1, DateAssigned = fixedDate }, 
-                new UserRole { Id = 3, UserId = 3, RoleId = 2, DateAssigned = fixedDate }, 
-                new UserRole { Id = 4, UserId = 4, RoleId = 2, DateAssigned = fixedDate }  
+                // Admin user (desktop) - Administrator role
+                new UserRole { Id = 1, UserId = 1, RoleId = 1, DateAssigned = fixedDate },
+                // Landlord 1 - Landlord role
+                new UserRole { Id = 2, UserId = 2, RoleId = 3, DateAssigned = fixedDate },
+                // Landlord 2 - Landlord role
+                new UserRole { Id = 3, UserId = 3, RoleId = 3, DateAssigned = fixedDate },
+                // Landlord 3 - Landlord role
+                new UserRole { Id = 4, UserId = 4, RoleId = 3, DateAssigned = fixedDate },
+                // User 1 - User role
+                new UserRole { Id = 5, UserId = 5, RoleId = 2, DateAssigned = fixedDate },
+                // User 2 - User role
+                new UserRole { Id = 6, UserId = 6, RoleId = 2, DateAssigned = fixedDate },
+                // User 3 - User role
+                new UserRole { Id = 7, UserId = 7, RoleId = 2, DateAssigned = fixedDate }
             );
 
             // Seed Genders
@@ -117,6 +205,7 @@ namespace eRent.Services.Database
                 new Gender { Id = 1, Name = "Male" },
                 new Gender { Id = 2, Name = "Female" }
             );
+
 
             // Seed Countries (Balkan countries)
             modelBuilder.Entity<Country>().HasData(
@@ -216,6 +305,8 @@ namespace eRent.Services.Database
                 new City { Id = cityId++, Name = "Trbovlje", CountryId = 7, IsActive = true },
                 new City { Id = cityId++, Name = "Kamnik", CountryId = 7, IsActive = true }
             );
+
+
         }
     }
-} 
+}
