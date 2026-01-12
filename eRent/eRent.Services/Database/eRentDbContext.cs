@@ -195,6 +195,19 @@ namespace eRent.Services.Database
                 .HasIndex(rr => new { rr.RentId, rr.UserId })
                 .IsUnique();
 
+            // Configure Chat entity relationships
+            modelBuilder.Entity<Chat>()
+                .HasOne(c => c.Sender)
+                .WithMany()
+                .HasForeignKey(c => c.SenderId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Chat>()
+                .HasOne(c => c.Receiver)
+                .WithMany()
+                .HasForeignKey(c => c.ReceiverId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             // Seed initial data
             modelBuilder.SeedData();
         }

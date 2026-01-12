@@ -458,7 +458,7 @@ namespace eRent.Services.Database
                 {
                     Id = 1,
                     PropertyId = 1,
-                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap1_1.jpg"),
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "1.jpg"),
                     DisplayOrder = 1,
                     IsCover = true,
                     IsActive = true,
@@ -468,7 +468,7 @@ namespace eRent.Services.Database
                 {
                     Id = 2,
                     PropertyId = 1,
-                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap1_2.jpg"),
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "2.jpg"),
                     DisplayOrder = 2,
                     IsCover = false,
                     IsActive = true,
@@ -478,7 +478,7 @@ namespace eRent.Services.Database
                 {
                     Id = 3,
                     PropertyId = 1,
-                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap1_3.jpg"),
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "3.jpg"),
                     DisplayOrder = 3,
                     IsCover = false,
                     IsActive = true,
@@ -490,7 +490,7 @@ namespace eRent.Services.Database
                 {
                     Id = 4,
                     PropertyId = 2,
-                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap2_1.jpg"),
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "4.jpg"),
                     DisplayOrder = 1,
                     IsCover = true,
                     IsActive = true,
@@ -500,7 +500,7 @@ namespace eRent.Services.Database
                 {
                     Id = 5,
                     PropertyId = 2,
-                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap2_2.jpg"),
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "5.jpg"),
                     DisplayOrder = 2,
                     IsCover = false,
                     IsActive = true,
@@ -510,7 +510,7 @@ namespace eRent.Services.Database
                 {
                     Id = 6,
                     PropertyId = 2,
-                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap2_3.jpg"),
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "6.jpg"),
                     DisplayOrder = 3,
                     IsCover = false,
                     IsActive = true,
@@ -522,7 +522,7 @@ namespace eRent.Services.Database
                 {
                     Id = 7,
                     PropertyId = 3,
-                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap3_1.jpg"),
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "7.jpg"),
                     DisplayOrder = 1,
                     IsCover = true,
                     IsActive = true,
@@ -532,7 +532,7 @@ namespace eRent.Services.Database
                 {
                     Id = 8,
                     PropertyId = 3,
-                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap3_2.jpg"),
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "8.jpg"),
                     DisplayOrder = 2,
                     IsCover = false,
                     IsActive = true,
@@ -542,7 +542,7 @@ namespace eRent.Services.Database
                 {
                     Id = 9,
                     PropertyId = 3,
-                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap3_3.jpg"),
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "9.jpg"),
                     DisplayOrder = 3,
                     IsCover = false,
                     IsActive = true,
