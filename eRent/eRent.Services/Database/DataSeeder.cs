@@ -206,6 +206,19 @@ namespace eRent.Services.Database
                 new Gender { Id = 2, Name = "Female" }
             );
 
+            // Seed PropertyTypes
+            modelBuilder.Entity<PropertyType>().HasData(
+                new PropertyType { Id = 1, Name = "Apartment", IsActive = true },
+                new PropertyType { Id = 2, Name = "House", IsActive = true },
+                new PropertyType { Id = 3, Name = "Villa", IsActive = true },
+                new PropertyType { Id = 4, Name = "Studio", IsActive = true },
+                new PropertyType { Id = 5, Name = "Condo", IsActive = true },
+                new PropertyType { Id = 6, Name = "Townhouse", IsActive = true },
+                new PropertyType { Id = 7, Name = "Penthouse", IsActive = true },
+                new PropertyType { Id = 8, Name = "Cottage", IsActive = true },
+                new PropertyType { Id = 9, Name = "Duplex", IsActive = true },
+                new PropertyType { Id = 10, Name = "Loft", IsActive = true }
+            );
 
             // Seed Countries (Balkan countries)
             modelBuilder.Entity<Country>().HasData(

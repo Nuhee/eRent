@@ -15,6 +15,7 @@ namespace eRent.Services.Database
         public DbSet<Gender> Genders { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<City> Cities { get; set; }
+        public DbSet<PropertyType> PropertyTypes { get; set; }
     
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -59,6 +60,11 @@ namespace eRent.Services.Database
             // Configure Gender entity
             modelBuilder.Entity<Gender>()
                 .HasIndex(g => g.Name)
+                .IsUnique();
+
+            // Configure PropertyType entity
+            modelBuilder.Entity<PropertyType>()
+                .HasIndex(pt => pt.Name)
                 .IsUnique();
 
             // Configure Country entity
