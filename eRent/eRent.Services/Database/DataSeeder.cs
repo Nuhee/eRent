@@ -341,6 +341,97 @@ namespace eRent.Services.Database
                 new City { Id = cityId++, Name = "Kamnik", CountryId = 7, IsActive = true }
             );
 
+            // Seed Properties
+            modelBuilder.Entity<Property>().HasData(
+                // Property 1 - Landlord 1 (User Id = 2)
+                new Property
+                {
+                    Id = 1,
+                    Title = "Modern Apartment in Sarajevo Center",
+                    Description = "Beautiful 2-bedroom apartment located in the heart of Sarajevo. Fully furnished with modern amenities. Close to shopping centers and public transportation.",
+                    Price = 800.00m,
+                    Bedrooms = 2,
+                    Bathrooms = 1,
+                    Area = 65.5m,
+                    PropertyTypeId = 1, // Apartment
+                    CityId = 1, // Sarajevo
+                    LandlordId = 2, // Landlord 1
+                    Address = "Ferhadija 12, Sarajevo",
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                },
+                // Property 2 - Landlord 2 (User Id = 3)
+                new Property
+                {
+                    Id = 2,
+                    Title = "Spacious House in Mostar",
+                    Description = "Luxurious 3-bedroom house with garden and parking. Perfect for families. Located in a quiet neighborhood with easy access to city center.",
+                    Price = 1200.00m,
+                    Bedrooms = 3,
+                    Bathrooms = 2,
+                    Area = 120.0m,
+                    PropertyTypeId = 2, // House
+                    CityId = 5, // Mostar
+                    LandlordId = 3, // Landlord 2
+                    Address = "Bulevar 45, Mostar",
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                },
+                // Property 3 - Landlord 3 (User Id = 4)
+                new Property
+                {
+                    Id = 3,
+                    Title = "Cozy Studio in Tuzla",
+                    Description = "Compact and well-designed studio apartment ideal for students or young professionals. Includes all necessary amenities and is close to university.",
+                    Price = 450.00m,
+                    Bedrooms = 0,
+                    Bathrooms = 1,
+                    Area = 35.0m,
+                    PropertyTypeId = 4, // Studio
+                    CityId = 3, // Tuzla
+                    LandlordId = 4, // Landlord 3
+                    Address = "Slatina 8, Tuzla",
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                }
+            );
+
+            // Seed PropertyAmenities (many-to-many)
+            modelBuilder.Entity<PropertyAmenity>().HasData(
+                // Property 1 amenities
+                new PropertyAmenity { Id = 1, PropertyId = 1, AmenityId = 1, DateAdded = fixedDate }, // WiFi
+                new PropertyAmenity { Id = 2, PropertyId = 1, AmenityId = 2, DateAdded = fixedDate }, // Parking
+                new PropertyAmenity { Id = 3, PropertyId = 1, AmenityId = 3, DateAdded = fixedDate }, // Air Conditioning
+                new PropertyAmenity { Id = 4, PropertyId = 1, AmenityId = 4, DateAdded = fixedDate }, // TV
+                new PropertyAmenity { Id = 5, PropertyId = 1, AmenityId = 5, DateAdded = fixedDate }, // Washing Machine
+                new PropertyAmenity { Id = 6, PropertyId = 1, AmenityId = 8, DateAdded = fixedDate }, // Kitchen
+                new PropertyAmenity { Id = 7, PropertyId = 1, AmenityId = 9, DateAdded = fixedDate }, // Balcony
+                new PropertyAmenity { Id = 8, PropertyId = 1, AmenityId = 13, DateAdded = fixedDate }, // Elevator
+                new PropertyAmenity { Id = 9, PropertyId = 1, AmenityId = 18, DateAdded = fixedDate }, // Furnished
+
+                // Property 2 amenities
+                new PropertyAmenity { Id = 10, PropertyId = 2, AmenityId = 1, DateAdded = fixedDate }, // WiFi
+                new PropertyAmenity { Id = 11, PropertyId = 2, AmenityId = 2, DateAdded = fixedDate }, // Parking
+                new PropertyAmenity { Id = 12, PropertyId = 2, AmenityId = 3, DateAdded = fixedDate }, // Air Conditioning
+                new PropertyAmenity { Id = 13, PropertyId = 2, AmenityId = 4, DateAdded = fixedDate }, // TV
+                new PropertyAmenity { Id = 14, PropertyId = 2, AmenityId = 5, DateAdded = fixedDate }, // Washing Machine
+                new PropertyAmenity { Id = 15, PropertyId = 2, AmenityId = 6, DateAdded = fixedDate }, // Dishwasher
+                new PropertyAmenity { Id = 16, PropertyId = 2, AmenityId = 7, DateAdded = fixedDate }, // Heating
+                new PropertyAmenity { Id = 17, PropertyId = 2, AmenityId = 8, DateAdded = fixedDate }, // Kitchen
+                new PropertyAmenity { Id = 18, PropertyId = 2, AmenityId = 10, DateAdded = fixedDate }, // Garden
+                new PropertyAmenity { Id = 19, PropertyId = 2, AmenityId = 14, DateAdded = fixedDate }, // Pet Friendly
+                new PropertyAmenity { Id = 20, PropertyId = 2, AmenityId = 18, DateAdded = fixedDate }, // Furnished
+
+                // Property 3 amenities
+                new PropertyAmenity { Id = 21, PropertyId = 3, AmenityId = 1, DateAdded = fixedDate }, // WiFi
+                new PropertyAmenity { Id = 22, PropertyId = 3, AmenityId = 3, DateAdded = fixedDate }, // Air Conditioning
+                new PropertyAmenity { Id = 23, PropertyId = 3, AmenityId = 4, DateAdded = fixedDate }, // TV
+                new PropertyAmenity { Id = 24, PropertyId = 3, AmenityId = 5, DateAdded = fixedDate }, // Washing Machine
+                new PropertyAmenity { Id = 25, PropertyId = 3, AmenityId = 7, DateAdded = fixedDate }, // Heating
+                new PropertyAmenity { Id = 26, PropertyId = 3, AmenityId = 8, DateAdded = fixedDate }, // Kitchen
+                new PropertyAmenity { Id = 27, PropertyId = 3, AmenityId = 18, DateAdded = fixedDate } // Furnished
+            );
+
 
         }
     }

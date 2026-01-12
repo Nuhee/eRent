@@ -1,0 +1,312 @@
+using eRent.Model.Requests;
+using eRent.Model.Responses;
+using eRent.Model.SearchObjects;
+using eRent.Services.Database;
+using eRent.Services.Interfaces;
+using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace eRent.Services.Services
+{
+    public class PropertyService : BaseCRUDService<PropertyResponse, PropertySearchObject, Property, PropertyUpsertRequest, PropertyUpsertRequest>, IPropertyService
+    {
+        public PropertyService(eRentDbContext context, IMapper mapper) : base(context, mapper)
+        {
+        }
+
+        public override async Task<PagedResult<PropertyResponse>> GetAsync(PropertySearchObject search)
+        {
+            var query = _context.Properties
+                .Include(x => x.PropertyType)
+                .Include(x => x.City)
+                .Include(x => x.Landlord)
+                .Include(x => x.PropertyAmenities)
+                    .ThenInclude(pa => pa.Amenity)
+                .AsQueryable();
+
+            query = ApplyFilter(query, search);
+
+            int? totalCount = null;
+            if (search.IncludeTotalCount)
+            {
+                totalCount = await query.CountAsync();
+            }
+
+            if (!search.RetrieveAll)
+            {
+                if (search.Page.HasValue)
+                {
+                    query = query.Skip(search.Page.Value * search.PageSize.Value);
+                }
+                if (search.PageSize.HasValue)
+                {
+                    query = query.Take(search.PageSize.Value);
+                }
+            }
+
+            var list = await query.ToListAsync();
+            return new PagedResult<PropertyResponse>
+            {
+                Items = list.Select(MapToResponse).ToList(),
+                TotalCount = totalCount
+            };
+        }
+
+        protected override IQueryable<Property> ApplyFilter(IQueryable<Property> query, PropertySearchObject search)
+        {
+            if (!string.IsNullOrEmpty(search.Title))
+            {
+                query = query.Where(x => x.Title.Contains(search.Title));
+            }
+
+            if (search.PropertyTypeId.HasValue)
+            {
+                query = query.Where(x => x.PropertyTypeId == search.PropertyTypeId.Value);
+            }
+
+            if (search.CityId.HasValue)
+            {
+                query = query.Where(x => x.CityId == search.CityId.Value);
+            }
+
+            if (search.LandlordId.HasValue)
+            {
+                query = query.Where(x => x.LandlordId == search.LandlordId.Value);
+            }
+
+            if (search.MinPrice.HasValue)
+            {
+                query = query.Where(x => x.Price >= search.MinPrice.Value);
+            }
+
+            if (search.MaxPrice.HasValue)
+            {
+                query = query.Where(x => x.Price <= search.MaxPrice.Value);
+            }
+
+            if (search.MinBedrooms.HasValue)
+            {
+                query = query.Where(x => x.Bedrooms >= search.MinBedrooms.Value);
+            }
+
+            if (search.MaxBedrooms.HasValue)
+            {
+                query = query.Where(x => x.Bedrooms <= search.MaxBedrooms.Value);
+            }
+
+            if (search.IsActive.HasValue)
+            {
+                query = query.Where(x => x.IsActive == search.IsActive.Value);
+            }
+
+            return query;
+        }
+
+        protected PropertyResponse MapToResponse(Property entity)
+        {
+            var response = _mapper.Map<PropertyResponse>(entity);
+            
+            if (entity.PropertyType != null)
+            {
+                response.PropertyTypeName = entity.PropertyType.Name;
+            }
+
+            if (entity.City != null)
+            {
+                response.CityName = entity.City.Name;
+            }
+
+            if (entity.Landlord != null)
+            {
+                response.LandlordName = $"{entity.Landlord.FirstName} {entity.Landlord.LastName}";
+            }
+
+            if (entity.PropertyAmenities != null && entity.PropertyAmenities.Any())
+            {
+                response.Amenities = entity.PropertyAmenities
+                    .Select(pa => new AmenityResponse
+                    {
+                        Id = pa.Amenity.Id,
+                        Name = pa.Amenity.Name,
+                        IsActive = pa.Amenity.IsActive
+                    })
+                    .ToList();
+            }
+
+            return response;
+        }
+
+        public override async Task<PropertyResponse?> GetByIdAsync(int id)
+        {
+            var entity = await _context.Properties
+                .Include(x => x.PropertyType)
+                .Include(x => x.City)
+                .Include(x => x.Landlord)
+                .Include(x => x.PropertyAmenities)
+                    .ThenInclude(pa => pa.Amenity)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (entity == null)
+                return null;
+
+            return MapToResponse(entity);
+        }
+
+        public override async Task<PropertyResponse> CreateAsync(PropertyUpsertRequest request)
+        {
+            // Get the current user (landlord) - in a real scenario, this would come from authentication context
+            // For now, we'll use the LandlordId from request, but typically this would be set from the authenticated user
+            var entity = new Property();
+            MapInsertToEntity(entity, request);
+            entity.LandlordId = request.LandlordId;
+
+            _context.Properties.Add(entity);
+
+            await BeforeInsert(entity, request);
+
+            await _context.SaveChangesAsync();
+
+            // Handle amenities
+            if (request.AmenityIds != null && request.AmenityIds.Any())
+            {
+                foreach (var amenityId in request.AmenityIds)
+                {
+                    var propertyAmenity = new PropertyAmenity
+                    {
+                        PropertyId = entity.Id,
+                        AmenityId = amenityId,
+                        DateAdded = DateTime.UtcNow
+                    };
+                    _context.PropertyAmenities.Add(propertyAmenity);
+                }
+                await _context.SaveChangesAsync();
+            }
+
+            // Reload with all relationships
+            await _context.Entry(entity).Reference(x => x.PropertyType).LoadAsync();
+            await _context.Entry(entity).Reference(x => x.City).LoadAsync();
+            await _context.Entry(entity).Reference(x => x.Landlord).LoadAsync();
+            await _context.Entry(entity).Collection(x => x.PropertyAmenities).LoadAsync();
+            foreach (var pa in entity.PropertyAmenities)
+            {
+                await _context.Entry(pa).Reference(x => x.Amenity).LoadAsync();
+            }
+
+            return MapToResponse(entity);
+        }
+
+        public override async Task<PropertyResponse?> UpdateAsync(int id, PropertyUpsertRequest request)
+        {
+            var entity = await _context.Properties
+                .Include(x => x.PropertyAmenities)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (entity == null)
+                return null;
+
+            await BeforeUpdate(entity, request);
+
+            MapUpdateToEntity(entity, request);
+            entity.LandlordId = request.LandlordId;
+            entity.UpdatedAt = DateTime.UtcNow;
+
+            // Update amenities
+            if (request.AmenityIds != null)
+            {
+                // Remove existing amenities
+                _context.PropertyAmenities.RemoveRange(entity.PropertyAmenities);
+
+                // Add new amenities
+                foreach (var amenityId in request.AmenityIds)
+                {
+                    var propertyAmenity = new PropertyAmenity
+                    {
+                        PropertyId = entity.Id,
+                        AmenityId = amenityId,
+                        DateAdded = DateTime.UtcNow
+                    };
+                    _context.PropertyAmenities.Add(propertyAmenity);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Reload with all relationships
+            await _context.Entry(entity).Reference(x => x.PropertyType).LoadAsync();
+            await _context.Entry(entity).Reference(x => x.City).LoadAsync();
+            await _context.Entry(entity).Reference(x => x.Landlord).LoadAsync();
+            await _context.Entry(entity).Collection(x => x.PropertyAmenities).LoadAsync();
+            foreach (var pa in entity.PropertyAmenities)
+            {
+                await _context.Entry(pa).Reference(x => x.Amenity).LoadAsync();
+            }
+
+            return MapToResponse(entity);
+        }
+
+        protected override async Task BeforeInsert(Property entity, PropertyUpsertRequest request)
+        {
+            // Validate PropertyType exists
+            if (!await _context.PropertyTypes.AnyAsync(pt => pt.Id == request.PropertyTypeId))
+            {
+                throw new InvalidOperationException("Property type does not exist.");
+            }
+
+            // Validate City exists
+            if (!await _context.Cities.AnyAsync(c => c.Id == request.CityId))
+            {
+                throw new InvalidOperationException("City does not exist.");
+            }
+
+            // Validate Landlord exists
+            if (!await _context.Users.AnyAsync(u => u.Id == request.LandlordId))
+            {
+                throw new InvalidOperationException("Landlord does not exist.");
+            }
+
+            // Validate amenities exist
+            if (request.AmenityIds != null && request.AmenityIds.Any())
+            {
+                var invalidAmenities = request.AmenityIds.Where(aid => !_context.Amenities.Any(a => a.Id == aid));
+                if (invalidAmenities.Any())
+                {
+                    throw new InvalidOperationException("One or more amenities do not exist.");
+                }
+            }
+        }
+
+        protected override async Task BeforeUpdate(Property entity, PropertyUpsertRequest request)
+        {
+            // Validate PropertyType exists
+            if (!await _context.PropertyTypes.AnyAsync(pt => pt.Id == request.PropertyTypeId))
+            {
+                throw new InvalidOperationException("Property type does not exist.");
+            }
+
+            // Validate City exists
+            if (!await _context.Cities.AnyAsync(c => c.Id == request.CityId))
+            {
+                throw new InvalidOperationException("City does not exist.");
+            }
+
+            // Validate Landlord exists
+            if (!await _context.Users.AnyAsync(u => u.Id == request.LandlordId))
+            {
+                throw new InvalidOperationException("Landlord does not exist.");
+            }
+
+            // Validate amenities exist
+            if (request.AmenityIds != null && request.AmenityIds.Any())
+            {
+                var invalidAmenities = request.AmenityIds.Where(aid => !_context.Amenities.Any(a => a.Id == aid));
+                if (invalidAmenities.Any())
+                {
+                    throw new InvalidOperationException("One or more amenities do not exist.");
+                }
+            }
+        }
+    }
+}

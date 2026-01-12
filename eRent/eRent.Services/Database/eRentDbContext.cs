@@ -17,6 +17,8 @@ namespace eRent.Services.Database
         public DbSet<City> Cities { get; set; }
         public DbSet<PropertyType> PropertyTypes { get; set; }
         public DbSet<Amenity> Amenities { get; set; }
+        public DbSet<Property> Properties { get; set; }
+        public DbSet<PropertyAmenity> PropertyAmenities { get; set; }
     
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -101,6 +103,43 @@ namespace eRent.Services.Database
                 .WithMany()
                 .HasForeignKey(u => u.CityId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // Configure Property entity relationships
+            modelBuilder.Entity<Property>()
+                .HasOne(p => p.PropertyType)
+                .WithMany()
+                .HasForeignKey(p => p.PropertyTypeId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Property>()
+                .HasOne(p => p.City)
+                .WithMany()
+                .HasForeignKey(p => p.CityId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Property>()
+                .HasOne(p => p.Landlord)
+                .WithMany()
+                .HasForeignKey(p => p.LandlordId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Configure PropertyAmenity join entity (many-to-many)
+            modelBuilder.Entity<PropertyAmenity>()
+                .HasOne(pa => pa.Property)
+                .WithMany(p => p.PropertyAmenities)
+                .HasForeignKey(pa => pa.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PropertyAmenity>()
+                .HasOne(pa => pa.Amenity)
+                .WithMany()
+                .HasForeignKey(pa => pa.AmenityId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Create a unique constraint on PropertyId and AmenityId
+            modelBuilder.Entity<PropertyAmenity>()
+                .HasIndex(pa => new { pa.PropertyId, pa.AmenityId })
+                .IsUnique();
 
             // Seed initial data
             modelBuilder.SeedData();
