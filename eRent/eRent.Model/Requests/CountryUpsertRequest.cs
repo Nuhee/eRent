@@ -2,13 +2,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace eRent.Model.Requests
 {
-    public class CityUpsertRequest
+    public class CountryUpsertRequest
     {
         [Required]
-        [MaxLength(50)]
+        [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
         
-        [Required]
-        public int CountryId { get; set; }
+        [MaxLength(10)]
+        public string? Code { get; set; }
     }
-} 
+}

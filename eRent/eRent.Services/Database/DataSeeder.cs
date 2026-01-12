@@ -51,7 +51,7 @@ namespace eRent.Services.Database
                     CreatedAt = fixedDate,
                     PhoneNumber = DefaultPhoneNumber,
                     GenderId = 1, // Male
-                    CityId = 5, // Sarajevo
+                    CityId = 1, // Sarajevo
                     Picture = ImageConversion.ConvertImageToByteArray("Assets", "denis.png")
                 },
                 new User 
@@ -118,18 +118,103 @@ namespace eRent.Services.Database
                 new Gender { Id = 2, Name = "Female" }
             );
 
-            // Seed Cities
+            // Seed Countries (Balkan countries)
+            modelBuilder.Entity<Country>().HasData(
+                new Country { Id = 1, Name = "Bosnia and Herzegovina", Code = "BIH" },
+                new Country { Id = 2, Name = "Croatia", Code = "HRV" },
+                new Country { Id = 3, Name = "Serbia", Code = "SRB" },
+                new Country { Id = 4, Name = "Montenegro", Code = "MNE" },
+                new Country { Id = 5, Name = "North Macedonia", Code = "MKD" },
+                new Country { Id = 6, Name = "Albania", Code = "ALB" },
+                new Country { Id = 7, Name = "Slovenia", Code = "SVN" }
+            );
+
+            // Seed Cities - Bosnia and Herzegovina (Id = 1)
+            int cityId = 1;
             modelBuilder.Entity<City>().HasData(
-                new City { Id = 1, Name = "Sarajevo" },
-                new City { Id = 2, Name = "Banja Luka" },
-                new City { Id = 3, Name = "Tuzla" },
-                new City { Id = 4, Name = "Zenica" },
-                new City { Id = 5, Name = "Mostar" },
-                new City { Id = 6, Name = "Bijeljina" },
-                new City { Id = 7, Name = "Prijedor" },
-                new City { Id = 8, Name = "Brčko" },
-                new City { Id = 9, Name = "Doboj" },
-                new City { Id = 10, Name = "Zvornik" }
+                // Bosnia and Herzegovina cities
+                new City { Id = cityId++, Name = "Sarajevo", CountryId = 1 },
+                new City { Id = cityId++, Name = "Banja Luka", CountryId = 1 },
+                new City { Id = cityId++, Name = "Tuzla", CountryId = 1 },
+                new City { Id = cityId++, Name = "Zenica", CountryId = 1 },
+                new City { Id = cityId++, Name = "Mostar", CountryId = 1 },
+                new City { Id = cityId++, Name = "Bijeljina", CountryId = 1 },
+                new City { Id = cityId++, Name = "Prijedor", CountryId = 1 },
+                new City { Id = cityId++, Name = "Brčko", CountryId = 1 },
+                new City { Id = cityId++, Name = "Doboj", CountryId = 1 },
+                new City { Id = cityId++, Name = "Zvornik", CountryId = 1 },
+
+                // Croatia cities
+                new City { Id = cityId++, Name = "Zagreb", CountryId = 2 },
+                new City { Id = cityId++, Name = "Split", CountryId = 2 },
+                new City { Id = cityId++, Name = "Rijeka", CountryId = 2 },
+                new City { Id = cityId++, Name = "Osijek", CountryId = 2 },
+                new City { Id = cityId++, Name = "Zadar", CountryId = 2 },
+                new City { Id = cityId++, Name = "Slavonski Brod", CountryId = 2 },
+                new City { Id = cityId++, Name = "Pula", CountryId = 2 },
+                new City { Id = cityId++, Name = "Sesvete", CountryId = 2 },
+                new City { Id = cityId++, Name = "Karlovac", CountryId = 2 },
+                new City { Id = cityId++, Name = "Varaždin", CountryId = 2 },
+
+                // Serbia cities
+                new City { Id = cityId++, Name = "Belgrade", CountryId = 3 },
+                new City { Id = cityId++, Name = "Novi Sad", CountryId = 3 },
+                new City { Id = cityId++, Name = "Niš", CountryId = 3 },
+                new City { Id = cityId++, Name = "Kragujevac", CountryId = 3 },
+                new City { Id = cityId++, Name = "Subotica", CountryId = 3 },
+                new City { Id = cityId++, Name = "Zrenjanin", CountryId = 3 },
+                new City { Id = cityId++, Name = "Pančevo", CountryId = 3 },
+                new City { Id = cityId++, Name = "Čačak", CountryId = 3 },
+                new City { Id = cityId++, Name = "Novi Pazar", CountryId = 3 },
+                new City { Id = cityId++, Name = "Kraljevo", CountryId = 3 },
+
+                // Montenegro cities
+                new City { Id = cityId++, Name = "Podgorica", CountryId = 4 },
+                new City { Id = cityId++, Name = "Nikšić", CountryId = 4 },
+                new City { Id = cityId++, Name = "Pljevlja", CountryId = 4 },
+                new City { Id = cityId++, Name = "Bijelo Polje", CountryId = 4 },
+                new City { Id = cityId++, Name = "Cetinje", CountryId = 4 },
+                new City { Id = cityId++, Name = "Bar", CountryId = 4 },
+                new City { Id = cityId++, Name = "Herceg Novi", CountryId = 4 },
+                new City { Id = cityId++, Name = "Budva", CountryId = 4 },
+                new City { Id = cityId++, Name = "Berane", CountryId = 4 },
+                new City { Id = cityId++, Name = "Ulcinj", CountryId = 4 },
+
+                // North Macedonia cities
+                new City { Id = cityId++, Name = "Skopje", CountryId = 5 },
+                new City { Id = cityId++, Name = "Bitola", CountryId = 5 },
+                new City { Id = cityId++, Name = "Kumanovo", CountryId = 5 },
+                new City { Id = cityId++, Name = "Prilep", CountryId = 5 },
+                new City { Id = cityId++, Name = "Tetovo", CountryId = 5 },
+                new City { Id = cityId++, Name = "Veles", CountryId = 5 },
+                new City { Id = cityId++, Name = "Štip", CountryId = 5 },
+                new City { Id = cityId++, Name = "Ohrid", CountryId = 5 },
+                new City { Id = cityId++, Name = "Gostivar", CountryId = 5 },
+                new City { Id = cityId++, Name = "Strumica", CountryId = 5 },
+
+                // Albania cities
+                new City { Id = cityId++, Name = "Tirana", CountryId = 6 },
+                new City { Id = cityId++, Name = "Durrës", CountryId = 6 },
+                new City { Id = cityId++, Name = "Vlorë", CountryId = 6 },
+                new City { Id = cityId++, Name = "Shkodër", CountryId = 6 },
+                new City { Id = cityId++, Name = "Fier", CountryId = 6 },
+                new City { Id = cityId++, Name = "Korçë", CountryId = 6 },
+                new City { Id = cityId++, Name = "Elbasan", CountryId = 6 },
+                new City { Id = cityId++, Name = "Kavajë", CountryId = 6 },
+                new City { Id = cityId++, Name = "Gjirokastër", CountryId = 6 },
+                new City { Id = cityId++, Name = "Sarandë", CountryId = 6 },
+
+                // Slovenia cities
+                new City { Id = cityId++, Name = "Ljubljana", CountryId = 7 },
+                new City { Id = cityId++, Name = "Maribor", CountryId = 7 },
+                new City { Id = cityId++, Name = "Celje", CountryId = 7 },
+                new City { Id = cityId++, Name = "Kranj", CountryId = 7 },
+                new City { Id = cityId++, Name = "Velenje", CountryId = 7 },
+                new City { Id = cityId++, Name = "Koper", CountryId = 7 },
+                new City { Id = cityId++, Name = "Novo Mesto", CountryId = 7 },
+                new City { Id = cityId++, Name = "Ptuj", CountryId = 7 },
+                new City { Id = cityId++, Name = "Trbovlje", CountryId = 7 },
+                new City { Id = cityId++, Name = "Kamnik", CountryId = 7 }
             );
         }
     }

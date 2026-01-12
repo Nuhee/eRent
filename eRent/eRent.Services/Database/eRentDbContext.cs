@@ -13,6 +13,7 @@ namespace eRent.Services.Database
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<Gender> Genders { get; set; }
+        public DbSet<Country> Countries { get; set; }
         public DbSet<City> Cities { get; set; }
     
 
@@ -60,10 +61,22 @@ namespace eRent.Services.Database
                 .HasIndex(g => g.Name)
                 .IsUnique();
 
+            // Configure Country entity
+            modelBuilder.Entity<Country>()
+                .HasIndex(c => c.Name)
+                .IsUnique();
+
             // Configure City entity
             modelBuilder.Entity<City>()
                 .HasIndex(c => c.Name)
                 .IsUnique();
+
+            // Configure City-Country relationship
+            modelBuilder.Entity<City>()
+                .HasOne(c => c.Country)
+                .WithMany(co => co.Cities)
+                .HasForeignKey(c => c.CountryId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Gender)
