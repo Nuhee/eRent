@@ -59,5 +59,8 @@ namespace eRent.Services.Database
 
         // Navigation property for many-to-many relationship with Amenity
         public ICollection<PropertyAmenity> PropertyAmenities { get; set; } = new List<PropertyAmenity>();
+
+        // Navigation property for PropertyImages
+        public ICollection<PropertyImage> PropertyImages { get; set; } = new List<PropertyImage>();
     }
 }

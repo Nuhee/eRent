@@ -1,3 +1,5 @@
+using System;
+
 namespace eRent.Model.Responses
 {
     public class PropertyResponse
@@ -22,5 +24,6 @@ namespace eRent.Model.Responses
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public List<AmenityResponse> Amenities { get; set; } = new List<AmenityResponse>();
+        public List<PropertyImageResponse> Images { get; set; } = new List<PropertyImageResponse>();
     }
 }

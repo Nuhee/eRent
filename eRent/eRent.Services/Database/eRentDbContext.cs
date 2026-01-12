@@ -19,6 +19,7 @@ namespace eRent.Services.Database
         public DbSet<Amenity> Amenities { get; set; }
         public DbSet<Property> Properties { get; set; }
         public DbSet<PropertyAmenity> PropertyAmenities { get; set; }
+        public DbSet<PropertyImage> PropertyImages { get; set; }
     
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -140,6 +141,13 @@ namespace eRent.Services.Database
             modelBuilder.Entity<PropertyAmenity>()
                 .HasIndex(pa => new { pa.PropertyId, pa.AmenityId })
                 .IsUnique();
+
+            // Configure PropertyImage entity relationship
+            modelBuilder.Entity<PropertyImage>()
+                .HasOne(pi => pi.Property)
+                .WithMany(p => p.PropertyImages)
+                .HasForeignKey(pi => pi.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Seed initial data
             modelBuilder.SeedData();

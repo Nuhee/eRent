@@ -25,6 +25,7 @@ namespace eRent.Services.Services
                 .Include(x => x.Landlord)
                 .Include(x => x.PropertyAmenities)
                     .ThenInclude(pa => pa.Amenity)
+                .Include(x => x.PropertyImages)
                 .AsQueryable();
 
             query = ApplyFilter(query, search);
@@ -136,6 +137,25 @@ namespace eRent.Services.Services
                     .ToList();
             }
 
+            if (entity.PropertyImages != null && entity.PropertyImages.Any())
+            {
+                response.Images = entity.PropertyImages
+                    .OrderBy(pi => pi.DisplayOrder)
+                    .ThenBy(pi => pi.CreatedAt)
+                    .Select(pi => new PropertyImageResponse
+                    {
+                        Id = pi.Id,
+                        PropertyId = pi.PropertyId,
+                        PropertyTitle = entity.Title,
+                        ImageData = pi.ImageData,
+                        DisplayOrder = pi.DisplayOrder,
+                        IsCover = pi.IsCover,
+                        IsActive = pi.IsActive,
+                        CreatedAt = pi.CreatedAt
+                    })
+                    .ToList();
+            }
+
             return response;
         }
 
@@ -147,6 +167,7 @@ namespace eRent.Services.Services
                 .Include(x => x.Landlord)
                 .Include(x => x.PropertyAmenities)
                     .ThenInclude(pa => pa.Amenity)
+                .Include(x => x.PropertyImages)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (entity == null)
@@ -194,6 +215,7 @@ namespace eRent.Services.Services
             {
                 await _context.Entry(pa).Reference(x => x.Amenity).LoadAsync();
             }
+            await _context.Entry(entity).Collection(x => x.PropertyImages).LoadAsync();
 
             return MapToResponse(entity);
         }
@@ -243,6 +265,7 @@ namespace eRent.Services.Services
             {
                 await _context.Entry(pa).Reference(x => x.Amenity).LoadAsync();
             }
+            await _context.Entry(entity).Collection(x => x.PropertyImages).LoadAsync();
 
             return MapToResponse(entity);
         }

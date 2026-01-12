@@ -82,7 +82,8 @@ namespace eRent.Services.Database
                     CreatedAt = fixedDate,
                     PhoneNumber = DefaultPhoneNumber,
                     GenderId = 1, 
-                    CityId = 1, 
+                    CityId = 1,
+                    //Picture = ImageConversion.ConvertImageToByteArray("Assets", "pic1.png")
                 },
                 // Landlord 1
                 new User
@@ -98,7 +99,9 @@ namespace eRent.Services.Database
                     CreatedAt = fixedDate,
                     PhoneNumber = DefaultPhoneNumber,
                     GenderId = 1, 
-                    CityId = 1, 
+                    CityId = 1,
+                    Picture = ImageConversion.ConvertImageToByteArray("Assets", "adil.png")
+
                 },
                 // Landlord 2
                 new User
@@ -130,7 +133,9 @@ namespace eRent.Services.Database
                     CreatedAt = fixedDate,
                     PhoneNumber = DefaultPhoneNumber,
                     GenderId = 1,
-                    CityId = 3, 
+                    CityId = 3,
+                    Picture = ImageConversion.ConvertImageToByteArray("Assets", "denis.png")
+
                 },
                 // User 1
                 new User
@@ -146,7 +151,9 @@ namespace eRent.Services.Database
                     CreatedAt = fixedDate,
                     PhoneNumber = DefaultPhoneNumber,
                     GenderId = 1, 
-                    CityId = 1, 
+                    CityId = 1,
+                    Picture = ImageConversion.ConvertImageToByteArray("Assets", "amel.png")
+
                 },
                 // User 2
                 new User
@@ -436,6 +443,105 @@ namespace eRent.Services.Database
                 new PropertyAmenity { Id = 25, PropertyId = 3, AmenityId = 7, DateAdded = fixedDate }, // Heating
                 new PropertyAmenity { Id = 26, PropertyId = 3, AmenityId = 8, DateAdded = fixedDate }, // Kitchen
                 new PropertyAmenity { Id = 27, PropertyId = 3, AmenityId = 18, DateAdded = fixedDate } // Furnished
+            );
+
+            // Seed PropertyImages
+            modelBuilder.Entity<PropertyImage>().HasData(
+                // Property 1 images (ap1_1.jpg, ap1_2.jpg, ap1_3.jpg)
+                new PropertyImage
+                {
+                    Id = 1,
+                    PropertyId = 1,
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap1_1.jpg"),
+                    DisplayOrder = 1,
+                    IsCover = true,
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                },
+                new PropertyImage
+                {
+                    Id = 2,
+                    PropertyId = 1,
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap1_2.jpg"),
+                    DisplayOrder = 2,
+                    IsCover = false,
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                },
+                new PropertyImage
+                {
+                    Id = 3,
+                    PropertyId = 1,
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap1_3.jpg"),
+                    DisplayOrder = 3,
+                    IsCover = false,
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                },
+
+                // Property 2 images (ap2_1.jpg, ap2_2.jpg, ap2_3.jpg)
+                new PropertyImage
+                {
+                    Id = 4,
+                    PropertyId = 2,
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap2_1.jpg"),
+                    DisplayOrder = 1,
+                    IsCover = true,
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                },
+                new PropertyImage
+                {
+                    Id = 5,
+                    PropertyId = 2,
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap2_2.jpg"),
+                    DisplayOrder = 2,
+                    IsCover = false,
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                },
+                new PropertyImage
+                {
+                    Id = 6,
+                    PropertyId = 2,
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap2_3.jpg"),
+                    DisplayOrder = 3,
+                    IsCover = false,
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                },
+
+                // Property 3 images (ap3_1.jpg, ap3_2.jpg, ap3_3.jpg)
+                new PropertyImage
+                {
+                    Id = 7,
+                    PropertyId = 3,
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap3_1.jpg"),
+                    DisplayOrder = 1,
+                    IsCover = true,
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                },
+                new PropertyImage
+                {
+                    Id = 8,
+                    PropertyId = 3,
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap3_2.jpg"),
+                    DisplayOrder = 2,
+                    IsCover = false,
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                },
+                new PropertyImage
+                {
+                    Id = 9,
+                    PropertyId = 3,
+                    ImageData = ImageConversion.ConvertImageToByteArray("Assets", "ap3_3.jpg"),
+                    DisplayOrder = 3,
+                    IsCover = false,
+                    IsActive = true,
+                    CreatedAt = fixedDate
+                }
             );
 
 
