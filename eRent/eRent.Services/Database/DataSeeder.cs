@@ -357,6 +357,8 @@ namespace eRent.Services.Database
                     CityId = 1, // Sarajevo
                     LandlordId = 2, // Landlord 1
                     Address = "Ferhadija 12, Sarajevo",
+                    Latitude = 43.8563m,
+                    Longitude = 18.4131m,
                     IsActive = true,
                     CreatedAt = fixedDate
                 },
@@ -374,6 +376,8 @@ namespace eRent.Services.Database
                     CityId = 5, // Mostar
                     LandlordId = 3, // Landlord 2
                     Address = "Bulevar 45, Mostar",
+                    Latitude = 43.3433m,
+                    Longitude = 17.8078m,
                     IsActive = true,
                     CreatedAt = fixedDate
                 },
@@ -391,6 +395,8 @@ namespace eRent.Services.Database
                     CityId = 3, // Tuzla
                     LandlordId = 4, // Landlord 3
                     Address = "Slatina 8, Tuzla",
+                    Latitude = 44.5384m,
+                    Longitude = 18.6678m,
                     IsActive = true,
                     CreatedAt = fixedDate
                 }

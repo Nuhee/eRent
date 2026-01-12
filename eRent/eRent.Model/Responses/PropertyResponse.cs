@@ -16,6 +16,8 @@ namespace eRent.Model.Responses
         public int LandlordId { get; set; }
         public string LandlordName { get; set; } = string.Empty;
         public string? Address { get; set; }
+        public decimal Latitude { get; set; }
+        public decimal Longitude { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

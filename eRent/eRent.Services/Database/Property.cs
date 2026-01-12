@@ -40,6 +40,12 @@ namespace eRent.Services.Database
         [MaxLength(200)]
         public string? Address { get; set; }
 
+        [Required]
+        public decimal Latitude { get; set; }
+
+        [Required]
+        public decimal Longitude { get; set; }
+
         public bool IsActive { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
