@@ -12,8 +12,13 @@ namespace eRent.Model.Requests
         public string? Description { get; set; }
 
         [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
-        public decimal Price { get; set; }
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price per month must be greater than 0")]
+        public decimal PricePerMonth { get; set; }
+
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price per day must be greater than 0")]
+        public decimal? PricePerDay { get; set; }
+
+        public bool AllowDailyRental { get; set; } = false;
 
         [Required]
         [Range(0, int.MaxValue, ErrorMessage = "Bedrooms must be 0 or greater")]

@@ -7,7 +7,9 @@ namespace eRent.Model.Responses
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public decimal Price { get; set; }
+        public decimal PricePerMonth { get; set; }
+        public decimal? PricePerDay { get; set; }
+        public bool AllowDailyRental { get; set; }
         public int Bedrooms { get; set; }
         public int Bathrooms { get; set; }
         public decimal Area { get; set; }

@@ -17,7 +17,11 @@ namespace eRent.Services.Database
         public string? Description { get; set; }
 
         [Required]
-        public decimal Price { get; set; }
+        public decimal PricePerMonth { get; set; } // Monthly rental price
+
+        public decimal? PricePerDay { get; set; } // Daily rental price (optional, only if AllowDailyRental is true)
+
+        public bool AllowDailyRental { get; set; } = false; // Whether landlord allows daily rentals
 
         [Required]
         public int Bedrooms { get; set; }

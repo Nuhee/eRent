@@ -78,14 +78,29 @@ namespace eRent.Services.Services
                 query = query.Where(x => x.LandlordId == search.LandlordId.Value);
             }
 
-            if (search.MinPrice.HasValue)
+            if (search.MinPricePerMonth.HasValue)
             {
-                query = query.Where(x => x.Price >= search.MinPrice.Value);
+                query = query.Where(x => x.PricePerMonth >= search.MinPricePerMonth.Value);
             }
 
-            if (search.MaxPrice.HasValue)
+            if (search.MaxPricePerMonth.HasValue)
             {
-                query = query.Where(x => x.Price <= search.MaxPrice.Value);
+                query = query.Where(x => x.PricePerMonth <= search.MaxPricePerMonth.Value);
+            }
+
+            if (search.MinPricePerDay.HasValue)
+            {
+                query = query.Where(x => x.PricePerDay.HasValue && x.PricePerDay.Value >= search.MinPricePerDay.Value);
+            }
+
+            if (search.MaxPricePerDay.HasValue)
+            {
+                query = query.Where(x => x.PricePerDay.HasValue && x.PricePerDay.Value <= search.MaxPricePerDay.Value);
+            }
+
+            if (search.AllowDailyRental.HasValue)
+            {
+                query = query.Where(x => x.AllowDailyRental == search.AllowDailyRental.Value);
             }
 
             if (search.MinBedrooms.HasValue)
@@ -299,6 +314,18 @@ namespace eRent.Services.Services
                     throw new InvalidOperationException("One or more amenities do not exist.");
                 }
             }
+
+            // Validate daily rental pricing
+            if (request.AllowDailyRental && (!request.PricePerDay.HasValue || request.PricePerDay.Value <= 0))
+            {
+                throw new InvalidOperationException("PricePerDay must be provided and greater than 0 when AllowDailyRental is true.");
+            }
+
+            // If daily rental is not allowed, ensure PricePerDay is null
+            if (!request.AllowDailyRental && request.PricePerDay.HasValue)
+            {
+                throw new InvalidOperationException("PricePerDay should not be provided when AllowDailyRental is false.");
+            }
         }
 
         protected override async Task BeforeUpdate(Property entity, PropertyUpsertRequest request)
@@ -329,6 +356,18 @@ namespace eRent.Services.Services
                 {
                     throw new InvalidOperationException("One or more amenities do not exist.");
                 }
+            }
+
+            // Validate daily rental pricing
+            if (request.AllowDailyRental && (!request.PricePerDay.HasValue || request.PricePerDay.Value <= 0))
+            {
+                throw new InvalidOperationException("PricePerDay must be provided and greater than 0 when AllowDailyRental is true.");
+            }
+
+            // If daily rental is not allowed, ensure PricePerDay is null
+            if (!request.AllowDailyRental && request.PricePerDay.HasValue)
+            {
+                throw new InvalidOperationException("PricePerDay should not be provided when AllowDailyRental is false.");
             }
         }
     }
