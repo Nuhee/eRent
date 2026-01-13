@@ -292,10 +292,10 @@ namespace eRent.Services.Services
             if (entity == null)
                 return null;
 
-            // Can only cancel if status is Pending (1)
-            if (entity.RentStatusId != 1)
+            // Can cancel if status is Pending (1) or Accepted (4)
+            if (entity.RentStatusId != 1 && entity.RentStatusId != 4)
             {
-                throw new InvalidOperationException("Rent can only be cancelled if it is in Pending status.");
+                throw new InvalidOperationException("Rent can only be cancelled if it is in Pending or Accepted status.");
             }
 
             entity.RentStatusId = 2; // Cancelled

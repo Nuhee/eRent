@@ -6,8 +6,8 @@ namespace eRent.Subscriber.Services
 {
     public class EmailSenderService : IEmailSenderService
     {
-        private readonly string _gmailMail = "calltaxi.sender@gmail.com";
-        private readonly string _gmailPass = "tlkv xshf zbaw oaab";
+        private readonly string _gmailMail = "info.vedadnuhic@gmail.com";
+        private readonly string _gmailPass = "ktrt mlro qujo nvks";
 
         public Task SendEmailAsync(string email, string subject, string message)
         {
