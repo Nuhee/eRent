@@ -24,8 +24,7 @@ namespace eRent.Model.Requests
         [Range(0.01, double.MaxValue, ErrorMessage = "Total price must be greater than 0")]
         public decimal TotalPrice { get; set; }
 
-        [Required]
-        public int RentStatusId { get; set; }
+        public int? RentStatusId { get; set; } // Optional - will be set to Pending (1) on create if not provided
 
         public bool IsActive { get; set; } = true;
     }

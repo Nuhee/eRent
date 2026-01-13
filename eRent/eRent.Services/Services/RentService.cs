@@ -17,6 +17,17 @@ namespace eRent.Services.Services
         {
         }
 
+        public override async Task<RentResponse> CreateAsync(RentUpsertRequest request)
+        {
+            // Set status to Pending (1) if not provided
+            if (!request.RentStatusId.HasValue)
+            {
+                request.RentStatusId = 1; // Pending
+            }
+
+            return await base.CreateAsync(request);
+        }
+
         public override async Task<PagedResult<RentResponse>> GetAsync(RentSearchObject search)
         {
             var query = _context.Rents
@@ -169,8 +180,8 @@ namespace eRent.Services.Services
                 }
             }
 
-            // Validate RentStatus exists
-            if (!await _context.RentStatuses.AnyAsync(rs => rs.Id == request.RentStatusId))
+            // Validate RentStatus exists (if provided, otherwise will be set to Pending in CreateAsync)
+            if (request.RentStatusId.HasValue && !await _context.RentStatuses.AnyAsync(rs => rs.Id == request.RentStatusId.Value))
             {
                 throw new InvalidOperationException("Rent status does not exist.");
             }
@@ -221,8 +232,8 @@ namespace eRent.Services.Services
                 }
             }
 
-            // Validate RentStatus exists
-            if (!await _context.RentStatuses.AnyAsync(rs => rs.Id == request.RentStatusId))
+            // Validate RentStatus exists (if provided)
+            if (request.RentStatusId.HasValue && !await _context.RentStatuses.AnyAsync(rs => rs.Id == request.RentStatusId.Value))
             {
                 throw new InvalidOperationException("Rent status does not exist.");
             }
@@ -244,10 +255,142 @@ namespace eRent.Services.Services
             }
         }
 
+        protected override Rent MapInsertToEntity(Rent entity, RentUpsertRequest request)
+        {
+            base.MapInsertToEntity(entity, request);
+            // Ensure RentStatusId is set (should be set to 1 in CreateAsync, but ensure it here too)
+            if (!request.RentStatusId.HasValue)
+            {
+                entity.RentStatusId = 1; // Pending
+            }
+            else
+            {
+                entity.RentStatusId = request.RentStatusId.Value;
+            }
+            return entity;
+        }
+
         protected override void MapUpdateToEntity(Rent entity, RentUpsertRequest request)
         {
             base.MapUpdateToEntity(entity, request);
+            // Only update RentStatusId if provided in update request
+            if (request.RentStatusId.HasValue)
+            {
+                entity.RentStatusId = request.RentStatusId.Value;
+            }
             entity.UpdatedAt = DateTime.Now;
+        }
+
+        public async Task<RentResponse?> CancelAsync(int id)
+        {
+            var entity = await _context.Rents
+                .Include(x => x.Property)
+                .Include(x => x.User)
+                .Include(x => x.RentStatus)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (entity == null)
+                return null;
+
+            // Can only cancel if status is Pending (1)
+            if (entity.RentStatusId != 1)
+            {
+                throw new InvalidOperationException("Rent can only be cancelled if it is in Pending status.");
+            }
+
+            entity.RentStatusId = 2; // Cancelled
+            entity.UpdatedAt = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+            return MapToResponse(entity);
+        }
+
+        public async Task<RentResponse?> RejectAsync(int id)
+        {
+            var entity = await _context.Rents
+                .Include(x => x.Property)
+                .Include(x => x.User)
+                .Include(x => x.RentStatus)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (entity == null)
+                return null;
+
+            // Can only reject if status is Pending (1)
+            if (entity.RentStatusId != 1)
+            {
+                throw new InvalidOperationException("Rent can only be rejected if it is in Pending status.");
+            }
+
+            entity.RentStatusId = 3; // Rejected
+            entity.UpdatedAt = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+            return MapToResponse(entity);
+        }
+
+        public async Task<RentResponse?> AcceptAsync(int id)
+        {
+            var entity = await _context.Rents
+                .Include(x => x.Property)
+                .Include(x => x.User)
+                .Include(x => x.RentStatus)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (entity == null)
+                return null;
+
+            // Can only accept if status is Pending (1)
+            if (entity.RentStatusId != 1)
+            {
+                throw new InvalidOperationException("Rent can only be accepted if it is in Pending status.");
+            }
+
+            // Check for overlapping rentals (only for Accepted or Paid statuses)
+            var overlappingRents = await _context.Rents
+                .Where(r => r.Id != entity.Id
+                    && r.PropertyId == entity.PropertyId
+                    && r.IsActive
+                    && (r.RentStatusId == 4 || r.RentStatusId == 5) // Accepted (4) or Paid (5)
+                    && ((r.StartDate <= entity.StartDate && r.EndDate > entity.StartDate) ||
+                        (r.StartDate < entity.EndDate && r.EndDate >= entity.EndDate) ||
+                        (r.StartDate >= entity.StartDate && r.EndDate <= entity.EndDate)))
+                .AnyAsync();
+
+            if (overlappingRents)
+            {
+                throw new InvalidOperationException("Cannot accept rent - property is already rented for the selected dates.");
+            }
+
+            entity.RentStatusId = 4; // Accepted
+            entity.UpdatedAt = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+            return MapToResponse(entity);
+        }
+
+        public async Task<RentResponse?> PayAsync(int id)
+        {
+            var entity = await _context.Rents
+                .Include(x => x.Property)
+                .Include(x => x.User)
+                .Include(x => x.RentStatus)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (entity == null)
+                return null;
+
+            // Can only pay if status is Accepted (4)
+            if (entity.RentStatusId != 4)
+            {
+                throw new InvalidOperationException("Rent can only be paid if it is in Accepted status.");
+            }
+
+            entity.RentStatusId = 5; // Paid
+            entity.UpdatedAt = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+            return MapToResponse(entity);
         }
     }
 }
