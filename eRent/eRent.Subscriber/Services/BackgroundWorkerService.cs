@@ -63,10 +63,10 @@ namespace eRent.Subscriber.Services
                 {
                     using (var bus = RabbitHutch.CreateBus($"host={_host};virtualHost={_virtualhost};username={_username};password={_password}"))
                     {
-                        // Subscribe to vehicle notifications only
-                        bus.PubSub.Subscribe<VehicleNotification>("Vehicle_Notifications", HandleVehicleMessage);
+                        // Subscribe to rent notifications
+                        bus.PubSub.Subscribe<RentNotification>("Rent_Notifications", HandleRentMessage);
 
-                        _logger.LogInformation("Waiting for vehicle notifications...");
+                        _logger.LogInformation("Waiting for rent notifications...");
                         await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
                     }
                 }
@@ -77,35 +77,70 @@ namespace eRent.Subscriber.Services
                 catch (Exception ex)
                 {
                     _logger.LogError($"Error in RabbitMQ listener: {ex.Message}");
+                    await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
                 }
             }
         }
 
-        private async Task HandleVehicleMessage(VehicleNotification notification)
+        private async Task HandleRentMessage(RentNotification notification)
         {
-            var vehicle = notification.Vehicle;
+            var rent = notification.Rent;
 
-            if (!vehicle.AdminEmails.Any())
+            if (string.IsNullOrWhiteSpace(rent.NotificationType))
             {
-                _logger.LogWarning("No admin emails provided in the notification");
+                _logger.LogWarning("No notification type provided in the rent notification");
                 return;
             }
 
-            var subject = "New Vehicle Pending Review";
-            var message = $"A new vehicle {vehicle.BrandName} {vehicle.Name} is ready to be accepted or rejected.\n" +
-                        $"Please review and take appropriate action.";
-
-            foreach (var email in vehicle.AdminEmails)
+            try
             {
-                try
+                // Generate HTML email based on notification type
+                var htmlBody = EmailTemplateService.GenerateRentNotificationEmail(rent, rent.NotificationType);
+                
+                // Determine recipient email and subject based on notification type
+                string recipientEmail;
+                string subject;
+
+                switch (rent.NotificationType)
                 {
-                    await _emailSender.SendEmailAsync(email, subject, message);
-                    _logger.LogInformation($"Notification sent to admin: {email}");
+                    case "Pending":
+                        recipientEmail = rent.UserEmail;
+                        subject = $"Rent Request Submitted - {rent.PropertyTitle}";
+                        break;
+                    case "Cancelled":
+                        recipientEmail = rent.LandlordEmail;
+                        subject = $"Rent Cancelled - {rent.PropertyTitle}";
+                        break;
+                    case "Accepted":
+                        recipientEmail = rent.UserEmail;
+                        subject = $"Rent Request Accepted - {rent.PropertyTitle}";
+                        break;
+                    case "Rejected":
+                        recipientEmail = rent.UserEmail;
+                        subject = $"Rent Request Rejected - {rent.PropertyTitle}";
+                        break;
+                    case "Paid":
+                        recipientEmail = rent.LandlordEmail;
+                        subject = $"Payment Received - {rent.PropertyTitle}";
+                        break;
+                    default:
+                        recipientEmail = rent.UserEmail;
+                        subject = $"Rent Status Update - {rent.PropertyTitle}";
+                        break;
                 }
-                catch (Exception ex)
+
+                if (string.IsNullOrWhiteSpace(recipientEmail))
                 {
-                    _logger.LogError($"Failed to send email to {email}: {ex.Message}");
+                    _logger.LogWarning($"No recipient email found for notification type: {rent.NotificationType}");
+                    return;
                 }
+
+                await _emailSender.SendHtmlEmailAsync(recipientEmail, subject, htmlBody);
+                _logger.LogInformation($"Rent notification ({rent.NotificationType}) sent to: {recipientEmail}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to send rent notification email: {ex.Message}");
             }
         }
     }

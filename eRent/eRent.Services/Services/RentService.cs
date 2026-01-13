@@ -3,6 +3,8 @@ using eRent.Model.Responses;
 using eRent.Model.SearchObjects;
 using eRent.Services.Database;
 using eRent.Services.Interfaces;
+using eRent.Subscriber.Models;
+using EasyNetQ;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -25,7 +27,12 @@ namespace eRent.Services.Services
                 request.RentStatusId = 1; // Pending
             }
 
-            return await base.CreateAsync(request);
+            var result = await base.CreateAsync(request);
+            
+            // Send notification after successful creation
+            await SendRentNotificationAsync(result.Id, "Pending");
+            
+            return result;
         }
 
         public override async Task<PagedResult<RentResponse>> GetAsync(RentSearchObject search)
@@ -302,6 +309,10 @@ namespace eRent.Services.Services
             entity.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
+            
+            // Send notification
+            await SendRentNotificationAsync(entity.Id, "Cancelled");
+            
             return MapToResponse(entity);
         }
 
@@ -326,6 +337,10 @@ namespace eRent.Services.Services
             entity.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
+            
+            // Send notification
+            await SendRentNotificationAsync(entity.Id, "Rejected");
+            
             return MapToResponse(entity);
         }
 
@@ -366,6 +381,10 @@ namespace eRent.Services.Services
             entity.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
+            
+            // Send notification
+            await SendRentNotificationAsync(entity.Id, "Accepted");
+            
             return MapToResponse(entity);
         }
 
@@ -390,7 +409,68 @@ namespace eRent.Services.Services
             entity.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
+            
+            // Send notification
+            await SendRentNotificationAsync(entity.Id, "Paid");
+            
             return MapToResponse(entity);
+        }
+
+        private async Task SendRentNotificationAsync(int rentId, string notificationType)
+        {
+            try
+            {
+                var rent = await _context.Rents
+                    .Include(r => r.User)
+                    .Include(r => r.Property)
+                        .ThenInclude(p => p.Landlord)
+                    .Include(r => r.Property)
+                        .ThenInclude(p => p.City)
+                            .ThenInclude(c => c.Country)
+                    .Include(r => r.RentStatus)
+                    .FirstOrDefaultAsync(r => r.Id == rentId);
+
+                if (rent == null || rent.User == null || rent.Property == null || rent.Property.Landlord == null)
+                {
+                    return;
+                }
+
+                var host = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost";
+                var username = Environment.GetEnvironmentVariable("RABBITMQ_USERNAME") ?? "guest";
+                var password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD") ?? "guest";
+                var virtualhost = Environment.GetEnvironmentVariable("RABBITMQ_VIRTUALHOST") ?? "/";
+
+                using var bus = RabbitHutch.CreateBus($"host={host};virtualHost={virtualhost};username={username};password={password}");
+
+                var notification = new RentNotification
+                {
+                    Rent = new RentNotificationDto
+                    {
+                        RentId = rent.Id,
+                        NotificationType = notificationType,
+                        UserEmail = rent.User.Email,
+                        UserFullName = $"{rent.User.FirstName} {rent.User.LastName}".Trim(),
+                        LandlordEmail = rent.Property.Landlord.Email,
+                        LandlordFullName = $"{rent.Property.Landlord.FirstName} {rent.Property.Landlord.LastName}".Trim(),
+                        PropertyTitle = rent.Property.Title,
+                        PropertyAddress = rent.Property.Address ?? string.Empty,
+                        CityName = rent.Property.City?.Name ?? string.Empty,
+                        CountryName = rent.Property.City?.Country?.Name ?? string.Empty,
+                        StartDate = rent.StartDate,
+                        EndDate = rent.EndDate,
+                        IsDailyRental = rent.IsDailyRental,
+                        TotalPrice = rent.TotalPrice,
+                        RentStatusName = rent.RentStatus?.Name ?? notificationType
+                    }
+                };
+
+                await bus.PubSub.PublishAsync(notification);
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't throw - notification failure shouldn't break rent operations
+                Console.WriteLine($"Failed to send rent notification: {ex.Message}");
+            }
         }
     }
 }

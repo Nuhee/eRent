@@ -25,5 +25,22 @@ namespace eRent.Subscriber.Services
                               message
                               ));
         }
+
+        public Task SendHtmlEmailAsync(string email, string subject, string htmlBody)
+        {
+            var client = new SmtpClient("smtp.gmail.com", 587)
+            {
+                EnableSsl = true,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(_gmailMail, _gmailPass)
+            };
+
+            var mailMessage = new MailMessage(from: _gmailMail, to: email, subject, htmlBody)
+            {
+                IsBodyHtml = true
+            };
+
+            return client.SendMailAsync(mailMessage);
+        }
     }
 }
