@@ -3,10 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
-// Brown color scheme matching the app
-const Color _brownPrimary = Color(0xFF8B6F47);
-const Color _brownDark = Color(0xFF6B5434);
-
 class BaseImageInsert extends StatelessWidget {
   final String? imageBase64;
   final Function(String?) onImageChanged;
@@ -16,6 +12,7 @@ class BaseImageInsert extends StatelessWidget {
   final String clearButtonLabel;
   final String placeholderText;
   final String placeholderSubtext;
+  final bool compact; // New parameter for compact sidebar mode
 
   const BaseImageInsert({
     super.key,
@@ -27,6 +24,7 @@ class BaseImageInsert extends StatelessWidget {
     this.clearButtonLabel = 'Clear Image',
     this.placeholderText = 'No image',
     this.placeholderSubtext = "Click 'Select Image' to add an image",
+    this.compact = false,
   });
 
   Future<void> _pickImage(BuildContext context) async {
@@ -42,134 +40,117 @@ class BaseImageInsert extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (compact) {
+      return _buildCompactVersion(context);
+    }
+    return _buildFullVersion(context);
+  }
+
+  Widget _buildFullVersion(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.grey[50]!,
-            Colors.white,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.grey[200]!,
+          color: Colors.grey.withOpacity(0.2),
           width: 1,
         ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Section Header
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: _brownPrimary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: _brownPrimary.withOpacity(0.3),
-                    width: 1.5,
-                  ),
+                  color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   icon,
-                  color: _brownPrimary,
-                  size: 22,
+                  color: const Color(0xFF5B9BD5),
+                  size: 20,
                 ),
               ),
               const SizedBox(width: 12),
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                   color: Colors.grey[600],
-                  letterSpacing: 1.5,
+                  letterSpacing: 0.5,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          Container(
-            width: 200,
-            height: 200,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  _brownPrimary,
-                  _brownDark,
+          const SizedBox(height: 20),
+          // Image Preview Container
+          Center(
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF5B9BD5),
+                    Color(0xFF7AB8CC),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.grey.withOpacity(0.2),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF5B9BD5).withOpacity(0.2),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
                 ],
               ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.grey[300]!,
-                width: 2,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(11),
+                child: imageBase64 != null && imageBase64!.isNotEmpty
+                    ? Image.memory(
+                        base64Decode(imageBase64!),
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildImagePlaceholder();
+                        },
+                      )
+                    : _buildImagePlaceholder(),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: _brownPrimary.withOpacity(0.2),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(18),
-              child: imageBase64 != null && imageBase64!.isNotEmpty
-                  ? Image.memory(
-                      base64Decode(imageBase64!),
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildImagePlaceholder();
-                      },
-                    )
-                  : _buildImagePlaceholder(),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+          // Action Buttons
           Row(
             children: [
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        _brownPrimary,
-                        _brownDark,
-                      ],
+                child: ElevatedButton.icon(
+                  onPressed: () => _pickImage(context),
+                  icon: const Icon(Icons.photo_library_outlined, size: 18),
+                  label: Text(selectButtonLabel),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF5B9BD5),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 14,
+                      horizontal: 16,
                     ),
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _brownPrimary.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: ElevatedButton.icon(
-                    onPressed: () => _pickImage(context),
-                    icon: const Icon(Icons.photo_library),
-                    label: Text(selectButtonLabel),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      shadowColor: Colors.transparent,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
+                    elevation: 0,
                   ),
                 ),
               ),
@@ -177,17 +158,163 @@ class BaseImageInsert extends StatelessWidget {
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () => onImageChanged(null),
-                  icon: const Icon(Icons.clear),
+                  icon: const Icon(Icons.clear_outlined, size: 18),
                   label: Text(clearButtonLabel),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade400,
-                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.grey[200],
+                    foregroundColor: Colors.grey[800],
                     padding: const EdgeInsets.symmetric(
-                      vertical: 16,
+                      vertical: 14,
+                      horizontal: 16,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactVersion(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.grey.withOpacity(0.1),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Section Header
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  color: const Color(0xFF5B9BD5),
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Image Preview Container
+          Center(
+            child: Container(
+              width: double.infinity,
+              height: 180,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF5B9BD5),
+                    Color(0xFF7AB8CC),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: Colors.grey.withOpacity(0.2),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF5B9BD5).withOpacity(0.15),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(9),
+                child: imageBase64 != null && imageBase64!.isNotEmpty
+                    ? Image.memory(
+                        base64Decode(imageBase64!),
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildCompactPlaceholder();
+                        },
+                      )
+                    : _buildCompactPlaceholder(),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Action Buttons
+          Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => _pickImage(context),
+                  icon: const Icon(Icons.photo_library_outlined, size: 16),
+                  label: Text(selectButtonLabel),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF5B9BD5),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => onImageChanged(null),
+                  icon: const Icon(Icons.clear_outlined, size: 16),
+                  label: Text(clearButtonLabel),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[200],
+                    foregroundColor: Colors.grey[800],
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 0,
                   ),
                 ),
               ),
@@ -199,24 +326,78 @@ class BaseImageInsert extends StatelessWidget {
   }
 
   Widget _buildImagePlaceholder() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, size: 64, color: Colors.grey[400]),
-        const SizedBox(height: 8),
-        Text(
-          placeholderText,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          placeholderSubtext,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 14, color: Colors.grey),
-        ),
-      ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(11),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 48,
+            color: Colors.white.withOpacity(0.8),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              placeholderText,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white.withOpacity(0.9),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              placeholderSubtext,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withOpacity(0.7),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactPlaceholder() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 40,
+            color: Colors.white.withOpacity(0.8),
+          ),
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              placeholderText,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withOpacity(0.9),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
-

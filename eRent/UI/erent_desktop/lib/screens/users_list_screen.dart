@@ -51,88 +51,173 @@ class _UsersListScreenState extends State<UsersListScreen> {
     });
   }
 
-  Future<void> _deactivateUser(User user) async {
-    // Show confirmation dialog
+  Future<void> _toggleUserStatus(User user) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Deactivate User'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              user.isActive ? Icons.warning_amber_rounded : Icons.check_circle_outline,
+              color: user.isActive ? Colors.orange : const Color(0xFF5B9BD5),
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              user.isActive ? "Deactivate User?" : "Activate User?",
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
         content: Text(
-          'Are you sure you want to deactivate ${user.firstName} ${user.lastName}?',
+          user.isActive
+              ? "Are you sure you want to deactivate '${user.firstName} ${user.lastName}'? This will make their account unavailable."
+              : "Are you sure you want to activate '${user.firstName} ${user.lastName}'? This will make their account available.",
+          style: const TextStyle(fontSize: 15),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.grey[600],
+            ),
+            child: const Text("Cancel"),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: user.isActive ? Colors.red : const Color(0xFF5B9BD5),
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
-            child: const Text('Deactivate'),
+            child: Text(user.isActive ? "Deactivate" : "Activate"),
           ),
         ],
       ),
     );
 
-    if (confirmed != true) return;
+    if (confirmed == true) {
+      try {
+        // Show loading indicator
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    user.isActive
+                        ? "Deactivating ${user.firstName} ${user.lastName}..."
+                        : "Activating ${user.firstName} ${user.lastName}...",
+                  ),
+                ],
+              ),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
 
-    try {
-      // Get current user data
-      var currentUser = await userProvider.getById(user.id);
-      if (currentUser == null) {
-        throw Exception('User not found');
-      }
+        // Get current user data
+        var currentUser = await userProvider.getById(user.id);
+        if (currentUser == null) {
+          throw Exception('User not found');
+        }
 
-      // Extract role IDs from user roles
-      var roleIds = currentUser.roles.map((role) => role.id).toList();
+        // Extract role IDs from user roles
+        var roleIds = currentUser.roles.map((role) => role.id).toList();
 
-      // Prepare update request with isActive = false
-      var request = {
-        'firstName': currentUser.firstName,
-        'lastName': currentUser.lastName,
-        'email': currentUser.email,
-        'username': currentUser.username,
-        'phoneNumber': currentUser.phoneNumber ?? '',
-        'isActive': false, // Deactivate
-        'cityId': currentUser.cityId,
-        'genderId': currentUser.genderId,
-        'picture': currentUser.picture,
-        'roleIds': roleIds, // Include role IDs
-      };
+        // Prepare update request
+        var request = {
+          'firstName': currentUser.firstName,
+          'lastName': currentUser.lastName,
+          'email': currentUser.email,
+          'username': currentUser.username,
+          'phoneNumber': currentUser.phoneNumber ?? '',
+          'isActive': !user.isActive,
+          'cityId': currentUser.cityId,
+          'genderId': currentUser.genderId,
+          'picture': currentUser.picture,
+          'roleIds': roleIds,
+        };
 
-      await userProvider.update(user.id, request);
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('User deactivated successfully'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 1),
-          ),
-        );
+        await userProvider.update(user.id, request);
+
         // Refresh the list
         await _performSearch();
-      }
-    } catch (e) {
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Error'),
-            content: Text(
-              e.toString().replaceFirst('Exception: ', ''),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(
+                    user.isActive ? Icons.block : Icons.check_circle,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    user.isActive
+                        ? "${user.firstName} ${user.lastName} has been deactivated"
+                        : "${user.firstName} ${user.lastName} has been activated",
+                  ),
+                ],
               ),
-            ],
-          ),
-        );
+              backgroundColor: user.isActive ? Colors.red : Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      "Failed to update user status: ${e.toString()}",
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
       }
     }
   }
@@ -214,16 +299,13 @@ class _UsersListScreenState extends State<UsersListScreen> {
               ElevatedButton(
                 onPressed: _performSearch,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2D2D2D),
+                  backgroundColor: Colors.grey[800],
                   foregroundColor: Colors.white,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  shadowColor: const Color(0xFF2D2D2D).withOpacity(0.3),
-                ).copyWith(
-                  elevation: WidgetStateProperty.all(4),
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
@@ -246,13 +328,13 @@ class _UsersListScreenState extends State<UsersListScreen> {
                   usernameController.clear();
                   emailController.clear();
                   setState(() {
-                    selectedRoleFilter = null; // Reset to All
+                    selectedRoleFilter = null;
                   });
                   _performSearch(page: 0);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey.shade300,
-                  foregroundColor: const Color(0xFF2D2D2D),
+                  backgroundColor: Colors.grey[200],
+                  foregroundColor: Colors.grey[800],
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -302,8 +384,8 @@ class _UsersListScreenState extends State<UsersListScreen> {
               125,
               280,
               150,
-              80,
-              190,
+              120,
+              180,
             ], // Name, Username, Email, City, Active, Actions (wider for 3 buttons)
             columns: const [
               DataColumn(
@@ -374,18 +456,39 @@ class _UsersListScreenState extends State<UsersListScreen> {
                               ),
                             ),
                             DataCell(
-                              Icon(
-                                e.isActive ? Icons.check_circle : Icons.cancel,
-                                color: e.isActive ? Colors.green : Colors.red,
-                                size: 20,
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    e.isActive
+                                        ? Icons.check_circle
+                                        : Icons.cancel,
+                                    color: e.isActive
+                                        ? const Color(0xFF5B9BD5)
+                                        : Colors.grey[400],
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    e.isActive ? 'Active' : 'Inactive',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: e.isActive
+                                          ? const Color(0xFF5B9BD5)
+                                          : Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             DataCell(
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  MouseRegion(
-                                    cursor: SystemMouseCursors.click,
+                                  // View Details Button
+                                  Tooltip(
+                                    message: "View Details",
                                     child: Material(
                                       color: Colors.transparent,
                                       child: InkWell(
@@ -394,8 +497,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) =>
-                                                  UsersDetailsScreen(user: e),
+                                              builder: (context) => UsersDetailsScreen(user: e),
                                               settings: const RouteSettings(
                                                 name: 'UsersDetailsScreen',
                                               ),
@@ -403,39 +505,30 @@ class _UsersListScreenState extends State<UsersListScreen> {
                                           );
                                         },
                                         child: Container(
-                                          width: 38,
-                                          height: 38,
+                                          width: 36,
+                                          height: 36,
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
-                                            gradient: const LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: [
-                                                Color(0xFF8B6F47),
-                                                Color(0xFF6B5434),
-                                              ],
-                                            ),
+                                            color: const Color(0xFF5B9BD5).withOpacity(0.1),
                                             borderRadius: BorderRadius.circular(8),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: const Color(0xFF8B6F47).withOpacity(0.3),
-                                                blurRadius: 6,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
+                                            border: Border.all(
+                                              color: const Color(0xFF5B9BD5).withOpacity(0.3),
+                                              width: 1,
+                                            ),
                                           ),
                                           child: const Icon(
-                                            Icons.info_outline_rounded,
-                                            color: Colors.white,
+                                            Icons.visibility_outlined,
+                                            color: Color(0xFF5B9BD5),
                                             size: 18,
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 10),
-                                  MouseRegion(
-                                    cursor: SystemMouseCursors.click,
+                                  const SizedBox(width: 8),
+                                  // Edit Button
+                                  Tooltip(
+                                    message: "Edit",
                                     child: Material(
                                       color: Colors.transparent,
                                       child: InkWell(
@@ -444,78 +537,69 @@ class _UsersListScreenState extends State<UsersListScreen> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) =>
-                                                  UsersEditScreen(user: e),
+                                              builder: (context) => UsersEditScreen(user: e),
                                               settings: const RouteSettings(
                                                 name: 'UsersEditScreen',
                                               ),
                                             ),
-                                          );
+                                          ).then((_) {
+                                            // Refresh when coming back from edit
+                                            _performSearch();
+                                          });
                                         },
                                         child: Container(
-                                          width: 38,
-                                          height: 38,
+                                          width: 36,
+                                          height: 36,
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
-                                            gradient: const LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: [
-                                                Color(0xFF8B6F47),
-                                                Color(0xFF6B5434),
-                                              ],
-                                            ),
+                                            color: Colors.orange.withOpacity(0.1),
                                             borderRadius: BorderRadius.circular(8),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: const Color(0xFF8B6F47).withOpacity(0.3),
-                                                blurRadius: 6,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
+                                            border: Border.all(
+                                              color: Colors.orange.withOpacity(0.3),
+                                              width: 1,
+                                            ),
                                           ),
                                           child: const Icon(
-                                            Icons.build_rounded,
-                                            color: Colors.white,
+                                            Icons.edit_outlined,
+                                            color: Colors.orange,
                                             size: 18,
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 10),
-                                  MouseRegion(
-                                    cursor: SystemMouseCursors.click,
+                                  const SizedBox(width: 8),
+                                  // Activate/Deactivate Button
+                                  Tooltip(
+                                    message: e.isActive ? "Deactivate" : "Activate",
                                     child: Material(
                                       color: Colors.transparent,
                                       child: InkWell(
                                         borderRadius: BorderRadius.circular(8),
-                                        onTap: () => _deactivateUser(e),
+                                        onTap: () => _toggleUserStatus(e),
                                         child: Container(
-                                          width: 38,
-                                          height: 38,
+                                          width: 36,
+                                          height: 36,
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
-                                            gradient: const LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: [
-                                                Color(0xFFD32F2F), // Red
-                                                Color(0xFFB71C1C), // Darker red
-                                              ],
-                                            ),
+                                            color: e.isActive
+                                                ? Colors.red.withOpacity(0.1)
+                                                : Colors.green.withOpacity(0.1),
                                             borderRadius: BorderRadius.circular(8),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: const Color(0xFFD32F2F).withOpacity(0.35), // Red tint
-                                                blurRadius: 6,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
+                                            border: Border.all(
+                                              color: e.isActive
+                                                  ? Colors.red.withOpacity(0.3)
+                                                  : Colors.green.withOpacity(0.3),
+                                              width: 1,
+                                            ),
                                           ),
-                                          child: const Icon(
-                                            Icons.delete_outline_rounded,
-                                            color: Colors.white,
+                                          child: Icon(
+                                            e.isActive
+                                                ? Icons.block_outlined
+                                                : Icons.check_circle_outline,
+                                            color: e.isActive
+                                                ? Colors.red
+                                                : Colors.green,
                                             size: 18,
                                           ),
                                         ),

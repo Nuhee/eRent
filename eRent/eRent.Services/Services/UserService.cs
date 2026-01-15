@@ -1,23 +1,22 @@
-using eRent.Services.Database;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using System;
-using System.Security.Cryptography;
+
+using MapsterMapper;
 using eRent.Model.Responses;
 using eRent.Model.SearchObjects;
-using eRent.Model.Requests;
+using eRent.Services.Database;
 using eRent.Services.Interfaces;
-using MapsterMapper;
+using eRent.Model.Requests;
+using eRent.Services.Helpers;
+
 
 namespace eRent.Services.Services
 {
     public class UserService : BaseService<UserResponse, UserSearchObject, User>, IUserService
     {
-        private const int SaltSize = 16;
-        private const int KeySize = 32;
-        private const int Iterations = 10000;
 
         public UserService(eRentDbContext context, IMapper mapper) : base(context, mapper)
         {
@@ -108,19 +107,6 @@ namespace eRent.Services.Services
             return MapToResponse(user);
         }
 
-        private string HashPassword(string password, out byte[] salt)
-        {
-            salt = new byte[SaltSize];
-            using (var rng = new RNGCryptoServiceProvider())
-            {
-                rng.GetBytes(salt);
-            }
-
-            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, Iterations))
-            {
-                return Convert.ToBase64String(pbkdf2.GetBytes(KeySize));
-            }
-        }
 
         public async Task<UserResponse> CreateAsync(UserUpsertRequest request)
         {
@@ -145,15 +131,15 @@ namespace eRent.Services.Services
                 GenderId = request.GenderId,
                 CityId = request.CityId,
                 IsActive = request.IsActive,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
                 Picture = request.Picture
             };
 
             // Hash password if provided
             if (!string.IsNullOrEmpty(request.Password))
             {
-                user.PasswordHash = HashPassword(request.Password, out byte[] salt);
-                user.PasswordSalt = Convert.ToBase64String(salt);
+                user.PasswordSalt = PasswordGenerator.GenerateSalt();
+                user.PasswordHash = PasswordGenerator.GenerateHash(request.Password, user.PasswordSalt);
             }
 
             _context.Users.Add(user);
@@ -168,7 +154,7 @@ namespace eRent.Services.Services
                     {
                         UserId = user.Id,
                         RoleId = roleId,
-                        DateAssigned = DateTime.Now
+                        DateAssigned = DateTime.UtcNow
                     };
                     _context.UserRoles.Add(userRole);
                 }
@@ -212,12 +198,12 @@ namespace eRent.Services.Services
             // Update password if provided
             if (!string.IsNullOrEmpty(request.Password))
             {
-                user.PasswordHash = HashPassword(request.Password, out byte[] salt);
-                user.PasswordSalt = Convert.ToBase64String(salt);
+                user.PasswordSalt = PasswordGenerator.GenerateSalt();
+                user.PasswordHash = PasswordGenerator.GenerateHash(request.Password, user.PasswordSalt);
             }
 
-            // Update roles if provided
-            if (request.RoleIds != null)
+            // Update roles if provided and not empty
+            if (request.RoleIds != null && request.RoleIds.Any())
             {
                 // Remove existing roles
                 _context.UserRoles.RemoveRange(user.UserRoles);
@@ -229,11 +215,12 @@ namespace eRent.Services.Services
                     {
                         UserId = user.Id,
                         RoleId = roleId,
-                        DateAssigned = DateTime.Now
+                        DateAssigned = DateTime.UtcNow
                     };
                     _context.UserRoles.Add(userRole);
                 }
             }
+            // If RoleIds is null, preserve existing roles (don't update them)
 
             await _context.SaveChangesAsync();
             return await GetUserResponseWithRolesAsync(user.Id);
@@ -307,7 +294,7 @@ namespace eRent.Services.Services
                 return null;
 
             // Update last login time
-            user.LastLoginAt = DateTime.Now;
+            user.LastLoginAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
             return MapToResponse(user);
@@ -315,10 +302,7 @@ namespace eRent.Services.Services
 
         private bool VerifyPassword(string password, string passwordHash, string passwordSalt)
         {
-            var salt = Convert.FromBase64String(passwordSalt);
-            var hash = Convert.FromBase64String(passwordHash);
-            var hashBytes = new Rfc2898DeriveBytes(password, salt, Iterations).GetBytes(KeySize);
-            return hash.SequenceEqual(hashBytes);
+            return PasswordGenerator.VerifyPassword(password, passwordHash, passwordSalt);
         }
     }
 }
