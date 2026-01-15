@@ -57,13 +57,13 @@ class BaseTable extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 24,
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
             offset: const Offset(0, 4),
             spreadRadius: 0,
           ),
           BoxShadow(
-            color: const Color(0xFF8B6F47).withOpacity(0.04),
+            color: const Color(0xFF5B9BD5).withOpacity(0.08),
             blurRadius: 12,
             offset: const Offset(0, 2),
             spreadRadius: 0,
@@ -85,8 +85,8 @@ class BaseTable extends StatelessWidget {
                     ),
                     border: Border(
                       bottom: BorderSide(
-                        color: const Color(0xFF8B6F47).withOpacity(0.2),
-                        width: 2,
+                        color: const Color(0xFF5B9BD5).withOpacity(0.15),
+                        width: 1.5,
                       ),
                     ),
                   ),
@@ -100,15 +100,15 @@ class BaseTable extends StatelessWidget {
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                Color(0xFF8B6F47),
-                                Color(0xFF6B5434),
+                                Color(0xFF5B9BD5),
+                                Color(0xFF7AB8CC),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF8B6F47).withOpacity(0.3),
-                                blurRadius: 6,
+                                color: const Color(0xFF5B9BD5).withOpacity(0.25),
+                                blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
                             ],
@@ -138,10 +138,10 @@ class BaseTable extends StatelessWidget {
                             Row(
                               children: [
                                 Container(
-                                  width: 4,
-                                  height: 4,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF8B6F47),
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF5B9BD5),
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -162,15 +162,15 @@ class BaseTable extends StatelessWidget {
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 5,
+                          horizontal: 14,
+                          vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF8B6F47).withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(12),
+                          color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: const Color(0xFF8B6F47).withOpacity(0.2),
-                            width: 1.5,
+                            color: const Color(0xFF5B9BD5).withOpacity(0.25),
+                            width: 1,
                           ),
                         ),
                         child: Row(
@@ -178,17 +178,17 @@ class BaseTable extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.table_chart_rounded,
-                              size: 18,
-                              color: const Color(0xFF8B6F47),
+                              size: 16,
+                              color: const Color(0xFF5B9BD5),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 6),
                             Text(
                               '${rows.length}',
                               style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF8B6F47),
-                                letterSpacing: 0.5,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF5B9BD5),
+                                letterSpacing: 0.3,
                               ),
                             ),
                           ],
@@ -239,8 +239,8 @@ class BaseTable extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Colors.grey.withOpacity(0.12),
-              width: 1.5,
+              color: Colors.grey.withOpacity(0.1),
+              width: 1,
             ),
           ),
           child: SingleChildScrollView(
@@ -256,10 +256,10 @@ class BaseTable extends StatelessWidget {
                 dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
                   if (states.contains(WidgetState.hovered)) {
                     return hoverRowColor ??
-                        const Color(0xFF8B6F47).withOpacity(0.06);
+                        const Color(0xFF5B9BD5).withOpacity(0.05);
                   }
                   if (states.contains(WidgetState.selected)) {
-                    return const Color(0xFF8B6F47).withOpacity(0.1);
+                    return const Color(0xFF5B9BD5).withOpacity(0.08);
                   }
                   return null;
                 }),
@@ -277,18 +277,18 @@ class BaseTable extends StatelessWidget {
                   color: Color(0xFF2D2D2D),
                   letterSpacing: 0.5,
                 ),
-                dividerThickness: 1.5,
+                dividerThickness: 1,
                 border: TableBorder(
                   horizontalInside: BorderSide(
-                    color: Colors.grey.withOpacity(0.12),
+                    color: Colors.grey.withOpacity(0.08),
                     width: 1,
                   ),
                   verticalInside: BorderSide(
-                    color: Colors.grey.withOpacity(0.12),
+                    color: Colors.grey.withOpacity(0.08),
                     width: 1,
                   ),
                   bottom: BorderSide(
-                    color: Colors.grey.withOpacity(0.15),
+                    color: Colors.grey.withOpacity(0.1),
                     width: 1,
                   ),
                 ),
@@ -394,20 +394,20 @@ class BaseTable extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      const Color(0xFF8B6F47).withOpacity(0.1),
-                      const Color(0xFF8B6F47).withOpacity(0.05),
+                      const Color(0xFF5B9BD5).withOpacity(0.1),
+                      const Color(0xFF7AB8CC).withOpacity(0.05),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(60),
                   border: Border.all(
-                    color: const Color(0xFF8B6F47).withOpacity(0.2),
+                    color: const Color(0xFF5B9BD5).withOpacity(0.2),
                     width: 2,
                   ),
                 ),
                 child: Icon(
                   emptyIcon,
                   size: 56,
-                  color: const Color(0xFF8B6F47),
+                  color: const Color(0xFF5B9BD5),
                 ),
               ),
             if (emptyText != null) ...[
