@@ -46,6 +46,162 @@ class _CityListScreenState extends State<CityListScreen> {
     });
   }
 
+  // Toggle city active status
+  Future<void> _toggleCityStatus(City city) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              city.isActive ? Icons.warning_amber_rounded : Icons.check_circle_outline,
+              color: city.isActive ? Colors.orange : const Color(0xFF5B9BD5),
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              city.isActive ? "Deactivate City?" : "Activate City?",
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          city.isActive
+              ? "Are you sure you want to deactivate '${city.name}'? This will make it unavailable for selection."
+              : "Are you sure you want to activate '${city.name}'? This will make it available for selection.",
+          style: const TextStyle(fontSize: 15),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.grey[600],
+            ),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: city.isActive ? Colors.red : const Color(0xFF5B9BD5),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(city.isActive ? "Deactivate" : "Activate"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        // Show loading indicator
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    city.isActive
+                        ? "Deactivating ${city.name}..."
+                        : "Activating ${city.name}...",
+                  ),
+                ],
+              ),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+
+        // Update city status
+        final updateRequest = {
+          'name': city.name,
+          'countryId': city.countryId,
+          'isActive': !city.isActive,
+        };
+
+        await cityProvider.update(city.id, updateRequest);
+
+        // Refresh the list
+        await _performSearch();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(
+                    city.isActive ? Icons.block : Icons.check_circle,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    city.isActive
+                        ? "${city.name} has been deactivated"
+                        : "${city.name} has been activated",
+                  ),
+                ],
+              ),
+              backgroundColor: city.isActive ? Colors.red : Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      "Failed to update city status: ${e.toString()}",
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -197,16 +353,30 @@ class _CityListScreenState extends State<CityListScreen> {
           BaseTable(
             icon: Icons.location_city_outlined,
             title: "Cities",
-            width: 480,
+            width: 800,
             height: 423,
             columnWidths: [
-              270, // Name
-              240, // Actions
+              200, // Name
+              200, // Country
+              120, // Status
+              280, // Actions
             ],
             columns: const [
               DataColumn(
                 label: Text(
                   "Name",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  "Country",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  "Status",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
@@ -227,60 +397,50 @@ class _CityListScreenState extends State<CityListScreen> {
                               Text(e.name, style: const TextStyle(fontSize: 15)),
                             ),
                             DataCell(
+                              Text(
+                                e.countryName.isNotEmpty ? e.countryName : 'N/A',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: e.countryName.isNotEmpty 
+                                      ? Colors.grey[800] 
+                                      : Colors.grey[500],
+                                ),
+                              ),
+                            ),
+                            DataCell(
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => CityDetailsScreen(city: e),
-                settings: const RouteSettings(
-                  name: 'CityDetailsScreen',
-                ),
-              ),
-            );
-          },
-          child: Container(
-            width: 38,
-            height: 38,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF8B6F47),
-                  Color(0xFF6B5434),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF8B6F47).withOpacity(0.3),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.info_outline_rounded,
-              color: Colors.white,
-              size: 18,
-            ),
-          ),
-        ),
-      ),
-    ),
-    const SizedBox(width: 10),
-                                  MouseRegion(
-                                    cursor: SystemMouseCursors.click,
+                                  Icon(
+                                    e.isActive
+                                        ? Icons.check_circle
+                                        : Icons.cancel,
+                                    color: e.isActive
+                                        ? const Color(0xFF5B9BD5)
+                                        : Colors.grey[400],
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    e.isActive ? 'Active' : 'Inactive',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: e.isActive
+                                          ? const Color(0xFF5B9BD5)
+                                          : Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            DataCell(
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // View Details Button
+                                  Tooltip(
+                                    message: "View Details",
                                     child: Material(
                                       color: Colors.transparent,
                                       child: InkWell(
@@ -289,8 +449,47 @@ class _CityListScreenState extends State<CityListScreen> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) =>
-                                                  CityEditScreen(city: e),
+                                              builder: (context) => CityDetailsScreen(city: e),
+                                              settings: const RouteSettings(
+                                                name: 'CityDetailsScreen',
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: Container(
+                                          width: 36,
+                                          height: 36,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(
+                                              color: const Color(0xFF5B9BD5).withOpacity(0.3),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.visibility_outlined,
+                                            color: Color(0xFF5B9BD5),
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Edit Button
+                                  Tooltip(
+                                    message: "Edit",
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(8),
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => CityEditScreen(city: e),
                                               settings: const RouteSettings(
                                                 name: 'CityEditScreen',
                                               ),
@@ -298,30 +497,60 @@ class _CityListScreenState extends State<CityListScreen> {
                                           );
                                         },
                                         child: Container(
-                                          width: 38,
-                                          height: 38,
+                                          width: 36,
+                                          height: 36,
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
-                                            gradient: const LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: [
-                                                Color(0xFF8B6F47),
-                                                Color(0xFF6B5434),
-                                              ],
-                                            ),
+                                            color: Colors.orange.withOpacity(0.1),
                                             borderRadius: BorderRadius.circular(8),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: const Color(0xFF8B6F47).withOpacity(0.3),
-                                                blurRadius: 6,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
+                                            border: Border.all(
+                                              color: Colors.orange.withOpacity(0.3),
+                                              width: 1,
+                                            ),
                                           ),
-                                          child:  Icon(
-                                            Icons.build_rounded,
-                                            color: Colors.white,
+                                          child: const Icon(
+                                            Icons.edit_outlined,
+                                            color: Colors.orange,
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Activate/Deactivate Button
+                                  Tooltip(
+                                    message: e.isActive ? "Deactivate" : "Activate",
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(8),
+                                        onTap: () async {
+                                          await _toggleCityStatus(e);
+                                        },
+                                        child: Container(
+                                          width: 36,
+                                          height: 36,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: e.isActive
+                                                ? Colors.red.withOpacity(0.1)
+                                                : Colors.green.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(
+                                              color: e.isActive
+                                                  ? Colors.red.withOpacity(0.3)
+                                                  : Colors.green.withOpacity(0.3),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            e.isActive
+                                                ? Icons.block_outlined
+                                                : Icons.check_circle_outline,
+                                            color: e.isActive
+                                                ? Colors.red
+                                                : Colors.green,
                                             size: 18,
                                           ),
                                         ),
