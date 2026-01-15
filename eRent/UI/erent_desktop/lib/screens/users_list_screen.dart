@@ -286,6 +286,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
                     DropdownMenuItem<int?>(value: null, child: Text('All')),
                     DropdownMenuItem<int>(value: 1, child: Text('Admin')),
                     DropdownMenuItem<int>(value: 2, child: Text('User')),
+                    DropdownMenuItem<int>(value: 3, child: Text('Landlord')),
                   ],
                   onChanged: (int? newValue) {
                     setState(() {
