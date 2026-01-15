@@ -15,40 +15,40 @@ InputDecoration customTextFieldDecoration(
     hintText: hintText,
     filled: true,
     fillColor: Colors.grey[50],
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
 
     border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12.0),
-      borderSide: BorderSide(color: Colors.grey[300]!, width: 1.5),
+      borderRadius: BorderRadius.circular(10.0),
+      borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
     ),
     enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12.0),
-      borderSide: BorderSide(color: Colors.grey[300]!, width: 1.5),
+      borderRadius: BorderRadius.circular(10.0),
+      borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
     ),
     focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12.0),
+      borderRadius: BorderRadius.circular(10.0),
       borderSide: const BorderSide(
-        color: Color(0xFF8B6F47),
+        color: Color(0xFF5B9BD5),
         width: 2.0,
       ),
     ),
     errorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12.0),
-      borderSide: const BorderSide(color: Color(0xFFFF6B6B), width: 1.5),
+      borderRadius: BorderRadius.circular(10.0),
+      borderSide: const BorderSide(color: Color(0xFFFF6B6B), width: 1),
     ),
     focusedErrorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12.0),
+      borderRadius: BorderRadius.circular(10.0),
       borderSide: const BorderSide(color: Color(0xFFFF6B6B), width: 2.0),
     ),
     prefixIcon: prefixIcon != null
         ? Icon(
             prefixIcon,
-            color: isError ? const Color(0xFFFF6B6B) : const Color(0xFF8B6F47),
+            color: isError ? const Color(0xFFFF6B6B) : const Color(0xFF5B9BD5),
             size: 20,
           )
         : null,
     suffixIcon: suffixIcon != null
-        ? Icon(suffixIcon, color: const Color(0xFF8B6F47), size: 20)
+        ? Icon(suffixIcon, color: const Color(0xFF5B9BD5), size: 20)
         : null,
     labelStyle: TextStyle(
       color: isError ? const Color(0xFFFF6B6B) : const Color(0xFF2D2D2D),

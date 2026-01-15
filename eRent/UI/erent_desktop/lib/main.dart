@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:erent_desktop/providers/car_provider.dart';
 import 'package:erent_desktop/providers/category_provider.dart';
 import 'package:erent_desktop/providers/city_provider.dart';
+import 'package:erent_desktop/providers/country_provider.dart';
 import 'package:erent_desktop/providers/user_provider.dart';
 import 'package:erent_desktop/providers/gender_provider.dart';
 import 'package:erent_desktop/providers/review_provider.dart';
@@ -25,6 +26,9 @@ void main() async {
       providers: [
         ChangeNotifierProvider<CityProvider>(
           create: (context) => CityProvider(),
+        ),
+        ChangeNotifierProvider<CountryProvider>(
+          create: (context) => CountryProvider(),
         ),
         ChangeNotifierProvider<CategoryProvider>(
           create: (context) => CategoryProvider(),

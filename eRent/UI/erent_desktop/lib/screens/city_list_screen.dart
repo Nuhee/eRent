@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:erent_desktop/layouts/master_screen.dart';
 import 'package:erent_desktop/model/city.dart';
+import 'package:erent_desktop/model/country.dart';
 import 'package:erent_desktop/model/search_result.dart';
 import 'package:erent_desktop/providers/city_provider.dart';
+import 'package:erent_desktop/providers/country_provider.dart';
 import 'package:erent_desktop/screens/city_details_screen.dart';
 import 'package:erent_desktop/screens/city_edit_screen.dart';
 import 'package:erent_desktop/utils/base_table.dart';
@@ -19,12 +21,30 @@ class CityListScreen extends StatefulWidget {
 
 class _CityListScreenState extends State<CityListScreen> {
   late CityProvider cityProvider;
+  late CountryProvider countryProvider;
   TextEditingController nameController = TextEditingController();
+  int? selectedCountryId;
+  List<Country>? countries;
 
   SearchResult<City>? cities;
   int _currentPage = 0;
   int _pageSize = 5;
   final List<int> _pageSizeOptions = [5, 7, 10, 20, 50];
+
+  // Load countries for dropdown
+  Future<void> _loadCountries() async {
+    try {
+      final result = await countryProvider.get(filter: {
+        'isActive': true,
+        'retrieveAll': true,
+      });
+      setState(() {
+        countries = result.items;
+      });
+    } catch (e) {
+      debugPrint('Error loading countries: $e');
+    }
+  }
 
   // Search for cities with ENTER key, not only when button is clicked
   Future<void> _performSearch({int? page, int? pageSize}) async {
@@ -32,6 +52,7 @@ class _CityListScreenState extends State<CityListScreen> {
     final int pageSizeToUse = pageSize ?? _pageSize;
     final filter = {
       if (nameController.text.isNotEmpty) 'name': nameController.text,
+      if (selectedCountryId != null) 'countryId': selectedCountryId,
       'page': pageToFetch,
       'pageSize': pageSizeToUse,
       'includeTotalCount': true, // Ensure backend returns total count
@@ -208,7 +229,9 @@ class _CityListScreenState extends State<CityListScreen> {
     // Delay to ensure context is available for Provider
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       cityProvider = context.read<CityProvider>();
+      countryProvider = context.read<CountryProvider>();
 
+      await _loadCountries();
       await _performSearch(page: 0);
     });
   }
@@ -251,18 +274,58 @@ class _CityListScreenState extends State<CityListScreen> {
             ),
           ),
           const SizedBox(width: 12),
+          // Country dropdown
+          Container(
+            width: 300,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: Colors.grey.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: DropdownButtonFormField<int?>(
+              value: selectedCountryId,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.flag_outlined, size: 20),
+                hintText: "All Countries",
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+              ),
+              items: [
+                const DropdownMenuItem<int?>(
+                  value: null,
+                  child: Text("All Countries"),
+                ),
+                ...?countries?.map((country) => DropdownMenuItem<int?>(
+                      value: country.id,
+                      child: Text(country.name),
+                    )),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  selectedCountryId = value;
+                });
+                _performSearch(page: 0);
+              },
+            ),
+          ),
+          const SizedBox(width: 12),
 
           ElevatedButton(
             onPressed: _performSearch,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2D2D2D),
+              backgroundColor: Colors.grey[800],
               foregroundColor: Colors.white,
-              elevation: 2,
+              elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              shadowColor: Colors.black.withOpacity(0.2),
             ),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
@@ -280,59 +343,38 @@ class _CityListScreenState extends State<CityListScreen> {
             ),
           ),
           const SizedBox(width: 12),
-          Container(
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF8B6F47),
-                  Color(0xFF6B5434),
-                ],
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CityEditScreen(),
+                  settings: const RouteSettings(name: 'CityEditScreen'),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF5B9BD5),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF8B6F47).withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.add_rounded, size: 18),
+                SizedBox(width: 8),
+                Text(
+                  'Add City',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
                 ),
               ],
-            ),
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CityEditScreen(),
-                    settings: const RouteSettings(name: 'CityEditScreen'),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                foregroundColor: Colors.white,
-                shadowColor: Colors.transparent,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.add_rounded, size: 18),
-                  SizedBox(width: 8),
-                  Text(
-                    'Add City',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
             ),
           ),
         ],

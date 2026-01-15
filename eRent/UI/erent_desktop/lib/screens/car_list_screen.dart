@@ -47,82 +47,167 @@ class _CarListScreenState extends State<CarListScreen> {
   }
 
   Future<void> _deactivateCar(Car car) async {
-    // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Deactivate Car'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              car.isActive ? Icons.warning_amber_rounded : Icons.check_circle_outline,
+              color: car.isActive ? Colors.orange : const Color(0xFF5B9BD5),
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              car.isActive ? "Deactivate Car?" : "Activate Car?",
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
         content: Text(
-          'Are you sure you want to deactivate ${car.brandName} ${car.model} (${car.licensePlate})?',
+          car.isActive
+              ? "Are you sure you want to deactivate '${car.brandName} ${car.model}' (${car.licensePlate})? This will make it unavailable for selection."
+              : "Are you sure you want to activate '${car.brandName} ${car.model}' (${car.licensePlate})? This will make it available for selection.",
+          style: const TextStyle(fontSize: 15),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.grey[600],
+            ),
+            child: const Text("Cancel"),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: car.isActive ? Colors.red : const Color(0xFF5B9BD5),
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
-            child: const Text('Deactivate'),
+            child: Text(car.isActive ? "Deactivate" : "Activate"),
           ),
         ],
       ),
     );
 
-    if (confirmed != true) return;
+    if (confirmed == true) {
+      try {
+        // Show loading indicator
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    car.isActive
+                        ? "Deactivating ${car.brandName} ${car.model}..."
+                        : "Activating ${car.brandName} ${car.model}...",
+                  ),
+                ],
+              ),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
 
-    try {
-      // Get current car data
-      var currentCar = await carProvider.getById(car.id);
-      if (currentCar == null) {
-        throw Exception('Car not found');
-      }
+        // Get current car data
+        var currentCar = await carProvider.getById(car.id);
+        if (currentCar == null) {
+          throw Exception('Car not found');
+        }
 
-      // Prepare update request with isActive = false
-      var request = {
-        'brandId': currentCar.brandId,
-        'colorId': currentCar.colorId,
-        'userId': currentCar.userId,
-        'model': currentCar.model,
-        'licensePlate': currentCar.licensePlate,
-        'yearOfManufacture': currentCar.yearOfManufacture,
-        'isActive': false, // Deactivate
-        'picture': currentCar.picture,
-      };
+        // Prepare update request
+        var request = {
+          'brandId': currentCar.brandId,
+          'colorId': currentCar.colorId,
+          'userId': currentCar.userId,
+          'model': currentCar.model,
+          'licensePlate': currentCar.licensePlate,
+          'yearOfManufacture': currentCar.yearOfManufacture,
+          'isActive': !car.isActive,
+          'picture': currentCar.picture,
+        };
 
-      await carProvider.update(car.id, request);
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Car deactivated successfully'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 1),
-          ),
-        );
+        await carProvider.update(car.id, request);
+
         // Refresh the list
         await _performSearch();
-      }
-    } catch (e) {
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Error'),
-            content: Text(
-              e.toString().replaceFirst('Exception: ', ''),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(
+                    car.isActive ? Icons.block : Icons.check_circle,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    car.isActive
+                        ? "${car.brandName} ${car.model} has been deactivated"
+                        : "${car.brandName} ${car.model} has been activated",
+                  ),
+                ],
               ),
-            ],
-          ),
-        );
+              backgroundColor: car.isActive ? Colors.red : Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      "Failed to update car status: ${e.toString()}",
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
       }
     }
   }
@@ -331,21 +416,40 @@ class _CarListScreenState extends State<CarListScreen> {
                           DataCell(
                             Text(e.userFullName, style: const TextStyle(fontSize: 15)),
                           ),
-                               DataCell(
-                            Icon(
-                              e.isActive
-                                  ? Icons.check_circle
-                                  : Icons.cancel,
-                              color: e.isActive ? Colors.green : Colors.red,
-                              size: 20,
+                          DataCell(
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  e.isActive
+                                      ? Icons.check_circle
+                                      : Icons.cancel,
+                                  color: e.isActive
+                                      ? const Color(0xFF5B9BD5)
+                                      : Colors.grey[400],
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  e.isActive ? 'Active' : 'Inactive',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: e.isActive
+                                        ? const Color(0xFF5B9BD5)
+                                        : Colors.grey[600],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           DataCell(
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                MouseRegion(
-                                  cursor: SystemMouseCursors.click,
+                                // View Details Button
+                                Tooltip(
+                                  message: "View Details",
                                   child: Material(
                                     color: Colors.transparent,
                                     child: InkWell(
@@ -354,8 +458,7 @@ class _CarListScreenState extends State<CarListScreen> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) =>
-                                                CarDetailsScreen(car: e),
+                                            builder: (context) => CarDetailsScreen(car: e),
                                             settings: const RouteSettings(
                                               name: 'CarDetailsScreen',
                                             ),
@@ -363,39 +466,30 @@ class _CarListScreenState extends State<CarListScreen> {
                                         );
                                       },
                                       child: Container(
-                                        width: 38,
-                                        height: 38,
+                                        width: 36,
+                                        height: 36,
                                         alignment: Alignment.center,
                                         decoration: BoxDecoration(
-                                          gradient: const LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              Color(0xFF8B6F47),
-                                              Color(0xFF6B5434),
-                                            ],
-                                          ),
+                                          color: const Color(0xFF5B9BD5).withOpacity(0.1),
                                           borderRadius: BorderRadius.circular(8),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: const Color(0xFF8B6F47).withOpacity(0.3),
-                                              blurRadius: 6,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
+                                          border: Border.all(
+                                            color: const Color(0xFF5B9BD5).withOpacity(0.3),
+                                            width: 1,
+                                          ),
                                         ),
                                         child: const Icon(
-                                          Icons.info_outline_rounded,
-                                          color: Colors.white,
+                                          Icons.visibility_outlined,
+                                          color: Color(0xFF5B9BD5),
                                           size: 18,
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 10),
-                                MouseRegion(
-                                  cursor: SystemMouseCursors.click,
+                                const SizedBox(width: 8),
+                                // Edit Button
+                                Tooltip(
+                                  message: "Edit",
                                   child: Material(
                                     color: Colors.transparent,
                                     child: InkWell(
@@ -404,8 +498,7 @@ class _CarListScreenState extends State<CarListScreen> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) =>
-                                                CarEditScreen(car: e),
+                                            builder: (context) => CarEditScreen(car: e),
                                             settings: const RouteSettings(
                                               name: 'CarEditScreen',
                                             ),
@@ -413,69 +506,58 @@ class _CarListScreenState extends State<CarListScreen> {
                                         );
                                       },
                                       child: Container(
-                                        width: 38,
-                                        height: 38,
+                                        width: 36,
+                                        height: 36,
                                         alignment: Alignment.center,
                                         decoration: BoxDecoration(
-                                          gradient: const LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              Color(0xFF8B6F47),
-                                              Color(0xFF6B5434),
-                                            ],
-                                          ),
+                                          color: Colors.orange.withOpacity(0.1),
                                           borderRadius: BorderRadius.circular(8),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: const Color(0xFF8B6F47).withOpacity(0.3),
-                                              blurRadius: 6,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
+                                          border: Border.all(
+                                            color: Colors.orange.withOpacity(0.3),
+                                            width: 1,
+                                          ),
                                         ),
                                         child: const Icon(
-                                          Icons.build_rounded,
-                                          color: Colors.white,
+                                          Icons.edit_outlined,
+                                          color: Colors.orange,
                                           size: 18,
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 10),
-                                MouseRegion(
-                                  cursor: SystemMouseCursors.click,
+                                const SizedBox(width: 8),
+                                // Deactivate Button
+                                Tooltip(
+                                  message: e.isActive ? "Deactivate" : "Activate",
                                   child: Material(
                                     color: Colors.transparent,
                                     child: InkWell(
                                       borderRadius: BorderRadius.circular(8),
                                       onTap: () => _deactivateCar(e),
                                       child: Container(
-                                        width: 38,
-                                        height: 38,
+                                        width: 36,
+                                        height: 36,
                                         alignment: Alignment.center,
                                         decoration: BoxDecoration(
-                                          gradient: const LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              Color(0xFFD32F2F), // Red
-                                              Color(0xFFB71C1C), // Darker red
-                                            ],
-                                          ),
+                                          color: e.isActive
+                                              ? Colors.red.withOpacity(0.1)
+                                              : Colors.green.withOpacity(0.1),
                                           borderRadius: BorderRadius.circular(8),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: const Color(0xFFD32F2F).withOpacity(0.35),
-                                              blurRadius: 6,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
+                                          border: Border.all(
+                                            color: e.isActive
+                                                ? Colors.red.withOpacity(0.3)
+                                                : Colors.green.withOpacity(0.3),
+                                            width: 1,
+                                          ),
                                         ),
-                                        child: const Icon(
-                                          Icons.delete_outline_rounded,
-                                          color: Colors.white,
+                                        child: Icon(
+                                          e.isActive
+                                              ? Icons.block_outlined
+                                              : Icons.check_circle_outline,
+                                          color: e.isActive
+                                              ? Colors.red
+                                              : Colors.green,
                                           size: 18,
                                         ),
                                       ),
