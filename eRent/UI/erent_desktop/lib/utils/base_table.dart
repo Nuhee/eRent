@@ -74,52 +74,46 @@ class BaseTable extends StatelessWidget {
           ? (emptyState ?? _defaultEmptyState())
           : Column(
               children: [
-                // Modern header with elegant design
+                // Compact modern header
                 Container(
-                  padding: const EdgeInsets.fromLTRB(28, 22, 28, 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white,
+                        const Color(0xFF5B9BD5).withOpacity(0.02),
+                      ],
+                    ),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(16),
                       topRight: Radius.circular(16),
                     ),
                     border: Border(
                       bottom: BorderSide(
-                        color: const Color(0xFF5B9BD5).withOpacity(0.15),
-                        width: 1.5,
+                        color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                        width: 1,
                       ),
                     ),
                   ),
                   child: Row(
                     children: [
-                      if (icon != null)
+                      if (icon != null) ...[
                         Container(
-                          padding: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Color(0xFF5B9BD5),
-                                Color(0xFF7AB8CC),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF5B9BD5).withOpacity(0.25),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                            color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
                             icon!,
-                            color: Colors.white,
-                            size: 20,
+                            color: const Color(0xFF5B9BD5),
+                            size: 18,
                           ),
                         ),
-                      if (icon != null) const SizedBox(width: 16),
+                        const SizedBox(width: 12),
+                      ],
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,70 +122,40 @@ class BaseTable extends StatelessWidget {
                             Text(
                               title ?? 'Data Table',
                               style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF2D2D2D),
-                                letterSpacing: -0.3,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF1F2937),
+                                letterSpacing: -0.2,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Container(
-                                  width: 6,
-                                  height: 6,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF5B9BD5),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '${rows.length} ${rows.length == 1 ? 'item' : 'items'}',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.grey[600],
-                                    letterSpacing: 0.2,
-                                  ),
-                                ),
-                              ],
+                            const SizedBox(height: 2),
+                            Text(
+                              '${rows.length} ${rows.length == 1 ? 'item' : 'items'}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[600],
+                              ),
                             ),
                           ],
                         ),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
+                          horizontal: 12,
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
                           color: const Color(0xFF5B9BD5).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: const Color(0xFF5B9BD5).withOpacity(0.25),
-                            width: 1,
-                          ),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.table_chart_rounded,
-                              size: 16,
-                              color: const Color(0xFF5B9BD5),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              '${rows.length}',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF5B9BD5),
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          '${rows.length}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF5B9BD5),
+                          ),
                         ),
                       ),
                     ],
@@ -199,11 +163,8 @@ class BaseTable extends StatelessWidget {
                 ),
                 // Table content
                 Expanded(
-                  child: Container(
-                    padding: padding ?? EdgeInsets.zero,
-                    child: SingleChildScrollView(
-                      child: _buildModernDataTable(context),
-                    ),
+                  child: SingleChildScrollView(
+                    child: _buildModernDataTable(context),
                   ),
                 ),
               ],
@@ -233,16 +194,8 @@ class BaseTable extends StatelessWidget {
         }
 
         return Container(
-          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.grey.withOpacity(0.1),
-              width: 1,
-            ),
-          ),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SizedBox(
@@ -250,13 +203,16 @@ class BaseTable extends StatelessWidget {
               child: DataTable(
                 showCheckboxColumn: showCheckboxColumn,
                 columnSpacing: columnSpacing,
+                headingRowHeight: 48,
+                dataRowMinHeight: 52,
+                dataRowMaxHeight: 52,
                 headingRowColor: WidgetStateProperty.all(
-                  headingRowColor ?? const Color(0xFFF8F9FA),
+                  headingRowColor ?? Colors.transparent,
                 ),
                 dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
                   if (states.contains(WidgetState.hovered)) {
                     return hoverRowColor ??
-                        const Color(0xFF5B9BD5).withOpacity(0.05);
+                        const Color(0xFF5B9BD5).withOpacity(0.04);
                   }
                   if (states.contains(WidgetState.selected)) {
                     return const Color(0xFF5B9BD5).withOpacity(0.08);
@@ -267,28 +223,25 @@ class BaseTable extends StatelessWidget {
                 rows: _buildModernRows(context, tableWidth),
                 dataTextStyle: const TextStyle(
                   fontSize: 14,
-                  color: Color(0xFF1F2937),
-                  fontWeight: FontWeight.w500,
-                  height: 1.5,
+                  color: Color(0xFF374151),
+                  fontWeight: FontWeight.w400,
+                  height: 1.4,
                 ),
-                headingTextStyle: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF2D2D2D),
-                  letterSpacing: 0.5,
+                headingTextStyle: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[700],
+                  letterSpacing: 0.3,
                 ),
-                dividerThickness: 1,
+                dividerThickness: 0,
+                horizontalMargin: 0,
                 border: TableBorder(
                   horizontalInside: BorderSide(
-                    color: Colors.grey.withOpacity(0.08),
-                    width: 1,
-                  ),
-                  verticalInside: BorderSide(
-                    color: Colors.grey.withOpacity(0.08),
+                    color: Colors.grey.withOpacity(0.06),
                     width: 1,
                   ),
                   bottom: BorderSide(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: Colors.grey.withOpacity(0.06),
                     width: 1,
                   ),
                 ),
@@ -314,7 +267,7 @@ class BaseTable extends StatelessWidget {
     }
 
     // Default padding for regular columns
-    final defaultPadding = const EdgeInsets.symmetric(vertical: 16, horizontal: 12);
+    final defaultPadding = const EdgeInsets.symmetric(vertical: 12, horizontal: 16);
     // Reduced padding for image columns
     final imagePadding = imageColumnPadding ?? const EdgeInsets.symmetric(vertical: 8, horizontal: 8);
 
@@ -343,7 +296,7 @@ class BaseTable extends StatelessWidget {
     }
 
     // Default padding for regular columns
-    final defaultPadding = const EdgeInsets.symmetric(vertical: 14, horizontal: 12);
+    final defaultPadding = const EdgeInsets.symmetric(vertical: 12, horizontal: 16);
     // Reduced padding for image columns
     final imagePadding = imageColumnPadding ?? const EdgeInsets.symmetric(vertical: 8, horizontal: 8);
 
@@ -381,57 +334,46 @@ class BaseTable extends StatelessWidget {
       );
     }
     return Center(
-      child: Container(
-        padding: const EdgeInsets.all(48),
+      child: Padding(
+        padding: const EdgeInsets.all(40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (emptyIcon != null)
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xFF5B9BD5).withOpacity(0.1),
-                      const Color(0xFF7AB8CC).withOpacity(0.05),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(60),
-                  border: Border.all(
-                    color: const Color(0xFF5B9BD5).withOpacity(0.2),
-                    width: 2,
-                  ),
+                  color: const Color(0xFF5B9BD5).withOpacity(0.08),
+                  shape: BoxShape.circle,
                 ),
                 child: Icon(
                   emptyIcon,
-                  size: 56,
+                  size: 48,
                   color: const Color(0xFF5B9BD5),
                 ),
               ),
             if (emptyText != null) ...[
-              const SizedBox(height: 28),
+              const SizedBox(height: 20),
               Text(
                 emptyText!,
                 style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF2D2D2D),
-                  letterSpacing: 0.3,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1F2937),
+                  letterSpacing: -0.2,
                 ),
                 textAlign: TextAlign.center,
               ),
             ],
             if (emptySubtext != null) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Text(
                 emptySubtext!,
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 14,
                   color: Colors.grey[600],
-                  height: 1.5,
-                  fontWeight: FontWeight.w500,
+                  height: 1.4,
+                  fontWeight: FontWeight.w400,
                 ),
                 textAlign: TextAlign.center,
               ),
