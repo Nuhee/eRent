@@ -24,67 +24,57 @@ class BasePagination extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = const Color(0xFF5B9BD5);
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.grey.withOpacity(0.1),
+          width: 1,
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Left side: Page info and navigation
+          // Left side: Navigation buttons and page info
           Row(
             children: [
+              // Previous button
+              _buildIconButton(
+                icon: Icons.chevron_left_rounded,
+                onPressed: currentPage > 0 ? onPrevious : null,
+                isEnabled: currentPage > 0,
+                primary: primary,
+              ),
+              const SizedBox(width: 12),
+              
               // Page info
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
+                  color: primary.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'Page ${currentPage + 1} of ${totalPages == 0 ? 1 : totalPages}',
+                  '${currentPage + 1} / ${totalPages == 0 ? 1 : totalPages}',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 14,
+                    color: primary,
+                    fontSize: 13,
                   ),
                 ),
               ),
-              const SizedBox(width: 24),
-
-              // Previous button
-              _buildNavigationButton(
-                context,
-                icon: Icons.chevron_left_rounded,
-                label: 'Previous',
-                onPressed: (currentPage == 0) ? null : onPrevious,
-                isEnabled: currentPage > 0,
-              ),
-
+              
               const SizedBox(width: 12),
-
+              
               // Next button
-              _buildNavigationButton(
-                context,
+              _buildIconButton(
                 icon: Icons.chevron_right_rounded,
-                label: 'Next',
-                onPressed: (currentPage >= totalPages - 1 || totalPages == 0)
-                    ? null
-                    : onNext,
+                onPressed: (currentPage < totalPages - 1 && totalPages > 0) ? onNext : null,
                 isEnabled: currentPage < totalPages - 1 && totalPages > 0,
-                isNext: true,
+                primary: primary,
               ),
             ],
           ),
@@ -101,51 +91,37 @@ class BasePagination extends StatelessWidget {
     );
   }
 
-  Widget _buildNavigationButton(
-    BuildContext context, {
+  Widget _buildIconButton({
     required IconData icon,
-    required String label,
     required VoidCallback? onPressed,
     required bool isEnabled,
-    bool isNext = false,
+    required Color primary,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: isEnabled
-            ? [
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
-      ),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isEnabled
-              ? Theme.of(context).colorScheme.primary
-              : Colors.grey[300],
-          foregroundColor: isEnabled ? Colors.white : Colors.grey[500],
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          minimumSize: const Size(120, 44),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (!isNext) ...[Icon(icon, size: 20), const SizedBox(width: 8)],
-            Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onPressed,
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: isEnabled
+                ? primary.withOpacity(0.1)
+                : Colors.grey.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isEnabled
+                  ? primary.withOpacity(0.2)
+                  : Colors.grey.withOpacity(0.2),
+              width: 1,
             ),
-            if (isNext) ...[const SizedBox(width: 8), Icon(icon, size: 20)],
-          ],
+          ),
+          child: Icon(
+            icon,
+            size: 20,
+            color: isEnabled ? primary : Colors.grey[400],
+          ),
         ),
       ),
     );
@@ -215,7 +191,6 @@ class _PageSizeSelectorState extends State<_PageSizeSelector>
 
   void _showOverlay() {
     final overlay = Overlay.of(context);
-    if (overlay == null) return;
 
     final RenderBox box = context.findRenderObject() as RenderBox;
     final Size buttonSize = box.size;
@@ -249,21 +224,26 @@ class _PageSizeSelectorState extends State<_PageSizeSelector>
                   ),
                 ),
                 child: Material(
-                  elevation: 8,
-                  shadowColor: Colors.black.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
+                  elevation: 4,
+                  shadowColor: Colors.black.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
                   color: Colors.white,
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Colors.grey.withOpacity(0.1),
+                        width: 1,
+                      ),
+                    ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: widget.options.map((option) {
                         final bool isSelected = widget.selected == option;
-                        final theme = Theme.of(context);
-                        final primary = theme.colorScheme.primary;
+                        final primary = const Color(0xFF5B9BD5);
                         return InkWell(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(6),
                           onTap: () {
                             widget.onChanged?.call(option);
                             _toggle();
@@ -271,11 +251,10 @@ class _PageSizeSelectorState extends State<_PageSizeSelector>
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(
-                              vertical: 10,
+                              vertical: 8,
                               horizontal: 14,
                             ),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
                               color: isSelected
                                   ? primary.withOpacity(0.08)
                                   : Colors.transparent,
@@ -283,19 +262,26 @@ class _PageSizeSelectorState extends State<_PageSizeSelector>
                             child: Row(
                               children: [
                                 Container(
-                                  height: 16,
-                                  width: 16,
+                                  height: 14,
+                                  width: 14,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: isSelected
                                         ? primary
-                                        : Colors.grey.withOpacity(0.3),
+                                        : Colors.grey.withOpacity(0.2),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? primary
+                                          : Colors.grey.withOpacity(0.3),
+                                      width: isSelected ? 0 : 1,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 10),
                                 Text(
                                   option.toString(),
                                   style: TextStyle(
+                                    fontSize: 13,
                                     fontWeight: isSelected
                                         ? FontWeight.w600
                                         : FontWeight.w500,
@@ -336,41 +322,44 @@ class _PageSizeSelectorState extends State<_PageSizeSelector>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
+    final primary = const Color(0xFF5B9BD5);
     return GestureDetector(
       onTap: _toggle,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.grey[50],
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: _open ? primary.withOpacity(0.25) : Colors.grey[200]!,
+            color: _open 
+                ? primary.withOpacity(0.3) 
+                : Colors.grey.withOpacity(0.2),
+            width: 1,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Rows per page',
+            Text(
+              'Show',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
+                color: Colors.grey[700],
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
                 widget.selected.toString(),
                 style: TextStyle(
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: primary,
                 ),
@@ -382,6 +371,7 @@ class _PageSizeSelectorState extends State<_PageSizeSelector>
               duration: const Duration(milliseconds: 200),
               child: Icon(
                 Icons.keyboard_arrow_down_rounded,
+                size: 18,
                 color: primary,
               ),
             ),
