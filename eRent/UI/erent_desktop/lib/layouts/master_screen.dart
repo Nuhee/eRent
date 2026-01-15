@@ -69,6 +69,22 @@ class _MasterScreenState extends State<MasterScreen>
 
   @override
   Widget build(BuildContext context) {
+    final user = UserProvider.currentUser;
+    ImageProvider? imageProvider;
+    
+    if (user?.picture != null && user!.picture!.isNotEmpty) {
+      try {
+        final sanitized = user.picture!.replaceAll(
+          RegExp(r'^data:image/[^;]+;base64,'),
+          '',
+        );
+        final bytes = base64Decode(sanitized);
+        imageProvider = MemoryImage(bytes);
+      } catch (_) {
+        imageProvider = null;
+      }
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -81,12 +97,12 @@ class _MasterScreenState extends State<MasterScreen>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                  color: const Color(0xFF8B6F47).withOpacity(0.12),
+                color: const Color(0xFF5B9BD5).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
                 Icons.menu_rounded,
-                color: Color(0xFF8B6F47),
+                color: Color(0xFF5B9BD5),
                 size: 20,
               ),
             ),
@@ -134,7 +150,76 @@ class _MasterScreenState extends State<MasterScreen>
           ],
         ),
         actions: [
-          // Profile moved to drawer header
+          // Profile Info in Header
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            child: Row(
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      user != null
+                          ? '${user.firstName} ${user.lastName}'
+                          : 'Guest',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1F2937),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text(
+                        'Administrator',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF5B9BD5),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF5B9BD5).withOpacity(0.3),
+                      width: 2,
+                    ),
+                  ),
+                  child: CircleAvatar(
+                    radius: 20,
+                    backgroundColor: const Color(0xFF5B9BD5),
+                    backgroundImage: imageProvider,
+                    child: imageProvider == null
+                        ? Text(
+                            _getUserInitials(user?.firstName, user?.lastName),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
       drawer: Drawer(
@@ -158,35 +243,73 @@ class _MasterScreenState extends State<MasterScreen>
   }
 
   Widget _buildDrawerContent() {
-    const gradientColors = [
-      Color(0xFF1A1A1A),
-      Color(0xFF2D2D2D),
-      Color(0xFF3A3A3A),
-    ];
-
     return Container(
       margin: const EdgeInsets.only(top: 16, bottom: 16, right: 8),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: gradientColors,
-        ),
+        color: Colors.white,
         borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(28),
-          bottomRight: Radius.circular(28),
+          topRight: Radius.circular(20),
+          bottomRight: Radius.circular(20),
+        ),
+        border: Border.all(
+          color: Colors.grey.withOpacity(0.1),
+          width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
-            blurRadius: 24,
-            offset: const Offset(6, 0),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(4, 0),
           ),
         ],
       ),
       child: Column(
         children: [
-          _buildDrawerHeader(),
+          // Simple header with logo/title
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF5B9BD5),
+                  Color(0xFF7AB8CC),
+                ],
+              ),
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.dashboard_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Navigation',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           Expanded(child: _buildFocusedNav(context)),
           _buildDrawerFooter(context),
         ],
@@ -194,147 +317,11 @@ class _MasterScreenState extends State<MasterScreen>
     );
   }
 
- 
-
-Widget _buildDrawerHeader() {
-  final user = UserProvider.currentUser;
-  final double radius = 28;
-  ImageProvider? imageProvider;
-
-  if (user?.picture != null && user!.picture!.isNotEmpty) {
-    try {
-      final sanitized = user.picture!.replaceAll(
-        RegExp(r'^data:image/[^;]+;base64,'),
-        '',
-      );
-      final bytes = base64Decode(sanitized);
-      imageProvider = MemoryImage(bytes);
-    } catch (_) {
-      imageProvider = null;
-    }
-  }
-
-  return Container(
-    padding: const EdgeInsets.fromLTRB(28, 32, 28, 24),
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          const Color(0xFF8B6F47).withOpacity(0.2),
-          const Color(0xFF8B6F47).withOpacity(0.1),
-        ],
-      ),
-      borderRadius: const BorderRadius.only(
-        topRight: Radius.circular(28),
-      ),
-    ),
-    child: Row(
-      children: [
-        ClipOval(
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: const Color(0xFF8B6F47).withOpacity(0.2),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0xFF8B6F47).withOpacity(0.4),
-                width: 2,
-              ),
-            ),
-            child: CircleAvatar(
-              radius: radius,
-              backgroundColor: const Color(0xFF8B6F47),
-              backgroundImage: imageProvider,
-              child: imageProvider == null
-                  ? Text(
-                      _getUserInitials(user?.firstName, user?.lastName),
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    )
-                  : null,
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                user != null
-                    ? '${user.firstName} ${user.lastName}'
-                    : 'Guest',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.2,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                user?.username ?? 'Admin',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.2,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF8B6F47).withOpacity(0.25),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: const Color(0xFF8B6F47).withOpacity(0.5),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(
-                      Icons.verified_user,
-                      size: 14,
-                      color: Color(0xFF8B6F47),
-                    ),
-                    SizedBox(width: 6),
-                    Text(
-                      'Administrator',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF8B6F47),
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
 
   Widget _buildFocusedNav(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -454,39 +441,47 @@ Widget _buildDrawerHeader() {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-      child: Text(
-        title.toUpperCase(),
-        style: TextStyle(
-          color: Colors.white.withOpacity(0.6),
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 1.2,
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 16,
+            decoration: BoxDecoration(
+              color: const Color(0xFF5B9BD5),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildDrawerFooter(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.only(
-          bottomRight: Radius.circular(28),
+          bottomRight: Radius.circular(20),
         ),
-        color: Colors.black.withOpacity(0.08),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Divider(
-            color: Colors.white.withOpacity(0.18),
-            thickness: 1,
+        border: Border(
+          top: BorderSide(
+            color: Colors.grey.withOpacity(0.1),
+            width: 1,
           ),
-          const SizedBox(height: 12),
-          _modernLogoutTile(context),
-        ],
+        ),
       ),
+      child: _modernLogoutTile(context),
     );
   }
 }
@@ -582,47 +577,54 @@ Widget _modernDrawerTile(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: isSelected
-                ? const Color(0xFF8B6F47).withOpacity(0.25)
+                ? const Color(0xFF5B9BD5).withOpacity(0.1)
                 : Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             border: isSelected
-                ? Border.all(color: const Color(0xFF8B6F47).withOpacity(0.5), width: 1.5)
+                ? Border.all(
+                    color: const Color(0xFF5B9BD5).withOpacity(0.3),
+                    width: 1,
+                  )
                 : null,
           ),
           child: Row(
             children: [
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color(0xFF5B9BD5).withOpacity(0.15)
+                      : Colors.grey.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: Icon(
                   isSelected ? activeIcon : icon,
-                  key: ValueKey(isSelected),
-                  color: Colors.white,
-                  size: 22,
+                  color: isSelected
+                      ? const Color(0xFF5B9BD5)
+                      : Colors.grey[700],
+                  size: 20,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   label,
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
+                    color: isSelected
+                        ? const Color(0xFF1F2937)
+                        : Colors.grey[700],
+                    fontSize: 15,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    letterSpacing: 0.2,
                   ),
                 ),
               ),
               if (isSelected)
                 Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF8B6F47).withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Color(0xFF8B6F47),
-                    size: 12,
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF5B9BD5),
+                    shape: BoxShape.circle,
                   ),
                 ),
             ],
@@ -638,35 +640,36 @@ Widget _modernLogoutTile(BuildContext context) {
     width: double.infinity,
     child: Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         onTap: () {
           _showLogoutDialog(context);
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF8B6F47).withOpacity(0.15),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF8B6F47).withOpacity(0.3), width: 1),
+            color: Colors.red.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.red.withOpacity(0.3),
+              width: 1,
+            ),
           ),
           child: const Row(
             children: [
-              Icon(Icons.logout_rounded, color: Colors.white, size: 22),
-              SizedBox(width: 16),
+              Icon(Icons.logout_rounded, color: Colors.red, size: 20),
+              SizedBox(width: 12),
               Expanded(
                 child: Text(
                   'Logout',
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.2,
+                    color: Colors.red,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-              Icon(Icons.exit_to_app_rounded, color: Colors.white, size: 18),
             ],
           ),
         ),
@@ -680,22 +683,33 @@ void _showLogoutDialog(BuildContext context) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         title: const Row(
           children: [
-            Icon(Icons.logout_rounded, color: Color(0xFF8B6F47)),
+            Icon(Icons.logout_rounded, color: Colors.red, size: 24),
             SizedBox(width: 12),
-            Text('Confirm Logout'),
+            Text(
+              'Confirm Logout',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1F2937),
+              ),
+            ),
           ],
         ),
         content: const Text(
           'Are you sure you want to logout from your account?',
-          style: TextStyle(fontSize: 16),
+          style: TextStyle(fontSize: 15),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            style: TextButton.styleFrom(foregroundColor: Colors.grey[600]),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.grey[600],
+            ),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
@@ -708,10 +722,10 @@ void _showLogoutDialog(BuildContext context) {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8B6F47),
-              foregroundColor: Colors.black,
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
             child: const Text('Logout'),
