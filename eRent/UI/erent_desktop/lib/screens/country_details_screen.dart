@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:erent_desktop/layouts/master_screen.dart';
-import 'package:erent_desktop/model/city.dart';
+import 'package:erent_desktop/model/country.dart';
 
-class CityDetailsScreen extends StatelessWidget {
-  final City city;
+class CountryDetailsScreen extends StatelessWidget {
+  final Country country;
 
-  const CityDetailsScreen({super.key, required this.city});
+  const CountryDetailsScreen({super.key, required this.country});
 
   @override
   Widget build(BuildContext context) {
     return MasterScreen(
-      title: 'City Details',
+      title: 'Country Details',
       showBackButton: true,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -76,7 +76,7 @@ class CityDetailsScreen extends StatelessWidget {
               ],
             ),
             child: const Icon(
-              Icons.location_city_rounded,
+              Icons.flag_rounded,
               size: 40,
               color: Colors.white,
             ),
@@ -88,7 +88,7 @@ class CityDetailsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'City Information',
+                  'Country Information',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -98,7 +98,7 @@ class CityDetailsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  city.name,
+                  country.name,
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -113,12 +113,12 @@ class CityDetailsScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: city.isActive
+              color: country.isActive
                   ? const Color(0xFF5B9BD5).withOpacity(0.1)
                   : Colors.grey.withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: city.isActive
+                color: country.isActive
                     ? const Color(0xFF5B9BD5).withOpacity(0.3)
                     : Colors.grey.withOpacity(0.3),
                 width: 1,
@@ -128,19 +128,19 @@ class CityDetailsScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  city.isActive ? Icons.check_circle : Icons.cancel,
-                  color: city.isActive
+                  country.isActive ? Icons.check_circle : Icons.cancel,
+                  color: country.isActive
                       ? const Color(0xFF5B9BD5)
                       : Colors.grey[600],
                   size: 18,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  city.isActive ? 'Active' : 'Inactive',
+                  country.isActive ? 'Active' : 'Inactive',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: city.isActive
+                    color: country.isActive
                         ? const Color(0xFF5B9BD5)
                         : Colors.grey[600],
                   ),
@@ -157,24 +157,22 @@ class CityDetailsScreen extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // City Details Card
+        // Country Details Card
         Expanded(
           child: _buildDetailCard(
-            title: 'City Details',
+            title: 'Country Details',
             icon: Icons.info_outline_rounded,
             children: [
               _buildInfoRow(
-                label: 'City Name',
-                value: city.name,
-                icon: Icons.location_city_outlined,
+                label: 'Country Name',
+                value: country.name,
+                icon: Icons.flag_outlined,
               ),
               const SizedBox(height: 20),
               _buildInfoRow(
-                label: 'Country',
-                value: city.countryName.isNotEmpty
-                    ? city.countryName
-                    : 'N/A',
-                icon: Icons.flag_outlined,
+                label: 'Country Code',
+                value: country.code?.isNotEmpty == true ? country.code! : 'N/A',
+                icon: Icons.code_outlined,
               ),
             ],
           ),
@@ -188,11 +186,11 @@ class CityDetailsScreen extends StatelessWidget {
             children: [
               _buildInfoRow(
                 label: 'Status',
-                value: city.isActive ? 'Active' : 'Inactive',
-                icon: city.isActive
+                value: country.isActive ? 'Active' : 'Inactive',
+                icon: country.isActive
                     ? Icons.check_circle_outline
                     : Icons.cancel_outlined,
-                valueColor: city.isActive
+                valueColor: country.isActive
                     ? const Color(0xFF5B9BD5)
                     : Colors.grey[600],
               ),
@@ -304,4 +302,3 @@ class CityDetailsScreen extends StatelessWidget {
     );
   }
 }
-

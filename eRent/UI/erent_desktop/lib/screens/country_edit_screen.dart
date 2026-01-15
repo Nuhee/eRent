@@ -1,68 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:erent_desktop/layouts/master_screen.dart';
-import 'package:erent_desktop/model/city.dart';
 import 'package:erent_desktop/model/country.dart';
-import 'package:erent_desktop/providers/city_provider.dart';
 import 'package:erent_desktop/providers/country_provider.dart';
 import 'package:erent_desktop/utils/base_textfield.dart';
 import 'package:erent_desktop/utils/base_switch.dart';
-import 'package:erent_desktop/screens/city_list_screen.dart';
+import 'package:erent_desktop/screens/country_list_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
-class CityEditScreen extends StatefulWidget {
-  final City? city;
+class CountryEditScreen extends StatefulWidget {
+  final Country? country;
 
-  const CityEditScreen({super.key, this.city});
+  const CountryEditScreen({super.key, this.country});
 
   @override
-  State<CityEditScreen> createState() => _CityEditScreenState();
+  State<CountryEditScreen> createState() => _CountryEditScreenState();
 }
 
-class _CityEditScreenState extends State<CityEditScreen> {
+class _CountryEditScreenState extends State<CountryEditScreen> {
   final formKey = GlobalKey<FormBuilderState>();
   Map<String, dynamic> _initialValue = {};
-  late CityProvider cityProvider;
   late CountryProvider countryProvider;
-  bool isLoading = true;
+  bool isLoading = false;
   bool _isSaving = false;
-  List<Country>? countries;
 
   @override
   void initState() {
     super.initState();
-    cityProvider = Provider.of<CityProvider>(context, listen: false);
     countryProvider = Provider.of<CountryProvider>(context, listen: false);
     _initialValue = {
-      "name": widget.city?.name ?? '',
-      "countryId": widget.city?.countryId ?? null,
-      "isActive": widget.city?.isActive ?? true,
+      "name": widget.country?.name ?? '',
+      "code": widget.country?.code ?? '',
+      "isActive": widget.country?.isActive ?? true,
     };
-    initFormData();
-  }
-
-  initFormData() async {
-    try {
-      final result = await countryProvider.get(filter: {
-        'isActive': true,
-        'retrieveAll': true,
-      });
-      setState(() {
-        countries = result.items;
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return MasterScreen(
-      title: widget.city != null ? "Edit City" : "Add City",
+      title: widget.country != null ? "Edit Country" : "Add Country",
       showBackButton: true,
       child: _buildForm(),
     );
@@ -102,8 +79,8 @@ class _CityEditScreenState extends State<CityEditScreen> {
                     var request = Map.from(formKey.currentState?.value ?? {});
 
                     try {
-                      if (widget.city == null) {
-                        await cityProvider.insert(request);
+                      if (widget.country == null) {
+                        await countryProvider.insert(request);
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -111,7 +88,7 @@ class _CityEditScreenState extends State<CityEditScreen> {
                                 children: [
                                   Icon(Icons.check_circle, color: Colors.white),
                                   SizedBox(width: 12),
-                                  Text('City created successfully'),
+                                  Text('Country created successfully'),
                                 ],
                               ),
                               backgroundColor: Colors.green,
@@ -124,7 +101,7 @@ class _CityEditScreenState extends State<CityEditScreen> {
                           );
                         }
                       } else {
-                        await cityProvider.update(widget.city!.id, request);
+                        await countryProvider.update(widget.country!.id, request);
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -132,7 +109,7 @@ class _CityEditScreenState extends State<CityEditScreen> {
                                 children: [
                                   Icon(Icons.check_circle, color: Colors.white),
                                   SizedBox(width: 12),
-                                  Text('City updated successfully'),
+                                  Text('Country updated successfully'),
                                 ],
                               ),
                               backgroundColor: Colors.green,
@@ -148,8 +125,8 @@ class _CityEditScreenState extends State<CityEditScreen> {
                       if (mounted) {
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
-                            builder: (context) => const CityListScreen(),
-                            settings: const RouteSettings(name: 'CityListScreen'),
+                            builder: (context) => const CountryListScreen(),
+                            settings: const RouteSettings(name: 'CountryListScreen'),
                           ),
                         );
                       }
@@ -240,14 +217,6 @@ class _CityEditScreenState extends State<CityEditScreen> {
   }
 
   Widget _buildForm() {
-    if (isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF5B9BD5)),
-        ),
-      );
-    }
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Center(
@@ -310,9 +279,9 @@ class _CityEditScreenState extends State<CityEditScreen> {
               ],
             ),
             child: Icon(
-              widget.city != null
-                  ? Icons.edit_location_alt_rounded
-                  : Icons.add_location_alt_rounded,
+              widget.country != null
+                  ? Icons.edit_rounded
+                  : Icons.add_rounded,
               size: 32,
               color: Colors.white,
             ),
@@ -323,7 +292,7 @@ class _CityEditScreenState extends State<CityEditScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.city != null ? 'Edit City' : 'Add New City',
+                  widget.country != null ? 'Edit Country' : 'Add New Country',
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -333,9 +302,9 @@ class _CityEditScreenState extends State<CityEditScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  widget.city != null
-                      ? 'Update city information'
-                      : 'Create a new city in the system',
+                  widget.country != null
+                      ? 'Update country information'
+                      : 'Create a new country in the system',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[600],
@@ -383,14 +352,14 @@ class _CityEditScreenState extends State<CityEditScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
-                    Icons.location_on_rounded,
+                    Icons.flag_rounded,
                     color: Color(0xFF5B9BD5),
                     size: 20,
                   ),
                 ),
                 const SizedBox(width: 12),
                 const Text(
-                  'City Information',
+                  'Country Information',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -400,13 +369,13 @@ class _CityEditScreenState extends State<CityEditScreen> {
               ],
             ),
             const SizedBox(height: 28),
-            // City Name field
+            // Country Name field
             FormBuilderTextField(
               name: "name",
               decoration: customTextFieldDecoration(
-                "City Name",
-                prefixIcon: Icons.location_city_outlined,
-                hintText: "Enter city name",
+                "Country Name",
+                prefixIcon: Icons.flag_outlined,
+                hintText: "Enter country name",
               ),
               validator: FormBuilderValidators.compose([
                 FormBuilderValidators.required(),
@@ -418,23 +387,16 @@ class _CityEditScreenState extends State<CityEditScreen> {
               ]),
             ),
             const SizedBox(height: 20),
-            // Country dropdown
-            FormBuilderDropdown<int?>(
-              name: "countryId",
+            // Country Code field (optional)
+            FormBuilderTextField(
+              name: "code",
               decoration: customTextFieldDecoration(
-                "Country",
-                prefixIcon: Icons.flag_outlined,
-                hintText: "Select a country",
+                "Country Code",
+                prefixIcon: Icons.code_outlined,
+                hintText: "Enter country code (e.g., BA, HR)",
               ),
-              items: countries?.map((country) {
-                    return DropdownMenuItem<int?>(
-                      value: country.id,
-                      child: Text(country.name),
-                    );
-                  }).toList() ??
-                  [],
               validator: FormBuilderValidators.compose([
-                FormBuilderValidators.required(),
+                FormBuilderValidators.maxLength(3),
               ]),
             ),
             const SizedBox(height: 20),
@@ -442,7 +404,7 @@ class _CityEditScreenState extends State<CityEditScreen> {
             customSwitchField(
               name: "isActive",
               label: "Active Status",
-              initialValue: widget.city?.isActive ?? true,
+              initialValue: widget.country?.isActive ?? true,
               icon: Icons.toggle_on_rounded,
             ),
             const SizedBox(height: 32),
@@ -454,4 +416,3 @@ class _CityEditScreenState extends State<CityEditScreen> {
     );
   }
 }
-

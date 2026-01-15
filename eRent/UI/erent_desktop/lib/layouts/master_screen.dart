@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:erent_desktop/main.dart';
 import 'package:erent_desktop/providers/user_provider.dart';
+import 'package:erent_desktop/screens/country_list_screen.dart';
 import 'package:erent_desktop/screens/city_list_screen.dart';
 import 'package:erent_desktop/screens/review_list_screen.dart';
 import 'package:erent_desktop/screens/users_list_screen.dart';
@@ -427,6 +428,16 @@ Widget _buildDrawerHeader() {
             ),
             const SizedBox(height: 5),
             
+            // Countries tile (no section header)
+            _modernDrawerTile(
+              context,
+              icon: Icons.flag_outlined,
+              activeIcon: Icons.flag_rounded,
+              label: 'Countries',
+              screen: CountryListScreen(),
+            ),
+            const SizedBox(height: 5),
+            
             // Cities tile (no section header)
             _modernDrawerTile(
               context,
@@ -508,6 +519,11 @@ Widget _modernDrawerTile(
     isSelected =
         currentRoute == 'ReviewListScreen' ||
         currentRoute == 'ReviewDetailsScreen';
+  } else if (label == 'Countries') {
+    isSelected =
+        currentRoute == 'CountryListScreen' ||
+        currentRoute == 'CountryDetailsScreen' ||
+        currentRoute == 'CountryEditScreen';
   } else if (label == 'Users') {
     isSelected =
         currentRoute == 'UsersListScreen' ||
