@@ -104,8 +104,8 @@ namespace eRent.Subscriber.Services
                 switch (rent.NotificationType)
                 {
                     case "Pending":
-                        recipientEmail = rent.UserEmail;
-                        subject = $"Rent Request Submitted - {rent.PropertyTitle}";
+                        recipientEmail = rent.LandlordEmail;
+                        subject = $"New Rent Request - {rent.PropertyTitle}";
                         break;
                     case "Cancelled":
                         recipientEmail = rent.LandlordEmail;

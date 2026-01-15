@@ -12,7 +12,7 @@ using eRent.Services.Database;
 namespace eRent.Services.Migrations
 {
     [DbContext(typeof(eRentDbContext))]
-    [Migration("20260112120910_init")]
+    [Migration("20260113093728_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -1797,7 +1797,7 @@ namespace eRent.Services.Migrations
                             Id = 2,
                             CityId = 1,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Local),
-                            Email = "landlord1@erent.com",
+                            Email = "test.vedadnuhic@gmail.com",
                             FirstName = "Adil",
                             GenderId = 1,
                             IsActive = true,
@@ -1844,7 +1844,7 @@ namespace eRent.Services.Migrations
                             Id = 5,
                             CityId = 1,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Local),
-                            Email = "test.vedadnuhic@gmail.com",
+                            Email = "user@erent.com",
                             FirstName = "Amel",
                             GenderId = 1,
                             IsActive = true,

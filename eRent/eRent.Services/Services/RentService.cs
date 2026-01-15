@@ -21,12 +21,6 @@ namespace eRent.Services.Services
 
         public override async Task<RentResponse> CreateAsync(RentUpsertRequest request)
         {
-            // Set status to Pending (1) if not provided
-            if (!request.RentStatusId.HasValue)
-            {
-                request.RentStatusId = 1; // Pending
-            }
-
             var result = await base.CreateAsync(request);
             
             // Send notification after successful creation
@@ -160,7 +154,8 @@ namespace eRent.Services.Services
         protected override async Task BeforeInsert(Rent entity, RentUpsertRequest request)
         {
             // Validate Property exists
-            if (!await _context.Properties.AnyAsync(p => p.Id == request.PropertyId))
+            var property = await _context.Properties.FirstOrDefaultAsync(p => p.Id == request.PropertyId);
+            if (property == null)
             {
                 throw new InvalidOperationException("Property does not exist.");
             }
@@ -180,17 +175,37 @@ namespace eRent.Services.Services
             // Validate daily rental availability
             if (request.IsDailyRental)
             {
-                var property = await _context.Properties.FirstOrDefaultAsync(p => p.Id == request.PropertyId);
-                if (property == null || !property.AllowDailyRental)
+                if (!property.AllowDailyRental)
                 {
                     throw new InvalidOperationException("Property does not allow daily rentals.");
                 }
+                
+                if (property.PricePerDay == null || property.PricePerDay <= 0)
+                {
+                    throw new InvalidOperationException("Property does not have a valid daily price set.");
+                }
             }
 
-            // Validate RentStatus exists (if provided, otherwise will be set to Pending in CreateAsync)
-            if (request.RentStatusId.HasValue && !await _context.RentStatuses.AnyAsync(rs => rs.Id == request.RentStatusId.Value))
+            // Calculate TotalPrice based on rental type
+            if (request.IsDailyRental && property.AllowDailyRental && property.PricePerDay.HasValue)
             {
-                throw new InvalidOperationException("Rent status does not exist.");
+                // Calculate daily rental: PricePerDay * number of days
+                var days = (request.EndDate - request.StartDate).Days;
+                if (days <= 0)
+                {
+                    throw new InvalidOperationException("Invalid date range for daily rental.");
+                }
+                entity.TotalPrice = property.PricePerDay.Value * days;
+            }
+            else
+            {
+                // Calculate monthly rental: PricePerMonth * number of months
+                var months = CalculateMonths(request.StartDate, request.EndDate);
+                if (months <= 0)
+                {
+                    throw new InvalidOperationException("Invalid date range for monthly rental.");
+                }
+                entity.TotalPrice = property.PricePerMonth * months;
             }
 
             // Check for overlapping rentals (only for Accepted or Paid statuses)
@@ -212,7 +227,8 @@ namespace eRent.Services.Services
         protected override async Task BeforeUpdate(Rent entity, RentUpsertRequest request)
         {
             // Validate Property exists
-            if (!await _context.Properties.AnyAsync(p => p.Id == request.PropertyId))
+            var property = await _context.Properties.FirstOrDefaultAsync(p => p.Id == request.PropertyId);
+            if (property == null)
             {
                 throw new InvalidOperationException("Property does not exist.");
             }
@@ -232,17 +248,43 @@ namespace eRent.Services.Services
             // Validate daily rental availability
             if (request.IsDailyRental)
             {
-                var property = await _context.Properties.FirstOrDefaultAsync(p => p.Id == request.PropertyId);
-                if (property == null || !property.AllowDailyRental)
+                if (!property.AllowDailyRental)
                 {
                     throw new InvalidOperationException("Property does not allow daily rentals.");
                 }
+                
+                if (property.PricePerDay == null || property.PricePerDay <= 0)
+                {
+                    throw new InvalidOperationException("Property does not have a valid daily price set.");
+                }
             }
 
-            // Validate RentStatus exists (if provided)
-            if (request.RentStatusId.HasValue && !await _context.RentStatuses.AnyAsync(rs => rs.Id == request.RentStatusId.Value))
+            // Recalculate TotalPrice if dates or rental type changed
+            bool datesChanged = entity.StartDate != request.StartDate || entity.EndDate != request.EndDate;
+            bool rentalTypeChanged = entity.IsDailyRental != request.IsDailyRental;
+            
+            if (datesChanged || rentalTypeChanged)
             {
-                throw new InvalidOperationException("Rent status does not exist.");
+                if (request.IsDailyRental && property.AllowDailyRental && property.PricePerDay.HasValue)
+                {
+                    // Calculate daily rental: PricePerDay * number of days
+                    var days = (request.EndDate - request.StartDate).Days;
+                    if (days <= 0)
+                    {
+                        throw new InvalidOperationException("Invalid date range for daily rental.");
+                    }
+                    entity.TotalPrice = property.PricePerDay.Value * days;
+                }
+                else
+                {
+                    // Calculate monthly rental: PricePerMonth * number of months
+                    var months = CalculateMonths(request.StartDate, request.EndDate);
+                    if (months <= 0)
+                    {
+                        throw new InvalidOperationException("Invalid date range for monthly rental.");
+                    }
+                    entity.TotalPrice = property.PricePerMonth * months;
+                }
             }
 
             // Check for overlapping rentals (excluding current rent, only for Accepted or Paid statuses)
@@ -265,26 +307,41 @@ namespace eRent.Services.Services
         protected override Rent MapInsertToEntity(Rent entity, RentUpsertRequest request)
         {
             base.MapInsertToEntity(entity, request);
-            // Ensure RentStatusId is set (should be set to 1 in CreateAsync, but ensure it here too)
-            if (!request.RentStatusId.HasValue)
-            {
-                entity.RentStatusId = 1; // Pending
-            }
-            else
-            {
-                entity.RentStatusId = request.RentStatusId.Value;
-            }
+            
+            // Always set RentStatusId to Pending (1) on create
+            entity.RentStatusId = 1; // Pending
+            
+            // TotalPrice will be calculated in BeforeInsert
+            
             return entity;
+        }
+        
+        private int CalculateMonths(DateTime startDate, DateTime endDate)
+        {
+            // Calculate the base difference in months
+            int months = (endDate.Year - startDate.Year) * 12 + (endDate.Month - startDate.Month);
+            
+            // For rental purposes, we count calendar months
+            // Examples:
+            // Jan 1 to Jan 31 = 1 month (the month of January)
+            // Jan 1 to Feb 1 = 1 month (the month of January, Feb 1 is start of next month)
+            // Jan 1 to Mar 1 = 2 months (January and February)
+            // Jan 15 to Feb 15 = 1 month (partial month counts as 1)
+            
+            // If same month, it's 1 month
+            // If different months, months already contains the correct count
+            // (e.g., Jan to Feb = 1, Jan to Mar = 2)
+            
+            return Math.Max(1, months); // At least 1 month
         }
 
         protected override void MapUpdateToEntity(Rent entity, RentUpsertRequest request)
         {
             base.MapUpdateToEntity(entity, request);
-            // Only update RentStatusId if provided in update request
-            if (request.RentStatusId.HasValue)
-            {
-                entity.RentStatusId = request.RentStatusId.Value;
-            }
+            
+            // TotalPrice recalculation is handled in BeforeUpdate if dates or rental type changed
+            // RentStatusId should not be updated via regular update - use custom actions instead
+            
             entity.UpdatedAt = DateTime.Now;
         }
 

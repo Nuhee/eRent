@@ -50,42 +50,46 @@ namespace eRent.Subscriber.Services
             <p>Your rent request has been submitted</p>
         </div>
         <div class='content'>
-            <p>Hello <strong>{rent.UserFullName}</strong>,</p>
-            <p>Thank you for your interest! Your rent request has been submitted and is now <span class='status-badge'>Pending</span> landlord approval.</p>
+            <p>Hello <strong>{rent.LandlordFullName}</strong>,</p>
+            <p>You have received a new rent request for your property. The request is currently <span class='status-badge'>Pending</span> your approval.</p>
             
             <div class='info-box'>
-                <h3 style='margin-top: 0; color: #667eea;'>Rent Details</h3>
+                <h3 style='margin-top: 0; color: #667eea;'>Rent Request Details</h3>
                 <div class='info-row'>
-                    <span class='label'>Property:</span>
-                    <span class='value'><strong>{rent.PropertyTitle}</strong></span>
+                    <span class='label'>Tenant: </span>
+                    <span class='value'><strong> {rent.UserFullName}</strong></span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Location:</span>
-                    <span class='value'>{rent.PropertyAddress}, {rent.CityName}, {rent.CountryName}</span>
+                    <span class='label'>Property: </span>
+                    <span class='value'><strong> {rent.PropertyTitle}</strong></span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Rental Type:</span>
-                    <span class='value'>{rentalType}</span>
+                    <span class='label'>Location: </span>
+                    <span class='value'> {rent.PropertyAddress}, {rent.CityName}, {rent.CountryName}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Duration:</span>
-                    <span class='value'>{duration}</span>
+                    <span class='label'>Rental Type: </span>
+                    <span class='value'> {rentalType}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Start Date:</span>
-                    <span class='value'>{rent.StartDate:MMMM dd, yyyy}</span>
+                    <span class='label'>Duration: </span>
+                    <span class='value'> {duration}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>End Date:</span>
-                    <span class='value'>{rent.EndDate:MMMM dd, yyyy}</span>
+                    <span class='label'>Start Date: </span>
+                    <span class='value'> {rent.StartDate:MMMM dd, yyyy}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Total Price:</span>
-                    <span class='value'><strong style='color: #667eea; font-size: 18px;'>{rent.TotalPrice:C}</strong></span>
+                    <span class='label'>End Date: </span>
+                    <span class='value'> {rent.EndDate:MMMM dd, yyyy}</span>
+                </div>
+                <div class='info-row'>
+                    <span class='label'>Total Price: </span>
+                    <span class='value'><strong style='color: #667eea; font-size: 18px;'> {rent.TotalPrice:F2} BAM</strong></span>
                 </div>
             </div>
 
-            <p>The landlord will review your request and you'll be notified once a decision is made.</p>
+            <p>Please review this request and take appropriate action (Accept or Reject) as soon as possible.</p>
             
             <div class='footer'>
                 <p>Best regards,<br>The eRent Team</p>
@@ -124,34 +128,34 @@ namespace eRent.Subscriber.Services
             <p>A rent request has been cancelled</p>
         </div>
         <div class='content'>
-            <p>Hello <strong>{rent.LandlordFullName}</strong>,</p>
+            <p>Hello <strong> {rent.LandlordFullName}</strong>,</p>
             <p>We wanted to inform you that a rent request for your property has been <span class='status-badge'>Cancelled</span> by the tenant.</p>
             
             <div class='info-box'>
                 <h3 style='margin-top: 0; color: #f5576c;'>Cancelled Rent Details</h3>
                 <div class='info-row'>
-                    <span class='label'>Property:</span>
-                    <span class='value'><strong>{rent.PropertyTitle}</strong></span>
+                    <span class='label'>Property: </span>
+                    <span class='value'><strong> {rent.PropertyTitle}</strong></span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Tenant:</span>
-                    <span class='value'>{rent.UserFullName}</span>
+                    <span class='label'>Tenant: </span>
+                    <span class='value'> {rent.UserFullName}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Rental Type:</span>
-                    <span class='value'>{rentalType}</span>
+                    <span class='label'>Rental Type: </span>
+                    <span class='value'> {rentalType}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Duration:</span>
-                    <span class='value'>{duration}</span>
+                    <span class='label'>Duration: </span>
+                    <span class='value'> {duration}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Dates:</span>
-                    <span class='value'>{rent.StartDate:MMMM dd, yyyy} - {rent.EndDate:MMMM dd, yyyy}</span>
+                    <span class='label'>Dates: </span>
+                    <span class='value'> {rent.StartDate:MMMM dd, yyyy} - {rent.EndDate:MMMM dd, yyyy}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Total Price:</span>
-                    <span class='value'><strong>{rent.TotalPrice:C}</strong></span>
+                    <span class='label'>Total Price: </span>
+                    <span class='value'><strong>{rent.TotalPrice:F2} BAM</strong></span>
                 </div>
             </div>
 
@@ -195,42 +199,42 @@ namespace eRent.Subscriber.Services
             <p>Great news - your request has been approved</p>
         </div>
         <div class='content'>
-            <p>Hello <strong>{rent.UserFullName}</strong>,</p>
+            <p>Hello <strong> {rent.UserFullName}</strong>,</p>
             <p>🎉 Excellent news! Your rent request has been <span class='status-badge'>Accepted</span> by the landlord.</p>
             
             <div class='info-box'>
                 <h3 style='margin-top: 0; color: #4facfe;'>Rent Details</h3>
                 <div class='info-row'>
-                    <span class='label'>Property:</span>
-                    <span class='value'><strong>{rent.PropertyTitle}</strong></span>
+                    <span class='label'>Property: </span>
+                    <span class='value'><strong> {rent.PropertyTitle}</strong></span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Location:</span>
-                    <span class='value'>{rent.PropertyAddress}, {rent.CityName}, {rent.CountryName}</span>
+                    <span class='label'>Location: </span>
+                    <span class='value'> {rent.PropertyAddress}, {rent.CityName}, {rent.CountryName}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Landlord:</span>
-                    <span class='value'>{rent.LandlordFullName}</span>
+                    <span class='label'>Landlord: </span>
+                    <span class='value'> {rent.LandlordFullName}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Rental Type:</span>
-                    <span class='value'>{rentalType}</span>
+                    <span class='label'>Rental Type: </span>
+                    <span class='value'> {rentalType}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Duration:</span>
-                    <span class='value'>{duration}</span>
+                    <span class='label'>Duration: </span>
+                    <span class='value'> {duration}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Start Date:</span>
-                    <span class='value'>{rent.StartDate:MMMM dd, yyyy}</span>
+                    <span class='label'>Start Date: </span>
+                    <span class='value'> {rent.StartDate:MMMM dd, yyyy}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>End Date:</span>
-                    <span class='value'>{rent.EndDate:MMMM dd, yyyy}</span>
+                    <span class='label'>End Date: </span>
+                    <span class='value'> {rent.EndDate:MMMM dd, yyyy}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Total Price:</span>
-                    <span class='value'><strong style='color: #4facfe; font-size: 18px;'>{rent.TotalPrice:C}</strong></span>
+                    <span class='label'>Total Price: </span>
+                    <span class='value'><strong style='color: #4facfe; font-size: 18px;'>{rent.TotalPrice:F2} BAM</strong></span>
                 </div>
             </div>
 
@@ -275,34 +279,34 @@ namespace eRent.Subscriber.Services
             <p>Your request could not be approved</p>
         </div>
         <div class='content'>
-            <p>Hello <strong>{rent.UserFullName}</strong>,</p>
+            <p>Hello <strong> {rent.UserFullName}</strong>,</p>
             <p>We regret to inform you that your rent request has been <span class='status-badge'>Rejected</span> by the landlord.</p>
             
             <div class='info-box'>
                 <h3 style='margin-top: 0; color: #fa709a;'>Rent Details</h3>
                 <div class='info-row'>
-                    <span class='label'>Property:</span>
-                    <span class='value'><strong>{rent.PropertyTitle}</strong></span>
+                    <span class='label'>Property: </span>
+                    <span class='value'><strong> {rent.PropertyTitle}</strong></span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Location:</span>
-                    <span class='value'>{rent.PropertyAddress}, {rent.CityName}, {rent.CountryName}</span>
+                    <span class='label'>Location: </span>
+                    <span class='value'> {rent.PropertyAddress}, {rent.CityName}, {rent.CountryName}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Rental Type:</span>
-                    <span class='value'>{rentalType}</span>
+                    <span class='label'>Rental Type: </span>
+                    <span class='value'> {rentalType}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Duration:</span>
-                    <span class='value'>{duration}</span>
+                    <span class='label'>Duration: </span>
+                    <span class='value'> {duration}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Dates:</span>
-                    <span class='value'>{rent.StartDate:MMMM dd, yyyy} - {rent.EndDate:MMMM dd, yyyy}</span>
+                    <span class='label'>Dates: </span>
+                    <span class='value'> {rent.StartDate:MMMM dd, yyyy} - {rent.EndDate:MMMM dd, yyyy}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Total Price:</span>
-                    <span class='value'><strong>{rent.TotalPrice:C}</strong></span>
+                    <span class='label'>Total Price: </span>
+                    <span class='value'><strong> {rent.TotalPrice:F2} BAM</strong></span>
                 </div>
             </div>
 
@@ -346,7 +350,7 @@ namespace eRent.Subscriber.Services
             <p>Rent payment has been completed</p>
         </div>
         <div class='content'>
-            <p>Hello <strong>{rent.LandlordFullName}</strong>,</p>
+            <p>Hello <strong> {rent.LandlordFullName}</strong>,</p>
             <p>Great news! Payment for the rent has been received and the reservation is now <span class='status-badge'>Paid</span>.</p>
             
             <div class='success-box'>
@@ -356,28 +360,28 @@ namespace eRent.Subscriber.Services
             <div class='info-box'>
                 <h3 style='margin-top: 0; color: #11998e;'>Rent Details</h3>
                 <div class='info-row'>
-                    <span class='label'>Property:</span>
-                    <span class='value'><strong>{rent.PropertyTitle}</strong></span>
+                    <span class='label'>Property: </span>
+                    <span class='value'><strong> {rent.PropertyTitle}</strong></span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Tenant:</span>
-                    <span class='value'>{rent.UserFullName}</span>
+                    <span class='label'>Tenant: </span>
+                    <span class='value'> {rent.UserFullName}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Rental Type:</span>
-                    <span class='value'>{rentalType}</span>
+                    <span class='label'>Rental Type: </span>
+                    <span class='value'> {rentalType}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Duration:</span>
-                    <span class='value'>{duration}</span>
+                    <span class='label'>Duration: </span>
+                    <span class='value'> {duration}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Dates:</span>
-                    <span class='value'>{rent.StartDate:MMMM dd, yyyy} - {rent.EndDate:MMMM dd, yyyy}</span>
+                    <span class='label'>Dates: </span>
+                    <span class='value'> {rent.StartDate:MMMM dd, yyyy} - {rent.EndDate:MMMM dd, yyyy}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Total Amount Received:</span>
-                    <span class='value'><strong style='color: #11998e; font-size: 18px;'>{rent.TotalPrice:C}</strong></span>
+                    <span class='label'>Total Amount Received: </span>
+                    <span class='value'><strong style='color: #11998e; font-size: 18px;'>{rent.TotalPrice:F2} BAM</strong></span>
                 </div>
             </div>
 
@@ -420,21 +424,21 @@ namespace eRent.Subscriber.Services
         </div>
         <div class='content'>
             <p>Hello,</p>
-            <p>Your rent status has been updated to: <strong>{notificationType}</strong></p>
+            <p>Your rent status has been updated to: <strong> {notificationType}</strong></p>
             
             <div class='info-box'>
                 <h3 style='margin-top: 0; color: #667eea;'>Rent Details</h3>
                 <div class='info-row'>
-                    <span class='label'>Property:</span>
-                    <span class='value'><strong>{rent.PropertyTitle}</strong></span>
+                    <span class='label'>Property: </span>
+                    <span class='value'><strong> {rent.PropertyTitle}</strong></span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Status:</span>
-                    <span class='value'>{notificationType}</span>
+                    <span class='label'>Status: </span>
+                    <span class='value'> {notificationType}</span>
                 </div>
                 <div class='info-row'>
-                    <span class='label'>Total Price:</span>
-                    <span class='value'><strong>{rent.TotalPrice:C}</strong></span>
+                    <span class='label'>Total Price: </span>
+                    <span class='value'><strong> {rent.TotalPrice:F2} BAM</strong></span>
                 </div>
             </div>
             
