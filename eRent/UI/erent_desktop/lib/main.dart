@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:erent_desktop/screens/analytics_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:erent_desktop/providers/city_provider.dart';
 import 'package:erent_desktop/providers/country_provider.dart';
@@ -547,8 +548,8 @@ final TextEditingController usernameController = TextEditingController(text: "de
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const CityListScreen(),
-                settings: const RouteSettings(name: 'CityListScreen'),
+                builder: (context) => const AnalyticsScreen(),
+                settings: const RouteSettings(name: 'AnalyticsScreen'),
               ),
             );
           }
