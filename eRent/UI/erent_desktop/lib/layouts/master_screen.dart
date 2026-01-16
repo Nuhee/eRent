@@ -9,6 +9,7 @@ import 'package:erent_desktop/screens/users_list_screen.dart';
 import 'package:erent_desktop/screens/property_type_list_screen.dart';
 import 'package:erent_desktop/screens/amenity_list_screen.dart';
 import 'package:erent_desktop/screens/property_list_screen.dart';
+import 'package:erent_desktop/screens/rent_list_screen.dart';
 
 class MasterScreen extends StatefulWidget {
   const MasterScreen({
@@ -382,6 +383,16 @@ class _MasterScreenState extends State<MasterScreen>
             ),
             const SizedBox(height: 5),
             
+            // Rents tile (no section header)
+            _modernDrawerTile(
+              context,
+              icon: Icons.receipt_long_outlined,
+              activeIcon: Icons.receipt_long_rounded,
+              label: 'Rents',
+              screen: const RentListScreen(),
+            ),
+            const SizedBox(height: 5),
+            
             // Cities tile (no section header)
             _modernDrawerTile(
               context,
@@ -491,6 +502,10 @@ Widget _modernDrawerTile(
     isSelected =
         currentRoute == 'PropertyListScreen' ||
         currentRoute == 'PropertyDetailsScreen';
+  } else if (label == 'Rents') {
+    isSelected =
+        currentRoute == 'RentListScreen' ||
+        currentRoute == 'RentDetailsScreen';
   }
 
   return Container(

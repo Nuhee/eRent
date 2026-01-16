@@ -636,7 +636,7 @@ namespace eRent.Services.Database
                     EndDate = new DateTime(2025, 2, 28, 23, 59, 59, DateTimeKind.Local),
                     IsDailyRental = false,
                     TotalPrice = 1200.00m, // Monthly price
-                    RentStatusId = 4, // Accepted
+                    RentStatusId = 5, // Paid
                     IsActive = true,
                     CreatedAt = rentFixedDate
                 },
@@ -650,7 +650,7 @@ namespace eRent.Services.Database
                     EndDate = new DateTime(2025, 4, 30, 23, 59, 59, DateTimeKind.Local),
                     IsDailyRental = false,
                     TotalPrice = 900.00m, // 450.00 * 2 months
-                    RentStatusId = 1, // Pending
+                    RentStatusId = 3, // Rejected
                     IsActive = true,
                     CreatedAt = rentFixedDate
                 }
@@ -682,9 +682,7 @@ namespace eRent.Services.Database
                     IsActive = true,
                     CreatedAt = reviewFixedDate.AddDays(5)
                 },
-                // Review for Rent 3 - User 7 (Goran) reviewing Property 2
-                // Note: This rent is "Accepted" but not "Paid", so normally wouldn't allow review
-                // Seeded for completeness as requested
+               
                 new ReviewRent
                 {
                     Id = 3,
@@ -694,19 +692,6 @@ namespace eRent.Services.Database
                     Comment = "Amazing house! Spacious, beautiful garden, and perfect for families. The landlord was very accommodating. Will definitely rent again!",
                     IsActive = true,
                     CreatedAt = reviewFixedDate.AddDays(10)
-                },
-                // Review for Rent 4 - User 6 (Nina) reviewing Property 3
-                // Note: This rent is "Pending", so normally wouldn't allow review
-                // Seeded for completeness as requested
-                new ReviewRent
-                {
-                    Id = 4,
-                    RentId = 4,
-                    UserId = 6, // Nina (regular user 2)
-                    Rating = 3,
-                    Comment = "Decent studio apartment. Good for students, close to university. Could use some updates but functional.",
-                    IsActive = true,
-                    CreatedAt = reviewFixedDate.AddDays(15)
                 }
             );
 

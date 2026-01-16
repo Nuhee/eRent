@@ -72,6 +72,11 @@ namespace eRent.Services.Services
                 query = query.Where(x => x.PropertyId == search.PropertyId.Value);
             }
 
+            if (!string.IsNullOrEmpty(search.PropertyTitle))
+            {
+                query = query.Where(x => x.Property != null && x.Property.Title.Contains(search.PropertyTitle));
+            }
+
             if (search.UserId.HasValue)
             {
                 query = query.Where(x => x.UserId == search.UserId.Value);

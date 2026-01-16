@@ -5,6 +5,7 @@ namespace eRent.Model.SearchObjects
     public class RentSearchObject : BaseSearchObject
     {
         public int? PropertyId { get; set; }
+        public string? PropertyTitle { get; set; }
         public int? UserId { get; set; }
         public bool? IsDailyRental { get; set; }
         public int? RentStatusId { get; set; }

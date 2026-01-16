@@ -8,6 +8,7 @@ import 'package:erent_desktop/providers/review_provider.dart';
 import 'package:erent_desktop/providers/property_type_provider.dart';
 import 'package:erent_desktop/providers/amenity_provider.dart';
 import 'package:erent_desktop/providers/property_provider.dart';
+import 'package:erent_desktop/providers/rent_provider.dart';
 import 'package:erent_desktop/providers/auth_provider.dart';
 import 'package:erent_desktop/screens/city_list_screen.dart';
 import 'package:provider/provider.dart';
@@ -40,6 +41,9 @@ void main() async {
         ),
         ChangeNotifierProvider<PropertyProvider>(
           create: (context) => PropertyProvider(),
+        ),
+        ChangeNotifierProvider<RentProvider>(
+          create: (context) => RentProvider(),
         ),
       ],
       child: const MyApp(),
