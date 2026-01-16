@@ -47,6 +47,181 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
     });
   }
 
+  // Toggle property active status
+  Future<void> _togglePropertyStatus(Property property) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              property.isActive ? Icons.warning_amber_rounded : Icons.check_circle_outline,
+              color: property.isActive ? Colors.orange : const Color(0xFF5B9BD5),
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              property.isActive ? "Deactivate Property?" : "Activate Property?",
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          property.isActive
+              ? "Are you sure you want to deactivate '${property.title}'? This will make it unavailable for rental."
+              : "Are you sure you want to activate '${property.title}'? This will make it available for rental.",
+          style: const TextStyle(fontSize: 15),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.grey[600],
+            ),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: property.isActive ? Colors.red : const Color(0xFF5B9BD5),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(property.isActive ? "Deactivate" : "Activate"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        // Show loading indicator
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    property.isActive
+                        ? "Deactivating ${property.title}..."
+                        : "Activating ${property.title}...",
+                  ),
+                ],
+              ),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+
+        // Get current property data
+        var currentProperty = await propertyProvider.getById(property.id);
+        if (currentProperty == null) {
+          throw Exception('Property not found');
+        }
+
+        // Prepare update request
+        var request = {
+          'title': currentProperty.title,
+          'description': currentProperty.description ?? '',
+          'pricePerMonth': currentProperty.pricePerMonth,
+          'pricePerDay': currentProperty.pricePerDay,
+          'allowDailyRental': currentProperty.allowDailyRental,
+          'bedrooms': currentProperty.bedrooms,
+          'bathrooms': currentProperty.bathrooms,
+          'area': currentProperty.area,
+          'propertyTypeId': currentProperty.propertyTypeId,
+          'cityId': currentProperty.cityId,
+          'landlordId': currentProperty.landlordId,
+          'address': currentProperty.address ?? '',
+          'latitude': currentProperty.latitude,
+          'longitude': currentProperty.longitude,
+          'isActive': !currentProperty.isActive,
+          'amenityIds': currentProperty.amenities.map((a) => a.id).toList(),
+        };
+
+        await propertyProvider.update(property.id, request);
+
+        // Refresh the list
+        await _performSearch();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(
+                    property.isActive ? Icons.block : Icons.check_circle,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    property.isActive
+                        ? "${property.title} has been deactivated"
+                        : "${property.title} has been activated",
+                  ),
+                ],
+              ),
+              backgroundColor: property.isActive ? Colors.red : Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      "Failed to update property status: ${e.toString().replaceFirst('Exception: ', '')}",
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -189,13 +364,13 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
             width: 1400,
             height: 423,
             columnWidths: const [
-              300, // Title
-              150, // Property Type
-              150, // City
+              270, // Title
+              130, // Property Type
+              140, // City
               150, // Landlord
-              120, // Price/Month
-              120, // Status
-              150, // Actions
+              160, // Price/Month
+              115, // Status
+              200, // Actions
             ],
             columns: const [
               DataColumn(
@@ -346,6 +521,46 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                           child: const Icon(
                                             Icons.visibility_outlined,
                                             color: Color(0xFF5B9BD5),
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Activate/Deactivate Button
+                                  Tooltip(
+                                    message: e.isActive ? "Deactivate" : "Activate",
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(8),
+                                        onTap: () async {
+                                          await _togglePropertyStatus(e);
+                                        },
+                                        child: Container(
+                                          width: 36,
+                                          height: 36,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: e.isActive
+                                                ? Colors.red.withOpacity(0.1)
+                                                : Colors.green.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(
+                                              color: e.isActive
+                                                  ? Colors.red.withOpacity(0.3)
+                                                  : Colors.green.withOpacity(0.3),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            e.isActive
+                                                ? Icons.block_outlined
+                                                : Icons.check_circle_outline,
+                                            color: e.isActive
+                                                ? Colors.red
+                                                : Colors.green,
                                             size: 18,
                                           ),
                                         ),
