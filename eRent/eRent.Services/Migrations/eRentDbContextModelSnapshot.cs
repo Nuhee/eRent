@@ -1467,7 +1467,7 @@ namespace eRent.Services.Migrations
                             IsActive = true,
                             IsDailyRental = false,
                             PropertyId = 2,
-                            RentStatusId = 4,
+                            RentStatusId = 5,
                             StartDate = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Local),
                             TotalPrice = 1200.00m,
                             UserId = 7
@@ -1480,10 +1480,179 @@ namespace eRent.Services.Migrations
                             IsActive = true,
                             IsDailyRental = false,
                             PropertyId = 3,
-                            RentStatusId = 1,
+                            RentStatusId = 3,
                             StartDate = new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Local),
                             TotalPrice = 900.00m,
                             UserId = 6
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CreatedAt = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Local),
+                            EndDate = new DateTime(2025, 5, 15, 0, 0, 0, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            IsDailyRental = true,
+                            PropertyId = 1,
+                            RentStatusId = 5,
+                            StartDate = new DateTime(2025, 5, 10, 0, 0, 0, 0, DateTimeKind.Local),
+                            TotalPrice = 175.00m,
+                            UserId = 6
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CreatedAt = new DateTime(2025, 5, 25, 0, 0, 0, 0, DateTimeKind.Local),
+                            EndDate = new DateTime(2025, 6, 30, 23, 59, 59, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            IsDailyRental = false,
+                            PropertyId = 2,
+                            RentStatusId = 5,
+                            StartDate = new DateTime(2025, 6, 1, 0, 0, 0, 0, DateTimeKind.Local),
+                            TotalPrice = 1200.00m,
+                            UserId = 6
+                        },
+                        new
+                        {
+                            Id = 7,
+                            CreatedAt = new DateTime(2025, 6, 28, 0, 0, 0, 0, DateTimeKind.Local),
+                            EndDate = new DateTime(2025, 7, 12, 0, 0, 0, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            IsDailyRental = true,
+                            PropertyId = 1,
+                            RentStatusId = 5,
+                            StartDate = new DateTime(2025, 7, 5, 0, 0, 0, 0, DateTimeKind.Local),
+                            TotalPrice = 245.00m,
+                            UserId = 6
+                        },
+                        new
+                        {
+                            Id = 8,
+                            CreatedAt = new DateTime(2025, 7, 20, 0, 0, 0, 0, DateTimeKind.Local),
+                            EndDate = new DateTime(2025, 9, 30, 23, 59, 59, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            IsDailyRental = false,
+                            PropertyId = 3,
+                            RentStatusId = 5,
+                            StartDate = new DateTime(2025, 8, 1, 0, 0, 0, 0, DateTimeKind.Local),
+                            TotalPrice = 900.00m,
+                            UserId = 6
+                        },
+                        new
+                        {
+                            Id = 9,
+                            CreatedAt = new DateTime(2025, 2, 25, 0, 0, 0, 0, DateTimeKind.Local),
+                            EndDate = new DateTime(2025, 3, 31, 23, 59, 59, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            IsDailyRental = false,
+                            PropertyId = 1,
+                            RentStatusId = 5,
+                            StartDate = new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Local),
+                            TotalPrice = 800.00m,
+                            UserId = 7
+                        },
+                        new
+                        {
+                            Id = 10,
+                            CreatedAt = new DateTime(2025, 4, 15, 0, 0, 0, 0, DateTimeKind.Local),
+                            EndDate = new DateTime(2025, 4, 24, 0, 0, 0, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            IsDailyRental = true,
+                            PropertyId = 1,
+                            RentStatusId = 5,
+                            StartDate = new DateTime(2025, 4, 20, 0, 0, 0, 0, DateTimeKind.Local),
+                            TotalPrice = 140.00m,
+                            UserId = 7
+                        },
+                        new
+                        {
+                            Id = 11,
+                            CreatedAt = new DateTime(2025, 4, 25, 0, 0, 0, 0, DateTimeKind.Local),
+                            EndDate = new DateTime(2025, 5, 31, 23, 59, 59, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            IsDailyRental = false,
+                            PropertyId = 2,
+                            RentStatusId = 5,
+                            StartDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Local),
+                            TotalPrice = 1200.00m,
+                            UserId = 7
+                        },
+                        new
+                        {
+                            Id = 12,
+                            CreatedAt = new DateTime(2025, 6, 25, 0, 0, 0, 0, DateTimeKind.Local),
+                            EndDate = new DateTime(2025, 7, 31, 23, 59, 59, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            IsDailyRental = false,
+                            PropertyId = 2,
+                            RentStatusId = 5,
+                            StartDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Local),
+                            TotalPrice = 1200.00m,
+                            UserId = 7
+                        },
+                        new
+                        {
+                            Id = 13,
+                            CreatedAt = new DateTime(2025, 8, 10, 0, 0, 0, 0, DateTimeKind.Local),
+                            EndDate = new DateTime(2025, 8, 21, 0, 0, 0, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            IsDailyRental = true,
+                            PropertyId = 1,
+                            RentStatusId = 5,
+                            StartDate = new DateTime(2025, 8, 15, 0, 0, 0, 0, DateTimeKind.Local),
+                            TotalPrice = 210.00m,
+                            UserId = 7
+                        },
+                        new
+                        {
+                            Id = 14,
+                            CreatedAt = new DateTime(2025, 9, 25, 0, 0, 0, 0, DateTimeKind.Local),
+                            EndDate = new DateTime(2025, 11, 30, 23, 59, 59, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            IsDailyRental = false,
+                            PropertyId = 3,
+                            RentStatusId = 5,
+                            StartDate = new DateTime(2025, 10, 1, 0, 0, 0, 0, DateTimeKind.Local),
+                            TotalPrice = 900.00m,
+                            UserId = 7
+                        },
+                        new
+                        {
+                            Id = 15,
+                            CreatedAt = new DateTime(2025, 9, 28, 0, 0, 0, 0, DateTimeKind.Local),
+                            EndDate = new DateTime(2025, 10, 31, 23, 59, 59, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            IsDailyRental = false,
+                            PropertyId = 2,
+                            RentStatusId = 4,
+                            StartDate = new DateTime(2025, 10, 1, 0, 0, 0, 0, DateTimeKind.Local),
+                            TotalPrice = 1200.00m,
+                            UserId = 6
+                        },
+                        new
+                        {
+                            Id = 16,
+                            CreatedAt = new DateTime(2025, 11, 5, 0, 0, 0, 0, DateTimeKind.Local),
+                            EndDate = new DateTime(2025, 11, 12, 0, 0, 0, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            IsDailyRental = true,
+                            PropertyId = 1,
+                            RentStatusId = 1,
+                            StartDate = new DateTime(2025, 11, 10, 0, 0, 0, 0, DateTimeKind.Local),
+                            TotalPrice = 70.00m,
+                            UserId = 6
+                        },
+                        new
+                        {
+                            Id = 17,
+                            CreatedAt = new DateTime(2025, 11, 25, 0, 0, 0, 0, DateTimeKind.Local),
+                            EndDate = new DateTime(2025, 12, 31, 23, 59, 59, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            IsDailyRental = false,
+                            PropertyId = 1,
+                            RentStatusId = 4,
+                            StartDate = new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Local),
+                            TotalPrice = 800.00m,
+                            UserId = 7
                         });
                 });
 
@@ -1634,12 +1803,102 @@ namespace eRent.Services.Migrations
                         new
                         {
                             Id = 4,
-                            Comment = "Decent studio apartment. Good for students, close to university. Could use some updates but functional.",
-                            CreatedAt = new DateTime(2025, 2, 16, 0, 0, 0, 0, DateTimeKind.Local),
+                            Comment = "Perfect for a short stay! Clean, comfortable, and great location. Would definitely book again.",
+                            CreatedAt = new DateTime(2025, 5, 16, 0, 0, 0, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            Rating = 5,
+                            RentId = 5,
+                            UserId = 6
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Comment = "Beautiful house with a lovely garden. Very spacious and well-maintained. Great for families.",
+                            CreatedAt = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            Rating = 4,
+                            RentId = 6,
+                            UserId = 6
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Comment = "Excellent apartment! Everything was perfect. The location is ideal and the apartment is very well equipped.",
+                            CreatedAt = new DateTime(2025, 7, 13, 0, 0, 0, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            Rating = 5,
+                            RentId = 7,
+                            UserId = 6
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Comment = "Studio is small but functional. Good value for money, though could use some updates.",
+                            CreatedAt = new DateTime(2025, 10, 1, 0, 0, 0, 0, DateTimeKind.Local),
                             IsActive = true,
                             Rating = 3,
-                            RentId = 4,
+                            RentId = 8,
                             UserId = 6
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Comment = "Nice apartment in a good location. Clean and well-maintained. Would recommend.",
+                            CreatedAt = new DateTime(2025, 4, 1, 0, 0, 0, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            Rating = 4,
+                            RentId = 9,
+                            UserId = 7
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Comment = "Perfect for a weekend getaway! Clean, comfortable, and great amenities.",
+                            CreatedAt = new DateTime(2025, 4, 25, 0, 0, 0, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            Rating = 5,
+                            RentId = 10,
+                            UserId = 7
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Comment = "Fantastic house! Spacious, beautiful, and perfect location. Highly recommend!",
+                            CreatedAt = new DateTime(2025, 6, 1, 0, 0, 0, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            Rating = 5,
+                            RentId = 11,
+                            UserId = 7
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Comment = "Amazing experience again! The house is perfect and the landlord is very accommodating.",
+                            CreatedAt = new DateTime(2025, 8, 1, 0, 0, 0, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            Rating = 5,
+                            RentId = 12,
+                            UserId = 7
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Comment = "Great apartment for a short stay. Clean and well-located.",
+                            CreatedAt = new DateTime(2025, 8, 22, 0, 0, 0, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            Rating = 4,
+                            RentId = 13,
+                            UserId = 7
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Comment = "Cozy studio, perfect for one person. Good value and clean.",
+                            CreatedAt = new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Local),
+                            IsActive = true,
+                            Rating = 4,
+                            RentId = 14,
+                            UserId = 7
                         });
                 });
 

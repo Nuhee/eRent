@@ -631,8 +631,21 @@ namespace eRent.Services.Migrations
                 {
                     { 1, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 1, 18, 0, 0, 0, 0, DateTimeKind.Local), true, true, 1, 5, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Local), 105.00m, null, 5 },
                     { 2, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 1, 31, 23, 59, 59, 0, DateTimeKind.Local), true, false, 1, 5, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Local), 800.00m, null, 6 },
-                    { 3, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 2, 28, 23, 59, 59, 0, DateTimeKind.Local), true, false, 2, 4, new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Local), 1200.00m, null, 7 },
-                    { 4, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 4, 30, 23, 59, 59, 0, DateTimeKind.Local), true, false, 3, 1, new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Local), 900.00m, null, 6 }
+                    { 3, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 2, 28, 23, 59, 59, 0, DateTimeKind.Local), true, false, 2, 5, new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Local), 1200.00m, null, 7 },
+                    { 4, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 4, 30, 23, 59, 59, 0, DateTimeKind.Local), true, false, 3, 3, new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Local), 900.00m, null, 6 },
+                    { 5, new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 5, 15, 0, 0, 0, 0, DateTimeKind.Local), true, true, 1, 5, new DateTime(2025, 5, 10, 0, 0, 0, 0, DateTimeKind.Local), 175.00m, null, 6 },
+                    { 6, new DateTime(2025, 5, 25, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 6, 30, 23, 59, 59, 0, DateTimeKind.Local), true, false, 2, 5, new DateTime(2025, 6, 1, 0, 0, 0, 0, DateTimeKind.Local), 1200.00m, null, 6 },
+                    { 7, new DateTime(2025, 6, 28, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 7, 12, 0, 0, 0, 0, DateTimeKind.Local), true, true, 1, 5, new DateTime(2025, 7, 5, 0, 0, 0, 0, DateTimeKind.Local), 245.00m, null, 6 },
+                    { 8, new DateTime(2025, 7, 20, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 9, 30, 23, 59, 59, 0, DateTimeKind.Local), true, false, 3, 5, new DateTime(2025, 8, 1, 0, 0, 0, 0, DateTimeKind.Local), 900.00m, null, 6 },
+                    { 9, new DateTime(2025, 2, 25, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 3, 31, 23, 59, 59, 0, DateTimeKind.Local), true, false, 1, 5, new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Local), 800.00m, null, 7 },
+                    { 10, new DateTime(2025, 4, 15, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 4, 24, 0, 0, 0, 0, DateTimeKind.Local), true, true, 1, 5, new DateTime(2025, 4, 20, 0, 0, 0, 0, DateTimeKind.Local), 140.00m, null, 7 },
+                    { 11, new DateTime(2025, 4, 25, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 5, 31, 23, 59, 59, 0, DateTimeKind.Local), true, false, 2, 5, new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Local), 1200.00m, null, 7 },
+                    { 12, new DateTime(2025, 6, 25, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 7, 31, 23, 59, 59, 0, DateTimeKind.Local), true, false, 2, 5, new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Local), 1200.00m, null, 7 },
+                    { 13, new DateTime(2025, 8, 10, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 8, 21, 0, 0, 0, 0, DateTimeKind.Local), true, true, 1, 5, new DateTime(2025, 8, 15, 0, 0, 0, 0, DateTimeKind.Local), 210.00m, null, 7 },
+                    { 14, new DateTime(2025, 9, 25, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 11, 30, 23, 59, 59, 0, DateTimeKind.Local), true, false, 3, 5, new DateTime(2025, 10, 1, 0, 0, 0, 0, DateTimeKind.Local), 900.00m, null, 7 },
+                    { 15, new DateTime(2025, 9, 28, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 10, 31, 23, 59, 59, 0, DateTimeKind.Local), true, false, 2, 4, new DateTime(2025, 10, 1, 0, 0, 0, 0, DateTimeKind.Local), 1200.00m, null, 6 },
+                    { 16, new DateTime(2025, 11, 5, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 11, 12, 0, 0, 0, 0, DateTimeKind.Local), true, true, 1, 1, new DateTime(2025, 11, 10, 0, 0, 0, 0, DateTimeKind.Local), 70.00m, null, 6 },
+                    { 17, new DateTime(2025, 11, 25, 0, 0, 0, 0, DateTimeKind.Local), new DateTime(2025, 12, 31, 23, 59, 59, 0, DateTimeKind.Local), true, false, 1, 4, new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Local), 800.00m, null, 7 }
                 });
 
             migrationBuilder.InsertData(
@@ -643,7 +656,16 @@ namespace eRent.Services.Migrations
                     { 1, "Excellent apartment! Very clean, well-located, and the landlord was very responsive. Highly recommend!", new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Local), true, 5, 1, null, 5 },
                     { 2, "Great location and good value for money. The apartment was clean and had all the amenities promised. Minor issue with heating but overall satisfied.", new DateTime(2025, 2, 6, 0, 0, 0, 0, DateTimeKind.Local), true, 4, 2, null, 6 },
                     { 3, "Amazing house! Spacious, beautiful garden, and perfect for families. The landlord was very accommodating. Will definitely rent again!", new DateTime(2025, 2, 11, 0, 0, 0, 0, DateTimeKind.Local), true, 5, 3, null, 7 },
-                    { 4, "Decent studio apartment. Good for students, close to university. Could use some updates but functional.", new DateTime(2025, 2, 16, 0, 0, 0, 0, DateTimeKind.Local), true, 3, 4, null, 6 }
+                    { 4, "Perfect for a short stay! Clean, comfortable, and great location. Would definitely book again.", new DateTime(2025, 5, 16, 0, 0, 0, 0, DateTimeKind.Local), true, 5, 5, null, 6 },
+                    { 5, "Beautiful house with a lovely garden. Very spacious and well-maintained. Great for families.", new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Local), true, 4, 6, null, 6 },
+                    { 6, "Excellent apartment! Everything was perfect. The location is ideal and the apartment is very well equipped.", new DateTime(2025, 7, 13, 0, 0, 0, 0, DateTimeKind.Local), true, 5, 7, null, 6 },
+                    { 7, "Studio is small but functional. Good value for money, though could use some updates.", new DateTime(2025, 10, 1, 0, 0, 0, 0, DateTimeKind.Local), true, 3, 8, null, 6 },
+                    { 8, "Nice apartment in a good location. Clean and well-maintained. Would recommend.", new DateTime(2025, 4, 1, 0, 0, 0, 0, DateTimeKind.Local), true, 4, 9, null, 7 },
+                    { 9, "Perfect for a weekend getaway! Clean, comfortable, and great amenities.", new DateTime(2025, 4, 25, 0, 0, 0, 0, DateTimeKind.Local), true, 5, 10, null, 7 },
+                    { 10, "Fantastic house! Spacious, beautiful, and perfect location. Highly recommend!", new DateTime(2025, 6, 1, 0, 0, 0, 0, DateTimeKind.Local), true, 5, 11, null, 7 },
+                    { 11, "Amazing experience again! The house is perfect and the landlord is very accommodating.", new DateTime(2025, 8, 1, 0, 0, 0, 0, DateTimeKind.Local), true, 5, 12, null, 7 },
+                    { 12, "Great apartment for a short stay. Clean and well-located.", new DateTime(2025, 8, 22, 0, 0, 0, 0, DateTimeKind.Local), true, 4, 13, null, 7 },
+                    { 13, "Cozy studio, perfect for one person. Good value and clean.", new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Local), true, 4, 14, null, 7 }
                 });
 
             migrationBuilder.CreateIndex(

@@ -653,6 +653,188 @@ namespace eRent.Services.Database
                     RentStatusId = 3, // Rejected
                     IsActive = true,
                     CreatedAt = rentFixedDate
+                },
+                // Daily rent for User 6 (Nina) - Property 1, May 2025 (5 days)
+                new Rent
+                {
+                    Id = 5,
+                    PropertyId = 1, // Modern Apartment in Sarajevo Center
+                    UserId = 6, // Nina
+                    StartDate = new DateTime(2025, 5, 10, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 5, 15, 0, 0, 0, DateTimeKind.Local),
+                    IsDailyRental = true,
+                    TotalPrice = 175.00m, // 35.00 * 5 days
+                    RentStatusId = 5, // Paid
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 5, 1, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Monthly rent for User 6 (Nina) - Property 2, June 2025
+                new Rent
+                {
+                    Id = 6,
+                    PropertyId = 2, // Spacious House in Mostar
+                    UserId = 6, // Nina
+                    StartDate = new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 6, 30, 23, 59, 59, DateTimeKind.Local),
+                    IsDailyRental = false,
+                    TotalPrice = 1200.00m, // Monthly price
+                    RentStatusId = 5, // Paid
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 5, 25, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Daily rent for User 6 (Nina) - Property 1, July 2025 (7 days)
+                new Rent
+                {
+                    Id = 7,
+                    PropertyId = 1, // Modern Apartment in Sarajevo Center
+                    UserId = 6, // Nina
+                    StartDate = new DateTime(2025, 7, 5, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 7, 12, 0, 0, 0, DateTimeKind.Local),
+                    IsDailyRental = true,
+                    TotalPrice = 245.00m, // 35.00 * 7 days
+                    RentStatusId = 5, // Paid
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 6, 28, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Monthly rent for User 6 (Nina) - Property 3, August-September 2025 (2 months)
+                new Rent
+                {
+                    Id = 8,
+                    PropertyId = 3, // Cozy Studio in Tuzla
+                    UserId = 6, // Nina
+                    StartDate = new DateTime(2025, 8, 1, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 9, 30, 23, 59, 59, DateTimeKind.Local),
+                    IsDailyRental = false,
+                    TotalPrice = 900.00m, // 450.00 * 2 months
+                    RentStatusId = 5, // Paid
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 7, 20, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Monthly rent for User 7 (Goran) - Property 1, March 2025
+                new Rent
+                {
+                    Id = 9,
+                    PropertyId = 1, // Modern Apartment in Sarajevo Center
+                    UserId = 7, // Goran
+                    StartDate = new DateTime(2025, 3, 1, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 3, 31, 23, 59, 59, DateTimeKind.Local),
+                    IsDailyRental = false,
+                    TotalPrice = 800.00m, // Monthly price
+                    RentStatusId = 5, // Paid
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 2, 25, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Daily rent for User 7 (Goran) - Property 1, April 2025 (4 days)
+                new Rent
+                {
+                    Id = 10,
+                    PropertyId = 1, // Modern Apartment in Sarajevo Center
+                    UserId = 7, // Goran
+                    StartDate = new DateTime(2025, 4, 20, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 4, 24, 0, 0, 0, DateTimeKind.Local),
+                    IsDailyRental = true,
+                    TotalPrice = 140.00m, // 35.00 * 4 days
+                    RentStatusId = 5, // Paid
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 4, 15, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Monthly rent for User 7 (Goran) - Property 2, May 2025
+                new Rent
+                {
+                    Id = 11,
+                    PropertyId = 2, // Spacious House in Mostar
+                    UserId = 7, // Goran
+                    StartDate = new DateTime(2025, 5, 1, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 5, 31, 23, 59, 59, DateTimeKind.Local),
+                    IsDailyRental = false,
+                    TotalPrice = 1200.00m, // Monthly price
+                    RentStatusId = 5, // Paid
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 4, 25, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Monthly rent for User 7 (Goran) - Property 2, July 2025
+                new Rent
+                {
+                    Id = 12,
+                    PropertyId = 2, // Spacious House in Mostar
+                    UserId = 7, // Goran
+                    StartDate = new DateTime(2025, 7, 1, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 7, 31, 23, 59, 59, DateTimeKind.Local),
+                    IsDailyRental = false,
+                    TotalPrice = 1200.00m, // Monthly price
+                    RentStatusId = 5, // Paid
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 6, 25, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Daily rent for User 7 (Goran) - Property 1, August 2025 (6 days)
+                new Rent
+                {
+                    Id = 13,
+                    PropertyId = 1, // Modern Apartment in Sarajevo Center
+                    UserId = 7, // Goran
+                    StartDate = new DateTime(2025, 8, 15, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 8, 21, 0, 0, 0, DateTimeKind.Local),
+                    IsDailyRental = true,
+                    TotalPrice = 210.00m, // 35.00 * 6 days
+                    RentStatusId = 5, // Paid
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 8, 10, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Monthly rent for User 7 (Goran) - Property 3, October-November 2025 (2 months)
+                new Rent
+                {
+                    Id = 14,
+                    PropertyId = 3, // Cozy Studio in Tuzla
+                    UserId = 7, // Goran
+                    StartDate = new DateTime(2025, 10, 1, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 11, 30, 23, 59, 59, DateTimeKind.Local),
+                    IsDailyRental = false,
+                    TotalPrice = 900.00m, // 450.00 * 2 months
+                    RentStatusId = 5, // Paid
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 9, 25, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Monthly rent for User 6 (Nina) - Property 2, October 2025
+                new Rent
+                {
+                    Id = 15,
+                    PropertyId = 2, // Spacious House in Mostar
+                    UserId = 6, // Nina
+                    StartDate = new DateTime(2025, 10, 1, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 10, 31, 23, 59, 59, DateTimeKind.Local),
+                    IsDailyRental = false,
+                    TotalPrice = 1200.00m, // Monthly price
+                    RentStatusId = 4, // Accepted (not paid yet)
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 9, 28, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Daily rent for User 6 (Nina) - Property 1, November 2025 (2 days)
+                new Rent
+                {
+                    Id = 16,
+                    PropertyId = 1, // Modern Apartment in Sarajevo Center
+                    UserId = 6, // Nina
+                    StartDate = new DateTime(2025, 11, 10, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 11, 12, 0, 0, 0, DateTimeKind.Local),
+                    IsDailyRental = true,
+                    TotalPrice = 70.00m, // 35.00 * 2 days
+                    RentStatusId = 1, // Pending
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 11, 5, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Monthly rent for User 7 (Goran) - Property 1, December 2025
+                new Rent
+                {
+                    Id = 17,
+                    PropertyId = 1, // Modern Apartment in Sarajevo Center
+                    UserId = 7, // Goran
+                    StartDate = new DateTime(2025, 12, 1, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2025, 12, 31, 23, 59, 59, DateTimeKind.Local),
+                    IsDailyRental = false,
+                    TotalPrice = 800.00m, // Monthly price
+                    RentStatusId = 4, // Accepted
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 11, 25, 0, 0, 0, DateTimeKind.Local)
                 }
             );
 
@@ -692,6 +874,116 @@ namespace eRent.Services.Database
                     Comment = "Amazing house! Spacious, beautiful garden, and perfect for families. The landlord was very accommodating. Will definitely rent again!",
                     IsActive = true,
                     CreatedAt = reviewFixedDate.AddDays(10)
+                },
+                // Review for Rent 5 - User 6 (Nina) reviewing Property 1 (daily rental)
+                new ReviewRent
+                {
+                    Id = 4,
+                    RentId = 5,
+                    UserId = 6, // Nina
+                    Rating = 5,
+                    Comment = "Perfect for a short stay! Clean, comfortable, and great location. Would definitely book again.",
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 5, 16, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Review for Rent 6 - User 6 (Nina) reviewing Property 2
+                new ReviewRent
+                {
+                    Id = 5,
+                    RentId = 6,
+                    UserId = 6, // Nina
+                    Rating = 4,
+                    Comment = "Beautiful house with a lovely garden. Very spacious and well-maintained. Great for families.",
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 7, 1, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Review for Rent 7 - User 6 (Nina) reviewing Property 1 (daily rental)
+                new ReviewRent
+                {
+                    Id = 6,
+                    RentId = 7,
+                    UserId = 6, // Nina
+                    Rating = 5,
+                    Comment = "Excellent apartment! Everything was perfect. The location is ideal and the apartment is very well equipped.",
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 7, 13, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Review for Rent 8 - User 6 (Nina) reviewing Property 3
+                new ReviewRent
+                {
+                    Id = 7,
+                    RentId = 8,
+                    UserId = 6, // Nina
+                    Rating = 3,
+                    Comment = "Studio is small but functional. Good value for money, though could use some updates.",
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 10, 1, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Review for Rent 9 - User 7 (Goran) reviewing Property 1
+                new ReviewRent
+                {
+                    Id = 8,
+                    RentId = 9,
+                    UserId = 7, // Goran
+                    Rating = 4,
+                    Comment = "Nice apartment in a good location. Clean and well-maintained. Would recommend.",
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 4, 1, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Review for Rent 10 - User 7 (Goran) reviewing Property 1 (daily rental)
+                new ReviewRent
+                {
+                    Id = 9,
+                    RentId = 10,
+                    UserId = 7, // Goran
+                    Rating = 5,
+                    Comment = "Perfect for a weekend getaway! Clean, comfortable, and great amenities.",
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 4, 25, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Review for Rent 11 - User 7 (Goran) reviewing Property 2
+                new ReviewRent
+                {
+                    Id = 10,
+                    RentId = 11,
+                    UserId = 7, // Goran
+                    Rating = 5,
+                    Comment = "Fantastic house! Spacious, beautiful, and perfect location. Highly recommend!",
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Review for Rent 12 - User 7 (Goran) reviewing Property 2
+                new ReviewRent
+                {
+                    Id = 11,
+                    RentId = 12,
+                    UserId = 7, // Goran
+                    Rating = 5,
+                    Comment = "Amazing experience again! The house is perfect and the landlord is very accommodating.",
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 8, 1, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Review for Rent 13 - User 7 (Goran) reviewing Property 1 (daily rental)
+                new ReviewRent
+                {
+                    Id = 12,
+                    RentId = 13,
+                    UserId = 7, // Goran
+                    Rating = 4,
+                    Comment = "Great apartment for a short stay. Clean and well-located.",
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 8, 22, 0, 0, 0, DateTimeKind.Local)
+                },
+                // Review for Rent 14 - User 7 (Goran) reviewing Property 3
+                new ReviewRent
+                {
+                    Id = 13,
+                    RentId = 14,
+                    UserId = 7, // Goran
+                    Rating = 4,
+                    Comment = "Cozy studio, perfect for one person. Good value and clean.",
+                    IsActive = true,
+                    CreatedAt = new DateTime(2025, 12, 1, 0, 0, 0, DateTimeKind.Local)
                 }
             );
 

@@ -10,6 +10,7 @@ import 'package:erent_desktop/screens/property_type_list_screen.dart';
 import 'package:erent_desktop/screens/amenity_list_screen.dart';
 import 'package:erent_desktop/screens/property_list_screen.dart';
 import 'package:erent_desktop/screens/rent_list_screen.dart';
+import 'package:erent_desktop/screens/analytics_screen.dart';
 
 class MasterScreen extends StatefulWidget {
   const MasterScreen({
@@ -401,6 +402,16 @@ class _MasterScreenState extends State<MasterScreen>
               label: 'Cities',
               screen: CityListScreen(),
             ),
+            const SizedBox(height: 5),
+            
+            // Analytics tile (no section header)
+            _modernDrawerTile(
+              context,
+              icon: Icons.analytics_outlined,
+              activeIcon: Icons.analytics_rounded,
+              label: 'Analytics',
+              screen: const AnalyticsScreen(),
+            ),
           ],
         ),
       ),
@@ -506,6 +517,8 @@ Widget _modernDrawerTile(
     isSelected =
         currentRoute == 'RentListScreen' ||
         currentRoute == 'RentDetailsScreen';
+  } else if (label == 'Analytics') {
+    isSelected = currentRoute == 'AnalyticsScreen';
   }
 
   return Container(
