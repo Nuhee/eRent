@@ -6,6 +6,7 @@ import 'package:erent_desktop/screens/country_list_screen.dart';
 import 'package:erent_desktop/screens/city_list_screen.dart';
 import 'package:erent_desktop/screens/review_list_screen.dart';
 import 'package:erent_desktop/screens/users_list_screen.dart';
+import 'package:erent_desktop/screens/property_type_list_screen.dart';
 
 class MasterScreen extends StatefulWidget {
   const MasterScreen({
@@ -349,6 +350,16 @@ class _MasterScreenState extends State<MasterScreen>
             ),
             const SizedBox(height: 5),
             
+            // Property Types tile (no section header)
+            _modernDrawerTile(
+              context,
+              icon: Icons.category_outlined,
+              activeIcon: Icons.category,
+              label: 'Property Types',
+              screen: const PropertyTypeListScreen(),
+            ),
+            const SizedBox(height: 5),
+            
             // Cities tile (no section header)
             _modernDrawerTile(
               context,
@@ -444,6 +455,11 @@ Widget _modernDrawerTile(
         currentRoute == 'UsersListScreen' ||
         currentRoute == 'UsersDetailsScreen' ||
         currentRoute == 'UsersEditScreen';
+  } else if (label == 'Property Types') {
+    isSelected =
+        currentRoute == 'PropertyTypeListScreen' ||
+        currentRoute == 'PropertyTypeDetailsScreen' ||
+        currentRoute == 'PropertyTypeEditScreen';
   }
 
   return Container(
