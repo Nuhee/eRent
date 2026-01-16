@@ -15,7 +15,9 @@ class PropertyDetailsScreen extends StatefulWidget {
 
 class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   int _currentImageIndex = 0;
+  int _currentInfoCardIndex = 0;
   late PageController _pageController;
+  late PageController _infoCardController;
   late List<PropertyImage> _sortedImages;
 
   @override
@@ -39,11 +41,13 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
     if (_currentImageIndex == -1) _currentImageIndex = 0;
     
     _pageController = PageController(initialPage: _currentImageIndex);
+    _infoCardController = PageController(initialPage: 0);
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _infoCardController.dispose();
     super.dispose();
   }
 
@@ -63,13 +67,25 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                 // Header Card
                 _buildHeaderCard(),
                 const SizedBox(height: 16),
-                // Image Carousel
-                if (_sortedImages.isNotEmpty) ...[
-                  _buildImageCarousel(),
-                  const SizedBox(height: 16),
-                ],
-                // Information Cards
-                _buildInfoCards(),
+                // Two Column Layout: Images and Info Cards
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Left Column: Image Carousel
+                    if (_sortedImages.isNotEmpty) ...[
+                      Expanded(
+                        flex: 1,
+                        child: _buildImageCarousel(),
+                      ),
+                      const SizedBox(width: 16),
+                    ],
+                    // Right Column: Info Card Carousel
+                    Expanded(
+                      flex: 1,
+                      child: _buildInfoCardCarousel(),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -205,7 +221,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
 
   Widget _buildImageCarousel() {
     return Container(
-      height: 300,
+      height: 445,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -256,6 +272,49 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               );
             },
           ),
+          // Circular navigation for images
+          if (_sortedImages.length > 1)
+            Positioned.fill(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Left swipe area
+                  GestureDetector(
+                    onTap: () {
+                      final newIndex = _currentImageIndex == 0 
+                          ? _sortedImages.length - 1 
+                          : _currentImageIndex - 1;
+                      _pageController.animateToPage(
+                        newIndex,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    child: Container(
+                      width: 80,
+                      color: Colors.transparent,
+                    ),
+                  ),
+                  // Right swipe area
+                  GestureDetector(
+                    onTap: () {
+                      final newIndex = _currentImageIndex == _sortedImages.length - 1 
+                          ? 0 
+                          : _currentImageIndex + 1;
+                      _pageController.animateToPage(
+                        newIndex,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    child: Container(
+                      width: 80,
+                      color: Colors.transparent,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           // Cover Badge (top right)
           if (_sortedImages[_currentImageIndex].isCover)
             Positioned(
@@ -315,18 +374,20 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Previous Button
+                  // Previous Button (circular)
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: _currentImageIndex > 0
-                          ? () {
-                              _pageController.previousPage(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                              );
-                            }
-                          : null,
+                      onTap: () {
+                        final newIndex = _currentImageIndex == 0 
+                            ? _sortedImages.length - 1 
+                            : _currentImageIndex - 1;
+                        _pageController.animateToPage(
+                          newIndex,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
                         width: 32,
@@ -335,9 +396,9 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.chevron_left,
-                          color: _currentImageIndex > 0 ? Colors.white : Colors.white.withOpacity(0.5),
+                          color: Colors.white,
                           size: 20,
                         ),
                       ),
@@ -369,18 +430,20 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Next Button
+                  // Next Button (circular)
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: _currentImageIndex < _sortedImages.length - 1
-                          ? () {
-                              _pageController.nextPage(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                              );
-                            }
-                          : null,
+                      onTap: () {
+                        final newIndex = _currentImageIndex == _sortedImages.length - 1 
+                            ? 0 
+                            : _currentImageIndex + 1;
+                        _pageController.animateToPage(
+                          newIndex,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
                         width: 32,
@@ -389,9 +452,9 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.chevron_right,
-                          color: _currentImageIndex < _sortedImages.length - 1 ? Colors.white : Colors.white.withOpacity(0.5),
+                          color: Colors.white,
                           size: 20,
                         ),
                       ),
@@ -425,146 +488,287 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
     );
   }
 
-  Widget _buildInfoCards() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Property Details Card
-        Expanded(
-          flex: 2,
-          child: _buildDetailCard(
-            title: 'Property Details',
-            icon: Icons.info_outline_rounded,
-            children: [
-              _buildInfoRow(
-                label: 'Title',
-                value: widget.property.title,
-                icon: Icons.title_outlined,
-              ),
-              const SizedBox(height: 16),
-              if (widget.property.description != null && widget.property.description!.isNotEmpty) ...[
-                _buildInfoRow(
-                  label: 'Description',
-                  value: widget.property.description!,
-                  icon: Icons.description_outlined,
-                  isMultiline: true,
-                ),
-                const SizedBox(height: 16),
-              ],
-              _buildInfoRow(
-                label: 'Property Type',
-                value: widget.property.propertyTypeName,
-                icon: Icons.category_outlined,
-              ),
-              const SizedBox(height: 16),
-              _buildInfoRow(
-                label: 'City',
-                value: widget.property.cityName,
-                icon: Icons.location_city_outlined,
-              ),
-              const SizedBox(height: 16),
-              _buildInfoRow(
-                label: 'Address',
-                value: widget.property.address ?? 'N/A',
-                icon: Icons.location_on_outlined,
-              ),
-              const SizedBox(height: 16),
-              _buildInfoRow(
-                label: 'Landlord',
-                value: widget.property.landlordName,
-                icon: Icons.person_outline,
-              ),
-            ],
+  Widget _buildInfoCardCarousel() {
+    final List<Map<String, dynamic>> infoCards = [
+      {
+        'title': 'Property Details',
+        'icon': Icons.info_outline_rounded,
+        'children': [
+          _buildInfoRow(
+            label: 'Title',
+            value: widget.property.title,
+            icon: Icons.title_outlined,
           ),
-        ),
-        const SizedBox(width: 12),
-        // Property Specifications Card
-        Expanded(
-          flex: 2,
-          child: _buildDetailCard(
-            title: 'Specifications',
-            icon: Icons.home_work_outlined,
-            children: [
-              _buildInfoRow(
-                label: 'Bedrooms',
-                value: widget.property.bedrooms.toString(),
-                icon: Icons.bed_outlined,
-              ),
-              const SizedBox(height: 16),
-              _buildInfoRow(
-                label: 'Bathrooms',
-                value: widget.property.bathrooms.toString(),
-                icon: Icons.bathroom_outlined,
-              ),
-              const SizedBox(height: 16),
-              _buildInfoRow(
-                label: 'Area',
-                value: '${widget.property.area.toStringAsFixed(2)} m²',
-                icon: Icons.square_foot_outlined,
-              ),
-              const SizedBox(height: 16),
-              _buildInfoRow(
-                label: 'Price per Month',
-                value: '${widget.property.pricePerMonth.toStringAsFixed(2)} BAM',
-                icon: Icons.attach_money_outlined,
-              ),
-              if (widget.property.allowDailyRental && widget.property.pricePerDay != null) ...[
-                const SizedBox(height: 16),
-                _buildInfoRow(
-                  label: 'Price per Day',
-                  value: '${widget.property.pricePerDay!.toStringAsFixed(2)} BAM',
-                  icon: Icons.calendar_today_outlined,
-                ),
-              ],
-            ],
+          const SizedBox(height: 16),
+          if (widget.property.description != null && widget.property.description!.isNotEmpty) ...[
+            _buildInfoRow(
+              label: 'Description',
+              value: widget.property.description!,
+              icon: Icons.description_outlined,
+              isMultiline: true,
+            ),
+            const SizedBox(height: 16),
+          ],
+          _buildInfoRow(
+            label: 'Property Type',
+            value: widget.property.propertyTypeName,
+            icon: Icons.category_outlined,
           ),
-        ),
-        const SizedBox(width: 12),
-        // Status and Amenities Card
-        Expanded(
-          flex: 2,
-          child: _buildDetailCard(
-            title: 'Status & Amenities',
-            icon: Icons.verified_outlined,
-            children: [
-              _buildInfoRow(
-                label: 'Status',
-                value: widget.property.isActive ? 'Active' : 'Inactive',
-                icon: widget.property.isActive
-                    ? Icons.check_circle_outline
-                    : Icons.cancel_outlined,
-                valueColor: widget.property.isActive
-                    ? const Color(0xFF5B9BD5)
-                    : Colors.grey[600],
-              ),
-              const SizedBox(height: 16),
-              _buildInfoRow(
-                label: 'Daily Rental',
-                value: widget.property.allowDailyRental ? 'Allowed' : 'Not Allowed',
-                icon: Icons.event_available_outlined,
-              ),
-              const SizedBox(height: 16),
-              _buildInfoRow(
-                label: 'Created At',
-                value: _formatDate(widget.property.createdAt),
-                icon: Icons.calendar_today_outlined,
-              ),
-              if (widget.property.updatedAt != null) ...[
-                const SizedBox(height: 16),
-                _buildInfoRow(
-                  label: 'Updated At',
-                  value: _formatDate(widget.property.updatedAt!),
-                  icon: Icons.update_outlined,
-                ),
-              ],
-              if (widget.property.amenities.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                _buildAmenitiesSection(),
-              ],
-            ],
+          const SizedBox(height: 16),
+          _buildInfoRow(
+            label: 'City',
+            value: widget.property.cityName,
+            icon: Icons.location_city_outlined,
           ),
+          const SizedBox(height: 16),
+          _buildInfoRow(
+            label: 'Address',
+            value: widget.property.address ?? 'N/A',
+            icon: Icons.location_on_outlined,
+          ),
+          const SizedBox(height: 16),
+          _buildInfoRow(
+            label: 'Landlord',
+            value: widget.property.landlordName,
+            icon: Icons.person_outline,
+          ),
+        ],
+      },
+      {
+        'title': 'Specifications',
+        'icon': Icons.home_work_outlined,
+        'children': [
+          _buildInfoRow(
+            label: 'Bedrooms',
+            value: widget.property.bedrooms.toString(),
+            icon: Icons.bed_outlined,
+          ),
+          const SizedBox(height: 16),
+          _buildInfoRow(
+            label: 'Bathrooms',
+            value: widget.property.bathrooms.toString(),
+            icon: Icons.bathroom_outlined,
+          ),
+          const SizedBox(height: 16),
+          _buildInfoRow(
+            label: 'Area',
+            value: '${widget.property.area.toStringAsFixed(2)} m²',
+            icon: Icons.square_foot_outlined,
+          ),
+          const SizedBox(height: 16),
+          _buildInfoRow(
+            label: 'Price per Month',
+            value: '${widget.property.pricePerMonth.toStringAsFixed(2)} BAM',
+            icon: Icons.attach_money_outlined,
+          ),
+          if (widget.property.allowDailyRental && widget.property.pricePerDay != null) ...[
+            const SizedBox(height: 16),
+            _buildInfoRow(
+              label: 'Price per Day',
+              value: '${widget.property.pricePerDay!.toStringAsFixed(2)} BAM',
+              icon: Icons.calendar_today_outlined,
+            ),
+          ],
+        ],
+      },
+      {
+        'title': 'Status & Amenities',
+        'icon': Icons.verified_outlined,
+        'children': [
+          _buildInfoRow(
+            label: 'Status',
+            value: widget.property.isActive ? 'Active' : 'Inactive',
+            icon: widget.property.isActive
+                ? Icons.check_circle_outline
+                : Icons.cancel_outlined,
+            valueColor: widget.property.isActive
+                ? const Color(0xFF5B9BD5)
+                : Colors.grey[600],
+          ),
+          const SizedBox(height: 16),
+          _buildInfoRow(
+            label: 'Daily Rental',
+            value: widget.property.allowDailyRental ? 'Allowed' : 'Not Allowed',
+            icon: Icons.event_available_outlined,
+          ),
+          const SizedBox(height: 16),
+          _buildInfoRow(
+            label: 'Created At',
+            value: _formatDate(widget.property.createdAt),
+            icon: Icons.calendar_today_outlined,
+          ),
+          if (widget.property.updatedAt != null) ...[
+            const SizedBox(height: 16),
+            _buildInfoRow(
+              label: 'Updated At',
+              value: _formatDate(widget.property.updatedAt!),
+              icon: Icons.update_outlined,
+            ),
+          ],
+          if (widget.property.amenities.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _buildAmenitiesSection(),
+          ],
+        ],
+      },
+    ];
+
+    return Container(
+      height: 445,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.grey.withOpacity(0.1),
+          width: 1,
         ),
-      ],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Info Card Display Area
+          PageView.builder(
+            controller: _infoCardController,
+            onPageChanged: (index) {
+              setState(() {
+                _currentInfoCardIndex = index;
+              });
+            },
+            itemCount: infoCards.length,
+            itemBuilder: (context, index) {
+              final card = infoCards[index];
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: _buildDetailCard(
+                  title: card['title'] as String,
+                  icon: card['icon'] as IconData,
+                  children: card['children'] as List<Widget>,
+                ),
+              );
+            },
+          ),
+          // Navigation and Indicators (bottom overlay)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.3),
+                  ],
+                ),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Previous Button (circular)
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        final newIndex = _currentInfoCardIndex == 0 
+                            ? infoCards.length - 1 
+                            : _currentInfoCardIndex - 1;
+                        _infoCardController.animateToPage(
+                          newIndex,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Icon(
+                          Icons.chevron_left,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Card Indicators
+                  ...List.generate(
+                    infoCards.length,
+                    (index) => GestureDetector(
+                      onTap: () {
+                        _infoCardController.animateToPage(
+                          index,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      child: Container(
+                        width: _currentInfoCardIndex == index ? 24 : 6,
+                        height: 6,
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        decoration: BoxDecoration(
+                          color: _currentInfoCardIndex == index
+                              ? Colors.white
+                              : Colors.white.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Next Button (circular)
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        final newIndex = _currentInfoCardIndex == infoCards.length - 1 
+                            ? 0 
+                            : _currentInfoCardIndex + 1;
+                        _infoCardController.animateToPage(
+                          newIndex,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Icon(
+                          Icons.chevron_right,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
