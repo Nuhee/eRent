@@ -1,20 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:erent_desktop/providers/car_provider.dart';
-import 'package:erent_desktop/providers/category_provider.dart';
 import 'package:erent_desktop/providers/city_provider.dart';
 import 'package:erent_desktop/providers/country_provider.dart';
 import 'package:erent_desktop/providers/user_provider.dart';
 import 'package:erent_desktop/providers/gender_provider.dart';
 import 'package:erent_desktop/providers/review_provider.dart';
-import 'package:erent_desktop/providers/brand_provider.dart';
-import 'package:erent_desktop/providers/color_provider.dart';
-import 'package:erent_desktop/providers/reservation_type_provider.dart';
-import 'package:erent_desktop/providers/reservation_provider.dart';
-import 'package:erent_desktop/providers/parking_spot_type_provider.dart';
-import 'package:erent_desktop/providers/parking_zone_provider.dart';
-import 'package:erent_desktop/providers/parking_spot_provider.dart';
-import 'package:erent_desktop/providers/business_report_provider.dart';
 import 'package:erent_desktop/providers/auth_provider.dart';
 import 'package:erent_desktop/screens/city_list_screen.dart';
 import 'package:provider/provider.dart';
@@ -30,9 +20,6 @@ void main() async {
         ChangeNotifierProvider<CountryProvider>(
           create: (context) => CountryProvider(),
         ),
-        ChangeNotifierProvider<CategoryProvider>(
-          create: (context) => CategoryProvider(),
-        ),
         ChangeNotifierProvider<UserProvider>(
           create: (context) => UserProvider(),
         ),
@@ -41,33 +28,6 @@ void main() async {
         ),
         ChangeNotifierProvider<ReviewProvider>(
           create: (context) => ReviewProvider(),
-        ),
-        ChangeNotifierProvider<BrandProvider>(
-          create: (context) => BrandProvider(),
-        ),
-        ChangeNotifierProvider<CarProvider>(
-          create: (context) => CarProvider(),
-        ),
-        ChangeNotifierProvider<ColorProvider>(
-          create: (context) => ColorProvider(),
-        ),
-        ChangeNotifierProvider<ReservationTypeProvider>(
-          create: (context) => ReservationTypeProvider(),
-        ),
-        ChangeNotifierProvider<ReservationProvider>(
-          create: (context) => ReservationProvider(),
-        ),
-        ChangeNotifierProvider<ParkingSpotTypeProvider>(
-          create: (context) => ParkingSpotTypeProvider(),
-        ),
-        ChangeNotifierProvider<ParkingZoneProvider>(
-          create: (context) => ParkingZoneProvider(),
-        ),
-        ChangeNotifierProvider<ParkingSpotProvider>(
-          create: (context) => ParkingSpotProvider(),
-        ),
-        ChangeNotifierProvider<BusinessReportProvider>(
-          create: (context) => BusinessReportProvider(),
         ),
       ],
       child: const MyApp(),

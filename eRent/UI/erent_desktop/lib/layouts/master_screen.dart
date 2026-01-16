@@ -6,14 +6,6 @@ import 'package:erent_desktop/screens/country_list_screen.dart';
 import 'package:erent_desktop/screens/city_list_screen.dart';
 import 'package:erent_desktop/screens/review_list_screen.dart';
 import 'package:erent_desktop/screens/users_list_screen.dart';
-import 'package:erent_desktop/screens/brand_list_screen.dart';
-import 'package:erent_desktop/screens/car_list_screen.dart';
-import 'package:erent_desktop/screens/reservation_list_screen.dart';
-import 'package:erent_desktop/screens/reservation_type_list_screen.dart';
-import 'package:erent_desktop/screens/parking_spot_type_list_screen.dart';
-import 'package:erent_desktop/screens/parking_zone_list_screen.dart';
-import 'package:erent_desktop/screens/parking_watch_screen.dart';
-import 'package:erent_desktop/screens/business_report_screen.dart';
 
 class MasterScreen extends StatefulWidget {
   const MasterScreen({
@@ -325,74 +317,6 @@ class _MasterScreenState extends State<MasterScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Parking Section
-            _buildSectionHeader('Parking Section'),
-            const SizedBox(height: 8),
-            _modernDrawerTile(
-              context,
-              icon: Icons.watch_later_outlined,
-              activeIcon: Icons.watch_later,
-              label: 'Live Parking Watch',
-              screen: const ParkingWatchScreen(),
-            ),
-            const SizedBox(height: 5),
-            _modernDrawerTile(
-              context,
-              icon: Icons.assessment_outlined,
-              activeIcon: Icons.assessment,
-              label: 'Business Report',
-              screen: const BusinessReportScreen(),
-            ),
-            const SizedBox(height: 5),
-            _modernDrawerTile(
-              context,
-              icon: Icons.location_on_outlined,
-              activeIcon: Icons.location_on,
-              label: 'Parking Zones',
-              screen: const ParkingZoneListScreen(),
-            ),
-            const SizedBox(height: 5),
-            _modernDrawerTile(
-              context,
-              icon: Icons.local_parking_outlined,
-              activeIcon: Icons.local_parking,
-              label: 'Parking Spot Types',
-              screen: const ParkingSpotTypeListScreen(),
-            ),
-            const SizedBox(height: 5),
-            _modernDrawerTile(
-              context,
-              icon: Icons.event_note_outlined,
-              activeIcon: Icons.event_note,
-              label: 'Reservations',
-              screen: const ReservationListScreen(),
-            ),
-            const SizedBox(height: 5),
-            _modernDrawerTile(
-              context,
-              icon: Icons.event_available_outlined,
-              activeIcon: Icons.event_available,
-              label: 'Reservation Types',
-              screen: const ReservationTypeListScreen(),
-            ),
-            const SizedBox(height: 5),
-            _modernDrawerTile(
-              context,
-              icon: Icons.directions_car_outlined,
-              activeIcon: Icons.directions_car,
-              label: 'Cars',
-              screen: const CarListScreen(),
-            ),
-            const SizedBox(height: 5),
-            _modernDrawerTile(
-              context,
-              icon: Icons.branding_watermark_outlined,
-              activeIcon: Icons.branding_watermark,
-              label: 'Brands',
-              screen: const BrandListScreen(),
-            ),
-            const SizedBox(height: 5),
-            
             // User Section
             _buildSectionHeader('User Section'),
             const SizedBox(height: 8),
@@ -501,11 +425,7 @@ Widget _modernDrawerTile(
   // Get the current screen type from the route
   bool isSelected = false;
 
-  if (label == 'Live Parking Watch') {
-    isSelected = currentRoute == 'ParkingWatchScreen';
-  } else if (label == 'Business Report') {
-    isSelected = currentRoute == 'BusinessReportScreen';
-  } else if (label == 'Cities') {
+  if (label == 'Cities') {
     isSelected =
         currentRoute == 'CityListScreen' ||
         currentRoute == 'CityDetailsScreen' ||
@@ -524,36 +444,6 @@ Widget _modernDrawerTile(
         currentRoute == 'UsersListScreen' ||
         currentRoute == 'UsersDetailsScreen' ||
         currentRoute == 'UsersEditScreen';
-  } else if (label == 'Parking Zones') {
-    isSelected =
-        currentRoute == 'ParkingZoneListScreen' ||
-        currentRoute == 'ParkingZoneAddEditScreen' ||
-        currentRoute == 'ParkingSpotListScreen' ||
-        currentRoute == 'ParkingSpotEditScreen';
-  } else if (label == 'Parking Spot Types') {
-    isSelected =
-        currentRoute == 'ParkingSpotTypeListScreen' ||
-        currentRoute == 'ParkingSpotTypeDetailsScreen' ||
-        currentRoute == 'ParkingSpotTypeEditScreen';
-  } else if (label == 'Reservations') {
-    isSelected =
-        currentRoute == 'ReservationListScreen' ||
-        currentRoute == 'ReservationDetailsScreen';
-  } else if (label == 'Reservation Types') {
-    isSelected =
-        currentRoute == 'ReservationTypeListScreen' ||
-        currentRoute == 'ReservationTypeDetailsScreen' ||
-        currentRoute == 'ReservationTypeEditScreen';
-  } else if (label == 'Cars') {
-    isSelected =
-        currentRoute == 'CarListScreen' ||
-        currentRoute == 'CarDetailsScreen' ||
-        currentRoute == 'CarEditScreen';
-  } else if (label == 'Brands') {
-    isSelected =
-        currentRoute == 'BrandListScreen' ||
-        currentRoute == 'BrandDetailsScreen' ||
-        currentRoute == 'BrandEditScreen';
   }
 
   return Container(
