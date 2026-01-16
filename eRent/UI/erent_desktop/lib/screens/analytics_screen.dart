@@ -12,15 +12,23 @@ class AnalyticsScreen extends StatefulWidget {
   State<AnalyticsScreen> createState() => _AnalyticsScreenState();
 }
 
-class _AnalyticsScreenState extends State<AnalyticsScreen> {
+class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProviderStateMixin {
   Analytics? analytics;
   bool isLoading = true;
   String? errorMessage;
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 7, vsync: this);
     _loadAnalytics();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadAnalytics() async {
@@ -73,490 +81,727 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 )
               : analytics == null
                   ? const Center(child: Text('No data available'))
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Key Metrics Cards
-                          _buildKeyMetricsSection(),
-                          const SizedBox(height: 24),
-                          // Revenue Section
-                          _buildRevenueSection(),
-                          const SizedBox(height: 24),
-                          // Rents Section
-                          _buildRentsSection(),
-                          const SizedBox(height: 24),
-                          // Properties Section
-                          _buildPropertiesSection(),
-                          const SizedBox(height: 24),
-                          // Users Section
-                          _buildUsersSection(),
-                          const SizedBox(height: 24),
-                          // Reviews Section
-                          _buildReviewsSection(),
-                          const SizedBox(height: 24),
-                          // Growth Trends
-                          _buildGrowthTrendsSection(),
-                        ],
-                      ),
+                  : Column(
+                      children: [
+                        // Tab Bar
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: TabBar(
+                            controller: _tabController,
+                            isScrollable: true,
+                            labelColor: const Color(0xFF5B9BD5),
+                            unselectedLabelColor: Colors.grey[600],
+                            indicatorColor: const Color(0xFF5B9BD5),
+                            indicatorWeight: 3,
+                            tabs: const [
+                              Tab(text: 'Overview', icon: Icon(Icons.dashboard_rounded, size: 20)),
+                              Tab(text: 'Revenue', icon: Icon(Icons.attach_money_rounded, size: 20)),
+                              Tab(text: 'Rents', icon: Icon(Icons.receipt_long_rounded, size: 20)),
+                              Tab(text: 'Properties', icon: Icon(Icons.home_rounded, size: 20)),
+                              Tab(text: 'Users', icon: Icon(Icons.people_rounded, size: 20)),
+                              Tab(text: 'Reviews', icon: Icon(Icons.star_rounded, size: 20)),
+                              Tab(text: 'Growth', icon: Icon(Icons.trending_up_rounded, size: 20)),
+                            ],
+                          ),
+                        ),
+                        // Tab Content
+                        Expanded(
+                          child: TabBarView(
+                            controller: _tabController,
+                            children: [
+                              _buildOverviewSection(),
+                              _buildRevenueSection(),
+                              _buildRentsSection(),
+                              _buildPropertiesSection(),
+                              _buildUsersSection(),
+                              _buildReviewsSection(),
+                              _buildGrowthTrendsSection(),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
     );
   }
 
-  Widget _buildKeyMetricsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Key Metrics',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
+  Widget _buildOverviewSection() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            'Key Metrics Overview',
+            Icons.dashboard_rounded,
+            'These are the most important metrics at a glance. Hover over each metric for more details.',
           ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetricCard(
+                  'Total Revenue',
+                  '${analytics!.totalRevenue.toStringAsFixed(2)} BAM',
+                  Icons.attach_money_rounded,
+                  const Color(0xFF5B9BD5),
+                  'Total revenue from all paid rents since the beginning. This represents the cumulative income from completed rental transactions.',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildMetricCard(
+                  'Monthly Revenue',
+                  '${analytics!.monthlyRevenue.toStringAsFixed(2)} BAM',
+                  Icons.trending_up_rounded,
+                  Colors.green,
+                  'Revenue generated from paid rents in the current month. This helps track recent business performance.',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildMetricCard(
+                  'Total Properties',
+                  analytics!.totalProperties.toString(),
+                  Icons.home_rounded,
+                  Colors.orange,
+                  'Total number of properties in the system, including both active and inactive listings.',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildMetricCard(
+                  'Total Rents',
+                  analytics!.totalRents.toString(),
+                  Icons.receipt_long_rounded,
+                  Colors.purple,
+                  'Total number of rental transactions created in the system, regardless of their status.',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetricCard(
+                  'Active Rents',
+                  analytics!.activeRents.toString(),
+                  Icons.check_circle_rounded,
+                  Colors.teal,
+                  'Number of rental transactions that are currently active (ongoing rentals).',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildMetricCard(
+                  'Active Properties',
+                  analytics!.activeProperties.toString(),
+                  Icons.home_work_rounded,
+                  Colors.blue,
+                  'Properties currently available for rent and visible to users.',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildMetricCard(
+                  'Total Users',
+                  analytics!.totalUsers.toString(),
+                  Icons.people_rounded,
+                  Colors.indigo,
+                  'Total number of registered users in the system.',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildMetricCard(
+                  'Average Rating',
+                  '${analytics!.averageRating.toStringAsFixed(2)} / 5.0',
+                  Icons.star_rounded,
+                  Colors.amber,
+                  'Average rating across all reviews. Higher ratings indicate better user satisfaction.',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricCard(String title, String value, IconData icon, Color color, String tooltip) {
+    return Tooltip(
+      message: tooltip,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.withOpacity(0.1)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        const SizedBox(height: 16),
-        Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: _buildMetricCard(
-                'Total Revenue',
-                '${analytics!.totalRevenue.toStringAsFixed(2)} BAM',
-                Icons.attach_money_rounded,
-                const Color(0xFF5B9BD5),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: color, size: 24),
+                ),
+                const Spacer(),
+                Icon(Icons.info_outline, size: 16, color: Colors.grey[400]),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildMetricCard(
-                'Monthly Revenue',
-                '${analytics!.monthlyRevenue.toStringAsFixed(2)} BAM',
-                Icons.trending_up_rounded,
-                Colors.green,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildMetricCard(
-                'Total Properties',
-                analytics!.totalProperties.toString(),
-                Icons.home_rounded,
-                Colors.orange,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildMetricCard(
-                'Total Rents',
-                analytics!.totalRents.toString(),
-                Icons.receipt_long_rounded,
-                Colors.purple,
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[800],
               ),
             ),
           ],
         ),
-      ],
-    );
-  }
-
-  Widget _buildMetricCard(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: color, size: 24),
-              ),
-              const Spacer(),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
-            ),
-          ),
-        ],
       ),
     );
   }
 
   Widget _buildRevenueSection() {
-    return _buildSectionCard(
-      title: 'Revenue Analytics',
-      icon: Icons.attach_money_rounded,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildInfoCard(
-                'Average Rent Price',
-                '${analytics!.averageRentPrice.toStringAsFixed(2)} BAM',
-                Icons.calculate_rounded,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            'Revenue Analytics',
+            Icons.attach_money_rounded,
+            'Detailed analysis of revenue generation, including breakdowns by property type, city, and monthly trends.',
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _buildInfoCard(
+                  'Average Rent Price',
+                  '${analytics!.averageRentPrice.toStringAsFixed(2)} BAM',
+                  Icons.calculate_rounded,
+                  'The average price of all paid rental transactions. This helps understand pricing trends and market positioning.',
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildChartCard(
-                'Revenue by Property Type',
-                _buildRevenueByPropertyTypeChart(),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildChartCard(
+                  'Revenue by Property Type',
+                  'Shows how revenue is distributed across different property types. Larger segments indicate higher revenue generation.',
+                  _buildRevenueByPropertyTypeChart(),
+                ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildChartCard(
-                'Revenue by City',
-                _buildRevenueByCityChart(),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildChartCard(
+                  'Revenue by City',
+                  'Top 5 cities ranked by total revenue. This helps identify the most profitable locations.',
+                  _buildRevenueByCityChart(),
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildChartCard(
-                'Monthly Revenue Trend',
-                _buildMonthlyRevenueChart(),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildChartCard(
+                  'Monthly Revenue Trend',
+                  'Revenue trend over the last 12 months. The line shows how revenue has changed over time, helping identify growth patterns.',
+                  _buildMonthlyRevenueChart(),
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildRentsSection() {
-    return _buildSectionCard(
-      title: 'Rent Analytics',
-      icon: Icons.receipt_long_rounded,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildInfoCard(
-                'Active Rents',
-                analytics!.activeRents.toString(),
-                Icons.check_circle_rounded,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            'Rent Analytics',
+            Icons.receipt_long_rounded,
+            'Comprehensive analysis of rental transactions, including status distribution, rental types, and occupancy metrics.',
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _buildInfoCard(
+                  'Active Rents',
+                  analytics!.activeRents.toString(),
+                  Icons.check_circle_rounded,
+                  'Number of rental transactions that are currently active (ongoing rentals).',
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildInfoCard(
-                'Occupancy Rate',
-                '${analytics!.occupancyRate.toStringAsFixed(1)}%',
-                Icons.hotel_rounded,
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildInfoCard(
+                  'Occupancy Rate',
+                  '${analytics!.occupancyRate.toStringAsFixed(1)}%',
+                  Icons.hotel_rounded,
+                  'Percentage of active properties that are currently rented. Higher rates indicate better property utilization.',
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildInfoCard(
-                'Avg Rental Duration',
-                '${analytics!.averageRentalDuration.toStringAsFixed(1)} days',
-                Icons.calendar_today_rounded,
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildInfoCard(
+                  'Avg Rental Duration',
+                  '${analytics!.averageRentalDuration.toStringAsFixed(1)} days',
+                  Icons.calendar_today_rounded,
+                  'Average number of days for completed rental periods. This helps understand typical rental patterns.',
+                ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildChartCard(
-                'Rents by Status',
-                _buildRentStatusChart(),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildInfoCard(
+                  'Pending Rents',
+                  analytics!.pendingRents.toString(),
+                  Icons.pending_actions_rounded,
+                  'Rental requests awaiting approval or payment.',
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildChartCard(
-                'Daily vs Monthly',
-                _buildRentalTypeChart(),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildInfoCard(
+                  'Paid Rents',
+                  analytics!.paidRents.toString(),
+                  Icons.payment_rounded,
+                  'Rentals that have been fully paid and completed.',
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildInfoCard(
+                  'Cancelled Rents',
+                  analytics!.cancelledRents.toString(),
+                  Icons.cancel_rounded,
+                  'Rentals that were cancelled before completion.',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildChartCard(
+                  'Rents by Status',
+                  'Distribution of rentals across different statuses. This shows the breakdown of pending, paid, accepted, cancelled, and rejected rentals.',
+                  _buildRentStatusChart(),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildChartCard(
+                  'Daily vs Monthly Rentals',
+                  'Comparison between daily and monthly rental types. This shows which rental model is more popular.',
+                  _buildRentalTypeChart(),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildPropertiesSection() {
-    return _buildSectionCard(
-      title: 'Property Analytics',
-      icon: Icons.home_rounded,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildInfoCard(
-                'Active Properties',
-                analytics!.activeProperties.toString(),
-                Icons.check_circle_rounded,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            'Property Analytics',
+            Icons.home_rounded,
+            'Analysis of property inventory, including distribution by type, city, and status.',
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _buildInfoCard(
+                  'Active Properties',
+                  analytics!.activeProperties.toString(),
+                  Icons.check_circle_rounded,
+                  'Properties currently available for rent and visible to users.',
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildInfoCard(
-                'Inactive Properties',
-                analytics!.inactiveProperties.toString(),
-                Icons.cancel_rounded,
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildInfoCard(
+                  'Inactive Properties',
+                  analytics!.inactiveProperties.toString(),
+                  Icons.cancel_rounded,
+                  'Properties that are temporarily or permanently unavailable for rent.',
+                ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildChartCard(
-                'Properties by Type',
-                _buildPropertiesByTypeChart(),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildChartCard(
+                  'Properties by Type',
+                  'Distribution of properties across different types (e.g., Apartment, House, Studio). Shows which property types are most common.',
+                  _buildPropertiesByTypeChart(),
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildChartCard(
-                'Properties by City',
-                _buildPropertiesByCityChart(),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildChartCard(
+                  'Properties by City',
+                  'Top 5 cities ranked by number of properties. Helps identify where most listings are located.',
+                  _buildPropertiesByCityChart(),
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildUsersSection() {
-    return _buildSectionCard(
-      title: 'User Analytics',
-      icon: Icons.people_rounded,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildInfoCard(
-                'Total Users',
-                analytics!.totalUsers.toString(),
-                Icons.people_outline_rounded,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            'User Analytics',
+            Icons.people_rounded,
+            'Analysis of user base, including total users, active users, and distribution by role (landlords, tenants, admins).',
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _buildInfoCard(
+                  'Total Users',
+                  analytics!.totalUsers.toString(),
+                  Icons.people_outline_rounded,
+                  'Total number of registered users in the system.',
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildInfoCard(
-                'Active Users',
-                analytics!.activeUsers.toString(),
-                Icons.check_circle_rounded,
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildInfoCard(
+                  'Active Users',
+                  analytics!.activeUsers.toString(),
+                  Icons.check_circle_rounded,
+                  'Users with active accounts that can use the platform.',
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildInfoCard(
-                'Landlords',
-                analytics!.totalLandlords.toString(),
-                Icons.person_outline_rounded,
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildInfoCard(
+                  'Landlords',
+                  analytics!.totalLandlords.toString(),
+                  Icons.person_outline_rounded,
+                  'Users with landlord role who can list and manage properties.',
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildInfoCard(
-                'Tenants',
-                analytics!.totalTenants.toString(),
-                Icons.person_outline_rounded,
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildInfoCard(
+                  'Tenants',
+                  analytics!.totalTenants.toString(),
+                  Icons.person_outline_rounded,
+                  'Regular users (tenants) who can browse and rent properties.',
+                ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        _buildChartCard(
-          'User Growth Trend',
-          _buildUserGrowthChart(),
-        ),
-      ],
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildInfoCard(
+                  'Admins',
+                  analytics!.totalAdmins.toString(),
+                  Icons.admin_panel_settings_rounded,
+                  'Users with administrator privileges who manage the platform.',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildChartCard(
+            'User Growth Trend',
+            'Shows how the total number of users has grown over the last 12 months. The line represents cumulative user count.',
+            _buildUserGrowthChart(),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildReviewsSection() {
-    return _buildSectionCard(
-      title: 'Review Analytics',
-      icon: Icons.star_rounded,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildInfoCard(
-                'Total Reviews',
-                analytics!.totalReviews.toString(),
-                Icons.rate_review_rounded,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            'Review Analytics',
+            Icons.star_rounded,
+            'Analysis of user reviews and ratings, including average rating and distribution across different rating levels.',
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _buildInfoCard(
+                  'Total Reviews',
+                  analytics!.totalReviews.toString(),
+                  Icons.rate_review_rounded,
+                  'Total number of reviews submitted by users for rental properties.',
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildInfoCard(
-                'Average Rating',
-                analytics!.averageRating.toStringAsFixed(2),
-                Icons.star_rounded,
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildInfoCard(
+                  'Average Rating',
+                  '${analytics!.averageRating.toStringAsFixed(2)} / 5.0',
+                  Icons.star_rounded,
+                  'Average rating across all reviews. Higher ratings indicate better user satisfaction.',
+                ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        _buildChartCard(
-          'Rating Distribution',
-          _buildRatingDistributionChart(),
-        ),
-      ],
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildInfoCard(
+                  '5 Star Reviews',
+                  analytics!.rating5Count.toString(),
+                  Icons.star,
+                  'Number of reviews with the highest rating (5 stars).',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildInfoCard(
+                  '4 Star Reviews',
+                  analytics!.rating4Count.toString(),
+                  Icons.star,
+                  'Number of reviews with 4-star rating.',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildInfoCard(
+                  '3 Star Reviews',
+                  analytics!.rating3Count.toString(),
+                  Icons.star,
+                  'Number of reviews with 3-star (average) rating.',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildInfoCard(
+                  '1-2 Star Reviews',
+                  '${analytics!.rating1Count + analytics!.rating2Count}',
+                  Icons.star,
+                  'Number of reviews with low ratings (1-2 stars).',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildChartCard(
+            'Rating Distribution',
+            'Visual breakdown of reviews by rating. Green bars indicate positive reviews, while red bars show areas needing improvement.',
+            _buildRatingDistributionChart(),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildGrowthTrendsSection() {
-    return _buildSectionCard(
-      title: 'Growth Trends',
-      icon: Icons.trending_up_rounded,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            'Growth Trends',
+            Icons.trending_up_rounded,
+            'Long-term growth analysis showing how properties, rents, and users have grown over the last 12 months.',
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _buildChartCard(
+                  'Property Growth Trend',
+                  'Shows the cumulative number of properties added over time. The line represents total properties, helping track inventory growth.',
+                  _buildPropertyGrowthChart(),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildChartCard(
+                  'Rent Growth Trend',
+                  'Shows the cumulative number of rental transactions over time. Helps track business activity and demand trends.',
+                  _buildRentGrowthChart(),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, IconData icon, String description) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Expanded(
-              child: _buildChartCard(
-                'Property Growth',
-                _buildPropertyGrowthChart(),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
               ),
+              child: Icon(icon, color: const Color(0xFF5B9BD5), size: 20),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildChartCard(
-                'Rent Growth',
-                _buildRentGrowthChart(),
+            const SizedBox(width: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1F2937),
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.blue[50],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.blue[100]!),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.info_outline, size: 16, color: Colors.blue[700]),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.blue[900],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildSectionCard({
-    required String title,
-    required IconData icon,
-    required List<Widget> children,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF5B9BD5).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
+  Widget _buildInfoCard(String title, String value, IconData icon, String tooltip) {
+    return Tooltip(
+      message: tooltip,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 20, color: const Color(0xFF5B9BD5)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
-                child: Icon(icon, color: const Color(0xFF5B9BD5), size: 20),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1F2937),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          ...children,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoCard(String title, String value, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 20, color: const Color(0xFF5B9BD5)),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1F2937),
+                Icon(Icons.info_outline, size: 14, color: Colors.grey[400]),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1F2937),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildChartCard(String title, Widget chart) {
+  Widget _buildChartCard(String title, String description, Widget chart) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -567,12 +812,38 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ),
+              Tooltip(
+                message: description,
+                child: Icon(Icons.info_outline, size: 16, color: Colors.grey[400]),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              description,
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.grey[600],
+                fontStyle: FontStyle.italic,
+              ),
             ),
           ),
           const SizedBox(height: 16),
