@@ -19,8 +19,9 @@ class ReviewListScreen extends StatefulWidget {
 class _ReviewListScreenState extends State<ReviewListScreen> {
   late ReviewProvider reviewProvider;
 
-  final TextEditingController userFullNameController = TextEditingController();
+  final TextEditingController propertyTitleController = TextEditingController();
   int? selectedRating;
+  bool? selectedIsActive;
 
   SearchResult<Review>? reviews;
   int _currentPage = 0;
@@ -32,9 +33,9 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
     final int pageSizeToUse = pageSize ?? _pageSize;
 
     final filter = {
-      if (userFullNameController.text.isNotEmpty) 
-        'userFullName': userFullNameController.text,
+      if (propertyTitleController.text.isNotEmpty) 'propertyTitle': propertyTitleController.text,
       if (selectedRating != null) 'rating': selectedRating,
+      if (selectedIsActive != null) 'isActive': selectedIsActive,
       'page': pageToFetch,
       'pageSize': pageSizeToUse,
       'includeTotalCount': true,
@@ -46,6 +47,169 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
       _currentPage = pageToFetch;
       _pageSize = pageSizeToUse;
     });
+  }
+
+  Future<void> _toggleReviewStatus(Review review) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              review.isActive ? Icons.warning_amber_rounded : Icons.check_circle_outline,
+              color: review.isActive ? Colors.orange : const Color(0xFF5B9BD5),
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              review.isActive ? "Deactivate Review?" : "Activate Review?",
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          review.isActive
+              ? "Are you sure you want to deactivate this review by '${review.userName}'? This will hide it from public view."
+              : "Are you sure you want to activate this review by '${review.userName}'? This will make it visible to others.",
+          style: const TextStyle(fontSize: 15),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.grey[600],
+            ),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: review.isActive ? Colors.red : const Color(0xFF5B9BD5),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(review.isActive ? "Deactivate" : "Activate"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      // Show loading indicator
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  review.isActive
+                      ? "Deactivating review..."
+                      : "Activating review...",
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+
+      // Get current review data
+      var currentReview = await reviewProvider.getById(review.id);
+      if (currentReview == null) {
+        throw Exception('Review not found');
+      }
+
+      // Prepare update request
+      var request = {
+        'rentId': currentReview.rentId,
+        'userId': currentReview.userId,
+        'rating': currentReview.rating,
+        'comment': currentReview.comment ?? '',
+        'isActive': !review.isActive, // Toggle the status
+      };
+
+      await reviewProvider.update(review.id, request);
+
+      // Refresh the list
+      await _performSearch();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  review.isActive ? Icons.block : Icons.check_circle,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  review.isActive
+                      ? "Review has been deactivated"
+                      : "Review has been activated",
+                ),
+              ],
+            ),
+            backgroundColor: review.isActive ? Colors.red : Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    "Failed to update review status: ${e.toString().replaceFirst('Exception: ', '')}",
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -75,126 +239,141 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
   Widget _buildSearch() {
     return Padding(
       padding: const EdgeInsets.all(10),
-      child: Column(
+      child: Row(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  decoration: customTextFieldDecoration(
-                    'User Full Name',
-                    prefixIcon: Icons.person_search,
-                  ),
-                  controller: userFullNameController,
-                  onSubmitted: (_) => _performSearch(page: 0),
-                ),
+          Expanded(
+            child: TextField(
+              decoration: customTextFieldDecoration(
+                'Property Title',
+                prefixIcon: Icons.home_outlined,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: DropdownButtonFormField<int?>(
-                  decoration: customTextFieldDecoration(
-                    'Rating',
-                    prefixIcon: Icons.star,
-                  ),
-                  value: selectedRating,
-                  items: [
-                    const DropdownMenuItem<int?>(
-                      value: null,
-                      child: Text('All Ratings'),
-                    ),
-                    ...List.generate(5, (index) => index + 1).map(
-                      (rating) => DropdownMenuItem<int>(
-                        value: rating,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('$rating'),
-                            const SizedBox(width: 4),
-                            ...List.generate(
-                              rating,
-                              (index) => const Icon(
-                                Icons.star,
-                                size: 16,
-                                color: Colors.amber,
-                              ),
-                            ),
-                          ],
+              controller: propertyTitleController,
+              onSubmitted: (_) => _performSearch(page: 0),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: DropdownButtonFormField<int?>(
+              decoration: customTextFieldDecoration(
+                'Rating',
+                prefixIcon: Icons.star,
+              ),
+              value: selectedRating,
+              items: [
+                const DropdownMenuItem<int?>(
+                  value: null,
+                  child: Text('All Ratings'),
+                ),
+                ...List.generate(5, (index) => index + 1).map(
+                  (rating) => DropdownMenuItem<int>(
+                    value: rating,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('$rating'),
+                        const SizedBox(width: 4),
+                        ...List.generate(
+                          rating,
+                          (index) => const Icon(
+                            Icons.star,
+                            size: 16,
+                            color: Colors.amber,
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                  onChanged: (int? value) {
-                    setState(() {
-                      selectedRating = value;
-                    });
-                    _performSearch(page: 0);
-                  },
-                ),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton(
-                onPressed: _performSearch,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2D2D2D),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  shadowColor: const Color(0xFF2D2D2D).withOpacity(0.3),
-                ).copyWith(
-                  elevation: WidgetStateProperty.all(4),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.search_rounded, size: 18),
-                    SizedBox(width: 8),
-                    Text(
-                      "Search",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton(
-                onPressed: () {
-                  userFullNameController.clear();
-                  setState(() {
-                    selectedRating = null;
-                  });
-                  _performSearch(page: 0);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey.shade300,
-                  foregroundColor: const Color(0xFF2D2D2D),
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.clear_rounded, size: 18),
-                    SizedBox(width: 8),
-                    Text(
-                      "Clear",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
+              ],
+              onChanged: (int? value) {
+                setState(() {
+                  selectedRating = value;
+                });
+                _performSearch(page: 0);
+              },
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: DropdownButtonFormField<bool?>(
+              decoration: customTextFieldDecoration(
+                'Status',
+                prefixIcon: Icons.verified_outlined,
               ),
-            ],
+              value: selectedIsActive,
+              items: const [
+                DropdownMenuItem<bool?>(value: null, child: Text('All')),
+                DropdownMenuItem<bool>(value: true, child: Text('Active')),
+                DropdownMenuItem<bool>(value: false, child: Text('Inactive')),
+              ],
+              onChanged: (bool? value) {
+                setState(() {
+                  selectedIsActive = value;
+                });
+                _performSearch(page: 0);
+              },
+            ),
+          ),
+          const SizedBox(width: 12),
+          ElevatedButton(
+            onPressed: _performSearch,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey[800],
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.search_rounded, size: 18),
+                SizedBox(width: 8),
+                Text(
+                  "Search",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          ElevatedButton(
+            onPressed: () {
+              propertyTitleController.clear();
+              setState(() {
+                selectedRating = null;
+                selectedIsActive = null;
+              });
+              _performSearch(page: 0);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey.shade300,
+              foregroundColor: const Color(0xFF2D2D2D),
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.clear_rounded, size: 18),
+                SizedBox(width: 8),
+                Text(
+                  "Clear",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -213,22 +392,27 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
       child: Column(
         children: [
           BaseTable(
-            icon: Icons.star,
+            icon: Icons.star_outlined,
             title: 'Reviews',
             width: 1200,
             height: 423,
             columnWidths: const [
-              220, // User
+              200, // User
+              490, // Property
               140, // Rating
-              240, // Car
-              150, // Parking Spot
-              180, // Date
-              120, // Actions
+              120, // Status
+              280, // Actions
             ],
             columns: const [
               DataColumn(
                 label: Text(
                   'User',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Property',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
@@ -240,20 +424,7 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
               ),
               DataColumn(
                 label: Text(
-                  'Car',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-              ),
-              DataColumn(
-                label: Text(
-                  'Parking Spot',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-              ),
- 
-              DataColumn(
-                label: Text(
-                  'Date',
+                  'Status',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
@@ -272,8 +443,16 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
                           cells: [
                             DataCell(
                               Text(
-                                e.userFullName ?? 'N/A',
+                                e.userName.isNotEmpty ? e.userName : 'N/A',
                                 style: const TextStyle(fontSize: 15),
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                e.propertyTitle.isNotEmpty ? e.propertyTitle : 'N/A',
+                                style: const TextStyle(fontSize: 15),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             DataCell(
@@ -300,32 +479,39 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
                               ),
                             ),
                             DataCell(
-                              Text(
-                                _formatCarDisplay(e),
-                                style: const TextStyle(fontSize: 15),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                e.parkingSpotNumber ?? 'N/A',
-                                style: const TextStyle(fontSize: 15),
-                              ),
-                            ),
-                      
-                            DataCell(
-                              Text(
-                                _formatDate(e.createdAt),
-                                style: const TextStyle(fontSize: 15),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    e.isActive
+                                        ? Icons.check_circle
+                                        : Icons.cancel,
+                                    color: e.isActive
+                                        ? const Color(0xFF5B9BD5)
+                                        : Colors.grey[400],
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    e.isActive ? 'Active' : 'Inactive',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: e.isActive
+                                          ? const Color(0xFF5B9BD5)
+                                          : Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             DataCell(
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  MouseRegion(
-                                    cursor: SystemMouseCursors.click,
+                                  // View Details Button
+                                  Tooltip(
+                                    message: "View Details",
                                     child: Material(
                                       color: Colors.transparent,
                                       child: InkWell(
@@ -343,30 +529,60 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
                                           );
                                         },
                                         child: Container(
-                                          width: 38,
-                                          height: 38,
+                                          width: 36,
+                                          height: 36,
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
-                                            gradient: const LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: [
-                                                Color(0xFF8B6F47),
-                                                Color(0xFF6B5434),
-                                              ],
-                                            ),
+                                            color: const Color(0xFF5B9BD5).withOpacity(0.1),
                                             borderRadius: BorderRadius.circular(8),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: const Color(0xFF8B6F47).withOpacity(0.3),
-                                                blurRadius: 6,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
+                                            border: Border.all(
+                                              color: const Color(0xFF5B9BD5).withOpacity(0.3),
+                                              width: 1,
+                                            ),
                                           ),
                                           child: const Icon(
-                                            Icons.info_outline_rounded,
-                                            color: Colors.white,
+                                            Icons.visibility_outlined,
+                                            color: Color(0xFF5B9BD5),
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Activate/Deactivate Button
+                                  Tooltip(
+                                    message: e.isActive ? "Deactivate" : "Activate",
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(8),
+                                        onTap: () async {
+                                          await _toggleReviewStatus(e);
+                                        },
+                                        child: Container(
+                                          width: 36,
+                                          height: 36,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: e.isActive
+                                                ? Colors.red.withOpacity(0.1)
+                                                : Colors.green.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(
+                                              color: e.isActive
+                                                  ? Colors.red.withOpacity(0.3)
+                                                  : Colors.green.withOpacity(0.3),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            e.isActive
+                                                ? Icons.block_outlined
+                                                : Icons.check_circle_outline,
+                                            color: e.isActive
+                                                ? Colors.red
+                                                : Colors.green,
                                             size: 18,
                                           ),
                                         ),
@@ -380,7 +596,7 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
                         ),
                       )
                       .toList(),
-            emptyIcon: Icons.rate_review,
+            emptyIcon: Icons.star_outline,
             emptyText: 'No reviews found.',
             emptySubtext: 'Try adjusting your search criteria.',
           ),
@@ -406,31 +622,5 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
-
-  String _formatCarDisplay(Review review) {
-    final parts = <String>[];
-    if (review.carBrandName != null && review.carBrandName!.isNotEmpty) {
-      parts.add(review.carBrandName!);
-    }
-    if (review.carModel != null && review.carModel!.isNotEmpty) {
-      parts.add(review.carModel!);
-    }
-    
-    final brandModel = parts.join(' ');
-    final licensePlate = review.carLicensePlate;
-    
-    if (brandModel.isNotEmpty && licensePlate != null && licensePlate.isNotEmpty) {
-      return '$brandModel ($licensePlate)';
-    } else if (brandModel.isNotEmpty) {
-      return brandModel;
-    } else if (licensePlate != null && licensePlate.isNotEmpty) {
-      return licensePlate;
-    }
-    return 'N/A';
   }
 }

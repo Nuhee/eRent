@@ -65,14 +65,24 @@ namespace eRent.Services.Services
                 query = query.Where(x => x.UserId == search.UserId.Value);
             }
 
-            if (search.MinRating.HasValue)
+            if (!string.IsNullOrEmpty(search.PropertyTitle))
             {
-                query = query.Where(x => x.Rating >= search.MinRating.Value);
+                query = query.Where(x => x.Rent != null && 
+                                        x.Rent.Property != null && 
+                                        x.Rent.Property.Title.Contains(search.PropertyTitle));
             }
 
-            if (search.MaxRating.HasValue)
+            if (!string.IsNullOrEmpty(search.UserName))
             {
-                query = query.Where(x => x.Rating <= search.MaxRating.Value);
+                query = query.Where(x => x.User != null && 
+                                        (x.User.FirstName.Contains(search.UserName) || 
+                                         x.User.LastName.Contains(search.UserName) ||
+                                         (x.User.FirstName + " " + x.User.LastName).Contains(search.UserName)));
+            }
+
+            if (search.Rating.HasValue)
+            {
+                query = query.Where(x => x.Rating == search.Rating.Value);
             }
 
             if (search.IsActive.HasValue)

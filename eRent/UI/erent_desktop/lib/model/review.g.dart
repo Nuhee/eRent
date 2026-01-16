@@ -8,44 +8,28 @@ part of 'review.dart';
 
 Review _$ReviewFromJson(Map<String, dynamic> json) => Review(
   id: (json['id'] as num?)?.toInt() ?? 0,
+  rentId: (json['rentId'] as num?)?.toInt() ?? 0,
+  propertyTitle: json['propertyTitle'] as String? ?? '',
   userId: (json['userId'] as num?)?.toInt() ?? 0,
-  reservationId: (json['reservationId'] as num?)?.toInt() ?? 0,
+  userName: json['userName'] as String? ?? '',
   rating: (json['rating'] as num?)?.toInt() ?? 0,
   comment: json['comment'] as String?,
+  isActive: json['isActive'] as bool? ?? true,
   createdAt: DateTime.parse(json['createdAt'] as String),
-  userFullName: json['userFullName'] as String?,
-  userEmail: json['userEmail'] as String?,
-  userPicture: json['userPicture'] as String?,
-  carBrandName: json['carBrandName'] as String?,
-  carModel: json['carModel'] as String?,
-  carLicensePlate: json['carLicensePlate'] as String?,
-  parkingSpotNumber: json['parkingSpotNumber'] as String?,
-  reservationTypeName: json['reservationTypeName'] as String?,
-  reservationStartDate: json['reservationStartDate'] == null
+  updatedAt: json['updatedAt'] == null
       ? null
-      : DateTime.parse(json['reservationStartDate'] as String),
-  reservationEndDate: json['reservationEndDate'] == null
-      ? null
-      : DateTime.parse(json['reservationEndDate'] as String),
-  reservationFinalPrice: (json['reservationFinalPrice'] as num?)?.toDouble(),
+      : DateTime.parse(json['updatedAt'] as String),
 );
 
 Map<String, dynamic> _$ReviewToJson(Review instance) => <String, dynamic>{
   'id': instance.id,
+  'rentId': instance.rentId,
+  'propertyTitle': instance.propertyTitle,
   'userId': instance.userId,
-  'reservationId': instance.reservationId,
+  'userName': instance.userName,
   'rating': instance.rating,
   'comment': instance.comment,
+  'isActive': instance.isActive,
   'createdAt': instance.createdAt.toIso8601String(),
-  'userFullName': instance.userFullName,
-  'userEmail': instance.userEmail,
-  'userPicture': instance.userPicture,
-  'carBrandName': instance.carBrandName,
-  'carModel': instance.carModel,
-  'carLicensePlate': instance.carLicensePlate,
-  'parkingSpotNumber': instance.parkingSpotNumber,
-  'reservationTypeName': instance.reservationTypeName,
-  'reservationStartDate': instance.reservationStartDate?.toIso8601String(),
-  'reservationEndDate': instance.reservationEndDate?.toIso8601String(),
-  'reservationFinalPrice': instance.reservationFinalPrice,
+  'updatedAt': instance.updatedAt?.toIso8601String(),
 };

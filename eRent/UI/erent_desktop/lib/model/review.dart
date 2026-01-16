@@ -5,45 +5,27 @@ part 'review.g.dart';
 @JsonSerializable()
 class Review {
   final int id;
+  final int rentId;
+  final String propertyTitle;
   final int userId;
-  final int reservationId;
+  final String userName;
   final int rating;
   final String? comment;
+  final bool isActive;
   final DateTime createdAt;
-  
-  // User details
-  final String? userFullName;
-  final String? userEmail;
-  final String? userPicture;
-  
-  // Reservation details
-  final String? carBrandName;
-  final String? carModel;
-  final String? carLicensePlate;
-  final String? parkingSpotNumber;
-  final String? reservationTypeName;
-  final DateTime? reservationStartDate;
-  final DateTime? reservationEndDate;
-  final double? reservationFinalPrice;
+  final DateTime? updatedAt;
 
   const Review({
     this.id = 0,
+    this.rentId = 0,
+    this.propertyTitle = '',
     this.userId = 0,
-    this.reservationId = 0,
+    this.userName = '',
     this.rating = 0,
     this.comment,
+    this.isActive = true,
     required this.createdAt,
-    this.userFullName,
-    this.userEmail,
-    this.userPicture,
-    this.carBrandName,
-    this.carModel,
-    this.carLicensePlate,
-    this.parkingSpotNumber,
-    this.reservationTypeName,
-    this.reservationStartDate,
-    this.reservationEndDate,
-    this.reservationFinalPrice,
+    this.updatedAt,
   });
 
   factory Review.fromJson(Map<String, dynamic> json) => _$ReviewFromJson(json);
