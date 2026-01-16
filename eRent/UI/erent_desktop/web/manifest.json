@@ -1,11 +1,11 @@
 {
-    "name": "Mo Smart Park Desktop",
-    "short_name": "Mo Smart Park",
+    "name": "eRent Desktop",
+    "short_name": "eRent",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "eRent Desktop - A desktop application for managing rental properties.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

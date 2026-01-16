@@ -1,6 +1,6 @@
-# Mo Smart Park Desktop
+# eRent Desktop
 
-A new Flutter project.
+A desktop application for managing rental properties, built with Flutter.
 
 ## Getting Started
 

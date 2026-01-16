@@ -322,69 +322,29 @@ class _MasterScreenState extends State<MasterScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // User Section
-            _buildSectionHeader('User Section'),
+            // Analytics Section (First as requested)
+            _buildSectionHeader('Analytics & Reports', Icons.analytics_outlined),
             const SizedBox(height: 8),
             _modernDrawerTile(
               context,
-              icon: Icons.people_outlined,
-              activeIcon: Icons.people_rounded,
-              label: 'Users',
-              screen: const UsersListScreen(),
+              icon: Icons.analytics_outlined,
+              activeIcon: Icons.analytics_rounded,
+              label: 'Business Analytics',
+              screen: const AnalyticsScreen(),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 20),
             
-            // Reviews tile (no section header)
-            _modernDrawerTile(
-              context,
-              icon: Icons.rate_review_outlined,
-              activeIcon: Icons.rate_review,
-              label: 'Reviews',
-              screen: ReviewListScreen(),
-            ),
-            const SizedBox(height: 5),
-            
-            // Countries tile (no section header)
-            _modernDrawerTile(
-              context,
-              icon: Icons.flag_outlined,
-              activeIcon: Icons.flag_rounded,
-              label: 'Countries',
-              screen: CountryListScreen(),
-            ),
-            const SizedBox(height: 5),
-            
-            // Property Types tile (no section header)
-            _modernDrawerTile(
-              context,
-              icon: Icons.category_outlined,
-              activeIcon: Icons.category,
-              label: 'Property Types',
-              screen: const PropertyTypeListScreen(),
-            ),
-            const SizedBox(height: 5),
-            
-            // Amenities tile (no section header)
-            _modernDrawerTile(
-              context,
-              icon: Icons.star_outlined,
-              activeIcon: Icons.star,
-              label: 'Amenities',
-              screen: const AmenityListScreen(),
-            ),
-            const SizedBox(height: 5),
-            
-            // Properties tile (no section header)
+            // Core Business Section
+            _buildSectionHeader('Core Business', Icons.business_outlined),
+            const SizedBox(height: 8),
             _modernDrawerTile(
               context,
               icon: Icons.home_outlined,
-              activeIcon: Icons.home,
+              activeIcon: Icons.home_rounded,
               label: 'Properties',
               screen: const PropertyListScreen(),
             ),
             const SizedBox(height: 5),
-            
-            // Rents tile (no section header)
             _modernDrawerTile(
               context,
               icon: Icons.receipt_long_outlined,
@@ -393,8 +353,26 @@ class _MasterScreenState extends State<MasterScreen>
               screen: const RentListScreen(),
             ),
             const SizedBox(height: 5),
+            _modernDrawerTile(
+              context,
+              icon: Icons.rate_review_outlined,
+              activeIcon: Icons.rate_review,
+              label: 'Reviews',
+              screen: ReviewListScreen(),
+            ),
+            const SizedBox(height: 20),
             
-            // Cities tile (no section header)
+            // Configuration Section
+            _buildSectionHeader('Configuration', Icons.settings_outlined),
+            const SizedBox(height: 8),
+            _modernDrawerTile(
+              context,
+              icon: Icons.flag_outlined,
+              activeIcon: Icons.flag_rounded,
+              label: 'Countries',
+              screen: CountryListScreen(),
+            ),
+            const SizedBox(height: 5),
             _modernDrawerTile(
               context,
               icon: Icons.location_city_outlined,
@@ -403,14 +381,32 @@ class _MasterScreenState extends State<MasterScreen>
               screen: CityListScreen(),
             ),
             const SizedBox(height: 5),
-            
-            // Analytics tile (no section header)
             _modernDrawerTile(
               context,
-              icon: Icons.analytics_outlined,
-              activeIcon: Icons.analytics_rounded,
-              label: 'Analytics',
-              screen: const AnalyticsScreen(),
+              icon: Icons.category_outlined,
+              activeIcon: Icons.category,
+              label: 'Property Types',
+              screen: const PropertyTypeListScreen(),
+            ),
+            const SizedBox(height: 5),
+            _modernDrawerTile(
+              context,
+              icon: Icons.star_outlined,
+              activeIcon: Icons.star,
+              label: 'Amenities',
+              screen: const AmenityListScreen(),
+            ),
+            const SizedBox(height: 20),
+            
+            // User Management Section
+            _buildSectionHeader('User Management', Icons.people_outlined),
+            const SizedBox(height: 8),
+            _modernDrawerTile(
+              context,
+              icon: Icons.people_outlined,
+              activeIcon: Icons.people_rounded,
+              label: 'Users',
+              screen: const UsersListScreen(),
             ),
           ],
         ),
@@ -418,17 +414,21 @@ class _MasterScreenState extends State<MasterScreen>
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, IconData icon) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
       child: Row(
         children: [
           Container(
-            width: 3,
-            height: 16,
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
+              color: const Color(0xFF5B9BD5).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              size: 14,
               color: const Color(0xFF5B9BD5),
-              borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(width: 8),
@@ -517,7 +517,7 @@ Widget _modernDrawerTile(
     isSelected =
         currentRoute == 'RentListScreen' ||
         currentRoute == 'RentDetailsScreen';
-  } else if (label == 'Analytics') {
+  } else if (label == 'Business Analytics') {
     isSelected = currentRoute == 'AnalyticsScreen';
   }
 
