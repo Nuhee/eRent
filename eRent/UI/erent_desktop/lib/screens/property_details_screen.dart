@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:erent_desktop/layouts/master_screen.dart';
 import 'package:erent_desktop/model/property.dart';
@@ -19,6 +20,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   late PageController _pageController;
   late PageController _infoCardController;
   late List<PropertyImage> _sortedImages;
+  final Map<int, Uint8List> _imageCache = {};
 
   @override
   void initState() {
@@ -35,6 +37,17 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
       if (b.displayOrder != null) return 1;
       return a.createdAt.compareTo(b.createdAt);
     });
+    
+    // Pre-decode and cache all images
+    for (var image in _sortedImages) {
+      if (image.imageData.isNotEmpty) {
+        try {
+          _imageCache[image.id] = base64Decode(image.imageData);
+        } catch (e) {
+          // If decoding fails, cache will remain empty for this image
+        }
+      }
+    }
     
     // Find cover image index
     _currentImageIndex = _sortedImages.indexWhere((img) => img.isCover);
@@ -250,6 +263,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
             itemCount: _sortedImages.length,
             itemBuilder: (context, index) {
               final image = _sortedImages[index];
+              final cachedImage = _imageCache[image.id];
               return Container(
                 margin: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -258,11 +272,13 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: image.imageData.isNotEmpty
+                  child: cachedImage != null
                       ? Image.memory(
-                          base64Decode(image.imageData),
+                          cachedImage,
                           fit: BoxFit.cover,
                           width: double.infinity,
+                          cacheWidth: null,
+                          cacheHeight: null,
                           errorBuilder: (context, error, stackTrace) {
                             return _buildImagePlaceholder();
                           },
@@ -336,14 +352,14 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.star, size: 14, color: Colors.amber[900]),
+                    Icon(Icons.star, size: 14, color: Colors.white),
                     const SizedBox(width: 4),
                     Text(
                       'Cover',
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: Colors.amber[900],
+                        color: Colors.white,
                       ),
                     ),
                   ],
