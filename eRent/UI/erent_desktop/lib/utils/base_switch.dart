@@ -13,6 +13,7 @@ Widget customSwitchField({
   Color? activeColor,
   Color? inactiveThumbColor,
   Color? inactiveTrackColor,
+  Function(bool?)? onChanged,
 }) {
   return Container(
     padding: const EdgeInsets.all(10),
@@ -72,6 +73,9 @@ Widget customSwitchField({
                 value: field.value ?? initialValue,
                 onChanged: (value) {
                   field.didChange(value);
+                  if (onChanged != null) {
+                    onChanged(value);
+                  }
                 },
                 activeColor: activeColor ?? const Color(0xFF5B9BD5),
                 inactiveThumbColor: inactiveThumbColor ?? Colors.grey[400],

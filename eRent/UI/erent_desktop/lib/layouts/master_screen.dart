@@ -8,6 +8,7 @@ import 'package:erent_desktop/screens/review_list_screen.dart';
 import 'package:erent_desktop/screens/users_list_screen.dart';
 import 'package:erent_desktop/screens/property_type_list_screen.dart';
 import 'package:erent_desktop/screens/amenity_list_screen.dart';
+import 'package:erent_desktop/screens/property_list_screen.dart';
 
 class MasterScreen extends StatefulWidget {
   const MasterScreen({
@@ -371,6 +372,16 @@ class _MasterScreenState extends State<MasterScreen>
             ),
             const SizedBox(height: 5),
             
+            // Properties tile (no section header)
+            _modernDrawerTile(
+              context,
+              icon: Icons.home_outlined,
+              activeIcon: Icons.home,
+              label: 'Properties',
+              screen: const PropertyListScreen(),
+            ),
+            const SizedBox(height: 5),
+            
             // Cities tile (no section header)
             _modernDrawerTile(
               context,
@@ -476,6 +487,10 @@ Widget _modernDrawerTile(
         currentRoute == 'AmenityListScreen' ||
         currentRoute == 'AmenityDetailsScreen' ||
         currentRoute == 'AmenityEditScreen';
+  } else if (label == 'Properties') {
+    isSelected =
+        currentRoute == 'PropertyListScreen' ||
+        currentRoute == 'PropertyDetailsScreen';
   }
 
   return Container(
