@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:erent_landlord_desktop/layouts/master_screen.dart';
 import 'package:erent_landlord_desktop/model/property.dart';
 import 'package:erent_landlord_desktop/model/property_image.dart';
+import 'package:erent_landlord_desktop/screens/property_edit_screen.dart';
 
 class PropertyDetailsScreen extends StatefulWidget {
   final Property property;
@@ -62,6 +63,19 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
     _pageController.dispose();
     _infoCardController.dispose();
     super.dispose();
+  }
+
+  void _navigateToEdit() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PropertyEditScreen(property: widget.property),
+        settings: const RouteSettings(name: 'PropertyEditScreen'),
+      ),
+    );
+    if (result == true) {
+      Navigator.pop(context, true);
+    }
   }
 
   @override
@@ -136,14 +150,14 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFF5B9BD5),
-                  Color(0xFF7AB8CC),
+                  Color(0xFFFFB84D),
+                  Color(0xFFFFA366),
                 ],
               ),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF5B9BD5).withOpacity(0.3),
+                  color: const Color(0xFFFFB84D).withOpacity(0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -188,17 +202,58 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               ],
             ),
           ),
+          // Edit Button
+          Container(
+            margin: const EdgeInsets.only(right: 12),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: _navigateToEdit,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.blue.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.edit_outlined,
+                        color: Colors.blue,
+                        size: 18,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Edit',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
           // Status Badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: widget.property.isActive
-                  ? const Color(0xFF5B9BD5).withOpacity(0.1)
+                  ? const Color(0xFFFFB84D).withOpacity(0.1)
                   : Colors.grey.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: widget.property.isActive
-                    ? const Color(0xFF5B9BD5).withOpacity(0.3)
+                    ? const Color(0xFFFFB84D).withOpacity(0.3)
                     : Colors.grey.withOpacity(0.3),
                 width: 1,
               ),
@@ -209,7 +264,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                 Icon(
                   widget.property.isActive ? Icons.check_circle : Icons.cancel,
                   color: widget.property.isActive
-                      ? const Color(0xFF5B9BD5)
+                      ? const Color(0xFFFFB84D)
                       : Colors.grey[600],
                   size: 16,
                 ),
@@ -220,7 +275,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: widget.property.isActive
-                        ? const Color(0xFF5B9BD5)
+                        ? const Color(0xFFFFB84D)
                         : Colors.grey[600],
                   ),
                 ),
@@ -332,14 +387,14 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               ),
             ),
           // Cover Badge (top right)
-          if (_sortedImages[_currentImageIndex].isCover)
+          if (_sortedImages.isNotEmpty && _sortedImages[_currentImageIndex].isCover)
             Positioned(
               top: 16,
               right: 16,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: Colors.amber.withOpacity(0.9),
+                  color: const Color(0xFFFFB84D).withOpacity(0.9),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -349,11 +404,11 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                     ),
                   ],
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.star, size: 14, color: Colors.white),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 4),
                     Text(
                       'Cover',
                       style: TextStyle(
@@ -542,12 +597,6 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
             value: widget.property.address ?? 'N/A',
             icon: Icons.location_on_outlined,
           ),
-          const SizedBox(height: 16),
-          _buildInfoRow(
-            label: 'Landlord',
-            value: widget.property.landlordName,
-            icon: Icons.person_outline,
-          ),
         ],
       },
       {
@@ -598,7 +647,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                 ? Icons.check_circle_outline
                 : Icons.cancel_outlined,
             valueColor: widget.property.isActive
-                ? const Color(0xFF5B9BD5)
+                ? const Color(0xFFFFB84D)
                 : Colors.grey[600],
           ),
           const SizedBox(height: 16),
@@ -818,12 +867,12 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                  color: const Color(0xFFFFB84D).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Icon(
                   icon,
-                  color: const Color(0xFF5B9BD5),
+                  color: const Color(0xFFFFB84D),
                   size: 18,
                 ),
               ),
@@ -858,7 +907,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
         Icon(
           icon,
           size: 20,
-          color: const Color(0xFF5B9BD5),
+          color: const Color(0xFFFFB84D),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -898,10 +947,10 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
       children: [
         Row(
           children: [
-            Icon(
+            const Icon(
               Icons.star_outlined,
               size: 20,
-              color: const Color(0xFF5B9BD5),
+              color: Color(0xFFFFB84D),
             ),
             const SizedBox(width: 12),
             Text(
@@ -923,20 +972,20 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                color: const Color(0xFFFFB84D).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: const Color(0xFF5B9BD5).withOpacity(0.3),
+                  color: const Color(0xFFFFB84D).withOpacity(0.3),
                   width: 1,
                 ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.check_circle,
                     size: 14,
-                    color: const Color(0xFF5B9BD5),
+                    color: Color(0xFFFFB84D),
                   ),
                   const SizedBox(width: 6),
                   Text(

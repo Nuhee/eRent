@@ -422,8 +422,8 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
             width: 1400,
             height: 423,
             columnWidths: const [
-              220, // Title
-              130, // Property Type
+              340, // Title
+              150, // Property Type
               140, // City
               160, // Price/Month
               115, // Status

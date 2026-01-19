@@ -9,6 +9,7 @@ import 'package:erent_landlord_desktop/providers/review_provider.dart';
 import 'package:erent_landlord_desktop/providers/property_type_provider.dart';
 import 'package:erent_landlord_desktop/providers/amenity_provider.dart';
 import 'package:erent_landlord_desktop/providers/property_provider.dart';
+import 'package:erent_landlord_desktop/providers/property_image_provider.dart';
 import 'package:erent_landlord_desktop/providers/rent_provider.dart';
 import 'package:erent_landlord_desktop/providers/landlord_analytics_provider.dart';
 import 'package:erent_landlord_desktop/providers/auth_provider.dart';
@@ -42,6 +43,9 @@ void main() async {
         ),
         ChangeNotifierProvider<PropertyProvider>(
           create: (context) => PropertyProvider(),
+        ),
+        ChangeNotifierProvider<PropertyImageProvider>(
+          create: (context) => PropertyImageProvider(),
         ),
         ChangeNotifierProvider<RentProvider>(
           create: (context) => RentProvider(),

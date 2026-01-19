@@ -6,6 +6,7 @@ using eRent.Services.Interfaces;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -143,6 +144,7 @@ namespace eRent.Services.Services
             if (entity.PropertyAmenities != null && entity.PropertyAmenities.Any())
             {
                 response.Amenities = entity.PropertyAmenities
+                    .Where(pa => pa.Amenity != null)
                     .Select(pa => new AmenityResponse
                     {
                         Id = pa.Amenity.Id,
@@ -193,20 +195,35 @@ namespace eRent.Services.Services
 
         public override async Task<PropertyResponse> CreateAsync(PropertyUpsertRequest request)
         {
-            // Get the current user (landlord) - in a real scenario, this would come from authentication context
-            // For now, we'll use the LandlordId from request, but typically this would be set from the authenticated user
-            var entity = new Property();
-            MapInsertToEntity(entity, request);
-            entity.LandlordId = request.LandlordId;
+            // Validate first
+            await ValidateRequest(request);
+
+            // Create entity manually to ensure all fields are mapped correctly
+            var entity = new Property
+            {
+                Title = request.Title,
+                Description = request.Description,
+                PricePerMonth = request.PricePerMonth,
+                PricePerDay = request.AllowDailyRental ? request.PricePerDay : null,
+                AllowDailyRental = request.AllowDailyRental,
+                Bedrooms = request.Bedrooms,
+                Bathrooms = request.Bathrooms,
+                Area = request.Area,
+                PropertyTypeId = request.PropertyTypeId,
+                CityId = request.CityId,
+                LandlordId = request.LandlordId,
+                Address = request.Address,
+                Latitude = request.Latitude,
+                Longitude = request.Longitude,
+                IsActive = request.IsActive,
+                CreatedAt = DateTime.Now
+            };
 
             _context.Properties.Add(entity);
-
-            await BeforeInsert(entity, request);
-
             await _context.SaveChangesAsync();
 
-            // Handle amenities
-            if (request.AmenityIds != null && request.AmenityIds.Any())
+            // Handle amenities after property is saved (so we have the ID)
+            if (request.AmenityIds != null && request.AmenityIds.Count > 0)
             {
                 foreach (var amenityId in request.AmenityIds)
                 {
@@ -222,17 +239,7 @@ namespace eRent.Services.Services
             }
 
             // Reload with all relationships
-            await _context.Entry(entity).Reference(x => x.PropertyType).LoadAsync();
-            await _context.Entry(entity).Reference(x => x.City).LoadAsync();
-            await _context.Entry(entity).Reference(x => x.Landlord).LoadAsync();
-            await _context.Entry(entity).Collection(x => x.PropertyAmenities).LoadAsync();
-            foreach (var pa in entity.PropertyAmenities)
-            {
-                await _context.Entry(pa).Reference(x => x.Amenity).LoadAsync();
-            }
-            await _context.Entry(entity).Collection(x => x.PropertyImages).LoadAsync();
-
-            return MapToResponse(entity);
+            return await GetByIdAsync(entity.Id) ?? throw new InvalidOperationException("Failed to reload property after creation");
         }
 
         public override async Task<PropertyResponse?> UpdateAsync(int id, PropertyUpsertRequest request)
@@ -244,19 +251,38 @@ namespace eRent.Services.Services
             if (entity == null)
                 return null;
 
-            await BeforeUpdate(entity, request);
+            // Validate
+            await ValidateRequest(request, id);
 
-            MapUpdateToEntity(entity, request);
+            // Update entity fields manually
+            entity.Title = request.Title;
+            entity.Description = request.Description;
+            entity.PricePerMonth = request.PricePerMonth;
+            entity.PricePerDay = request.AllowDailyRental ? request.PricePerDay : null;
+            entity.AllowDailyRental = request.AllowDailyRental;
+            entity.Bedrooms = request.Bedrooms;
+            entity.Bathrooms = request.Bathrooms;
+            entity.Area = request.Area;
+            entity.PropertyTypeId = request.PropertyTypeId;
+            entity.CityId = request.CityId;
             entity.LandlordId = request.LandlordId;
+            entity.Address = request.Address;
+            entity.Latitude = request.Latitude;
+            entity.Longitude = request.Longitude;
+            entity.IsActive = request.IsActive;
             entity.UpdatedAt = DateTime.Now;
 
-            // Update amenities
-            if (request.AmenityIds != null)
-            {
-                // Remove existing amenities
-                _context.PropertyAmenities.RemoveRange(entity.PropertyAmenities);
+            // Update amenities - remove all existing and add new ones
+            var existingAmenities = await _context.PropertyAmenities
+                .Where(pa => pa.PropertyId == id)
+                .ToListAsync();
+            
+            _context.PropertyAmenities.RemoveRange(existingAmenities);
+            await _context.SaveChangesAsync();
 
-                // Add new amenities
+            // Add new amenities
+            if (request.AmenityIds != null && request.AmenityIds.Count > 0)
+            {
                 foreach (var amenityId in request.AmenityIds)
                 {
                     var propertyAmenity = new PropertyAmenity
@@ -272,20 +298,10 @@ namespace eRent.Services.Services
             await _context.SaveChangesAsync();
 
             // Reload with all relationships
-            await _context.Entry(entity).Reference(x => x.PropertyType).LoadAsync();
-            await _context.Entry(entity).Reference(x => x.City).LoadAsync();
-            await _context.Entry(entity).Reference(x => x.Landlord).LoadAsync();
-            await _context.Entry(entity).Collection(x => x.PropertyAmenities).LoadAsync();
-            foreach (var pa in entity.PropertyAmenities)
-            {
-                await _context.Entry(pa).Reference(x => x.Amenity).LoadAsync();
-            }
-            await _context.Entry(entity).Collection(x => x.PropertyImages).LoadAsync();
-
-            return MapToResponse(entity);
+            return await GetByIdAsync(entity.Id);
         }
 
-        protected override async Task BeforeInsert(Property entity, PropertyUpsertRequest request)
+        private async Task ValidateRequest(PropertyUpsertRequest request, int? existingId = null)
         {
             // Validate PropertyType exists
             if (!await _context.PropertyTypes.AnyAsync(pt => pt.Id == request.PropertyTypeId))
@@ -306,68 +322,24 @@ namespace eRent.Services.Services
             }
 
             // Validate amenities exist
-            if (request.AmenityIds != null && request.AmenityIds.Any())
+            if (request.AmenityIds != null && request.AmenityIds.Count > 0)
             {
-                var invalidAmenities = request.AmenityIds.Where(aid => !_context.Amenities.Any(a => a.Id == aid));
-                if (invalidAmenities.Any())
+                var existingAmenityIds = await _context.Amenities
+                    .Where(a => request.AmenityIds.Contains(a.Id))
+                    .Select(a => a.Id)
+                    .ToListAsync();
+
+                var invalidIds = request.AmenityIds.Except(existingAmenityIds).ToList();
+                if (invalidIds.Any())
                 {
-                    throw new InvalidOperationException("One or more amenities do not exist.");
+                    throw new InvalidOperationException($"Amenities with IDs {string.Join(", ", invalidIds)} do not exist.");
                 }
             }
 
-            // Validate daily rental pricing
+            // Validate daily rental pricing (only validate if daily rental is allowed)
             if (request.AllowDailyRental && (!request.PricePerDay.HasValue || request.PricePerDay.Value <= 0))
             {
                 throw new InvalidOperationException("PricePerDay must be provided and greater than 0 when AllowDailyRental is true.");
-            }
-
-            // If daily rental is not allowed, ensure PricePerDay is null
-            if (!request.AllowDailyRental && request.PricePerDay.HasValue)
-            {
-                throw new InvalidOperationException("PricePerDay should not be provided when AllowDailyRental is false.");
-            }
-        }
-
-        protected override async Task BeforeUpdate(Property entity, PropertyUpsertRequest request)
-        {
-            // Validate PropertyType exists
-            if (!await _context.PropertyTypes.AnyAsync(pt => pt.Id == request.PropertyTypeId))
-            {
-                throw new InvalidOperationException("Property type does not exist.");
-            }
-
-            // Validate City exists
-            if (!await _context.Cities.AnyAsync(c => c.Id == request.CityId))
-            {
-                throw new InvalidOperationException("City does not exist.");
-            }
-
-            // Validate Landlord exists
-            if (!await _context.Users.AnyAsync(u => u.Id == request.LandlordId))
-            {
-                throw new InvalidOperationException("Landlord does not exist.");
-            }
-
-            // Validate amenities exist
-            if (request.AmenityIds != null && request.AmenityIds.Any())
-            {
-                var invalidAmenities = request.AmenityIds.Where(aid => !_context.Amenities.Any(a => a.Id == aid));
-                if (invalidAmenities.Any())
-                {
-                    throw new InvalidOperationException("One or more amenities do not exist.");
-                }
-            }
-
-            // Validate daily rental pricing
-            if (request.AllowDailyRental && (!request.PricePerDay.HasValue || request.PricePerDay.Value <= 0))
-            {
-                throw new InvalidOperationException("PricePerDay must be provided and greater than 0 when AllowDailyRental is true.");
-            }
-
-            // If daily rental is not allowed, ensure PricePerDay is null
-            if (!request.AllowDailyRental && request.PricePerDay.HasValue)
-            {
-                throw new InvalidOperationException("PricePerDay should not be provided when AllowDailyRental is false.");
             }
         }
     }
