@@ -94,12 +94,12 @@ class _MasterScreenState extends State<MasterScreen>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                color: const Color(0xFFFFB84D).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
                 Icons.menu_rounded,
-                color: Color(0xFF5B9BD5),
+                color: Color(0xFFFFB84D),
                 size: 20,
               ),
             ),
@@ -175,7 +175,7 @@ class _MasterScreenState extends State<MasterScreen>
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                        color: const Color(0xFFFFB84D).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Text(
@@ -183,7 +183,7 @@ class _MasterScreenState extends State<MasterScreen>
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF5B9BD5),
+                          color: Color(0xFFFFB84D),
                         ),
                       ),
                     ),
@@ -194,13 +194,13 @@ class _MasterScreenState extends State<MasterScreen>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: const Color(0xFF5B9BD5).withOpacity(0.3),
+                      color: const Color(0xFFFFB84D).withOpacity(0.3),
                       width: 2,
                     ),
                   ),
                   child: CircleAvatar(
                     radius: 20,
-                    backgroundColor: const Color(0xFF5B9BD5),
+                    backgroundColor: const Color(0xFFFFB84D),
                     backgroundImage: imageProvider,
                     child: imageProvider == null
                         ? Text(
@@ -270,8 +270,8 @@ class _MasterScreenState extends State<MasterScreen>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFF5B9BD5),
-                  Color(0xFF7AB8CC),
+                  Color(0xFFFFB84D),
+                  Color(0xFFFFA366),
                 ],
               ),
               borderRadius: const BorderRadius.only(
@@ -422,13 +422,13 @@ class _MasterScreenState extends State<MasterScreen>
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFF5B9BD5).withOpacity(0.1),
+              color: const Color(0xFFFFB84D).withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               icon,
               size: 14,
-              color: const Color(0xFF5B9BD5),
+              color: const Color(0xFFFFB84D),
             ),
           ),
           const SizedBox(width: 8),
@@ -542,12 +542,12 @@ Widget _modernDrawerTile(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: isSelected
-                ? const Color(0xFF5B9BD5).withOpacity(0.1)
+                ? const Color(0xFFFFB84D).withOpacity(0.1)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
             border: isSelected
                 ? Border.all(
-                    color: const Color(0xFF5B9BD5).withOpacity(0.3),
+                    color: const Color(0xFFFFB84D).withOpacity(0.3),
                     width: 1,
                   )
                 : null,
@@ -558,14 +558,14 @@ Widget _modernDrawerTile(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? const Color(0xFF5B9BD5).withOpacity(0.15)
+                      ? const Color(0xFFFFB84D).withOpacity(0.15)
                       : Colors.grey.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   isSelected ? activeIcon : icon,
                   color: isSelected
-                      ? const Color(0xFF5B9BD5)
+                      ? const Color(0xFFFFB84D)
                       : Colors.grey[700],
                   size: 20,
                 ),
@@ -588,7 +588,7 @@ Widget _modernDrawerTile(
                   width: 6,
                   height: 6,
                   decoration: const BoxDecoration(
-                    color: Color(0xFF5B9BD5),
+                    color: Color(0xFFFFB84D),
                     shape: BoxShape.circle,
                   ),
                 ),

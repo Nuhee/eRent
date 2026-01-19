@@ -10,7 +10,7 @@ import 'package:erent_landlord_desktop/providers/property_type_provider.dart';
 import 'package:erent_landlord_desktop/providers/amenity_provider.dart';
 import 'package:erent_landlord_desktop/providers/property_provider.dart';
 import 'package:erent_landlord_desktop/providers/rent_provider.dart';
-import 'package:erent_landlord_desktop/providers/analytics_provider.dart';
+import 'package:erent_landlord_desktop/providers/landlord_analytics_provider.dart';
 import 'package:erent_landlord_desktop/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -46,8 +46,8 @@ void main() async {
         ChangeNotifierProvider<RentProvider>(
           create: (context) => RentProvider(),
         ),
-        ChangeNotifierProvider<AnalyticsProvider>(
-          create: (context) => AnalyticsProvider(),
+        ChangeNotifierProvider<LandlordAnalyticsProvider>(
+          create: (context) => LandlordAnalyticsProvider(),
         ),
       ],
       child: const MyApp(),
@@ -65,9 +65,9 @@ class MyApp extends StatelessWidget {
       title: 'eRent',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFF59E0B), // Warm amber/orange
-          primary: const Color(0xFFF59E0B),
-          secondary: const Color(0xFFF97316), // Orange
+          seedColor: const Color(0xFFFFB84D), // Softer, lighter amber
+          primary: const Color(0xFFFFB84D),
+          secondary: const Color(0xFFFFA366), // Lighter coral-orange
         ),
         useMaterial3: true,
       ),
@@ -190,7 +190,7 @@ final TextEditingController usernameController = TextEditingController(text: "la
                                         Icon(
                                           Icons.home_work_rounded,
                                           size: 48,
-                                          color: const Color(0xFFF59E0B),
+                                          color: const Color(0xFFFFB84D),
                                         ),
                                         const SizedBox(width: 16),
                                         Column(
@@ -211,11 +211,11 @@ final TextEditingController usernameController = TextEditingController(text: "la
                                               style: TextStyle(
                                                 fontSize: 52,
                                                 fontWeight: FontWeight.bold,
-                                                color: const Color(0xFFF59E0B),
+                                                color: const Color(0xFFFFB84D),
                                                 letterSpacing: 1,
                                                 shadows: [
                                                   Shadow(
-                                                    color: const Color(0xFFF59E0B).withOpacity(0.5),
+                                                    color: const Color(0xFFFFB84D).withOpacity(0.5),
                                                     offset: const Offset(0, 0),
                                                     blurRadius: 20,
                                                   ),
@@ -233,8 +233,8 @@ final TextEditingController usernameController = TextEditingController(text: "la
                                       decoration: BoxDecoration(
                                         gradient: const LinearGradient(
                                           colors: [
-                                            Color(0xFFF59E0B),
-                                            Color(0xFFF97316),
+                                            Color(0xFFFFB84D),
+                                            Color(0xFFFFA366),
                                           ],
                                         ),
                                         borderRadius: BorderRadius.circular(2),
@@ -302,7 +302,7 @@ final TextEditingController usernameController = TextEditingController(text: "la
                                         children: [
                                           Icon(
                                             Icons.business_rounded,
-                                            color: const Color(0xFFF59E0B),
+                                            color: const Color(0xFFFFB84D),
                                             size: 32,
                                           ),
                                           const SizedBox(width: 12),
@@ -355,7 +355,7 @@ final TextEditingController usernameController = TextEditingController(text: "la
                                       hintText: "Enter your username",
                                       prefixIcon: Icon(
                                         Icons.person_outline,
-                                        color: const Color(0xFFF59E0B),
+                                        color: const Color(0xFFFFB84D),
                                       ),
                                       filled: true,
                                       fillColor: Colors.grey[50],
@@ -374,7 +374,7 @@ final TextEditingController usernameController = TextEditingController(text: "la
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: const BorderSide(
-                                          color: Color(0xFFF59E0B),
+                                          color: Color(0xFFFFB84D),
                                           width: 2,
                                         ),
                                       ),
@@ -412,7 +412,7 @@ final TextEditingController usernameController = TextEditingController(text: "la
                                       hintText: "Enter your password",
                                       prefixIcon: Icon(
                                         Icons.lock_outline,
-                                        color: const Color(0xFFF59E0B),
+                                        color: const Color(0xFFFFB84D),
                                       ),
                                       suffixIcon: IconButton(
                                         icon: Icon(
@@ -445,7 +445,7 @@ final TextEditingController usernameController = TextEditingController(text: "la
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: const BorderSide(
-                                          color: Color(0xFFF59E0B),
+                                          color: Color(0xFFFFB84D),
                                           width: 2,
                                         ),
                                       ),
@@ -476,8 +476,8 @@ final TextEditingController usernameController = TextEditingController(text: "la
                                     decoration: BoxDecoration(
                                       gradient: const LinearGradient(
                                         colors: [
-                                          Color(0xFFF59E0B),
-                                          Color(0xFFF97316),
+                                          Color(0xFFFFB84D),
+                                          Color(0xFFFFA366),
                                         ],
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
@@ -485,7 +485,7 @@ final TextEditingController usernameController = TextEditingController(text: "la
                                       borderRadius: BorderRadius.circular(12),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: const Color(0xFFF59E0B).withOpacity(0.4),
+                                          color: const Color(0xFFFFB84D).withOpacity(0.4),
                                           spreadRadius: 0,
                                           blurRadius: 15,
                                           offset: const Offset(0, 6),
@@ -612,7 +612,7 @@ final TextEditingController usernameController = TextEditingController(text: "la
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: const Row(
           children: [
-            Icon(Icons.error_outline, color: Color(0xFFF59E0B)),
+            Icon(Icons.error_outline, color: Color(0xFFFFB84D)),
             SizedBox(width: 8),
             Text("Login Failed", style: TextStyle(color: Colors.black87)),
           ],
@@ -622,7 +622,7 @@ final TextEditingController usernameController = TextEditingController(text: "la
           TextButton(
             onPressed: () => Navigator.pop(context),
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFF59E0B),
+              foregroundColor: const Color(0xFFFFB84D),
             ),
             child: const Text("OK"),
           ),
@@ -639,7 +639,7 @@ final TextEditingController usernameController = TextEditingController(text: "la
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: const Row(
           children: [
-            Icon(Icons.business_rounded, color: Color(0xFFF59E0B)),
+            Icon(Icons.business_rounded, color: Color(0xFFFFB84D)),
             SizedBox(width: 8),
             Text("Access Denied", style: TextStyle(color: Colors.black87)),
           ],
@@ -674,7 +674,7 @@ final TextEditingController usernameController = TextEditingController(text: "la
               });
             },
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFF59E0B),
+              foregroundColor: const Color(0xFFFFB84D),
             ),
             child: const Text("OK"),
           ),

@@ -28,6 +28,7 @@ builder.Services.AddTransient<IRentStatusService, RentStatusService>();
 builder.Services.AddTransient<IReviewRentService, ReviewRentService>();
 builder.Services.AddTransient<IChatService, ChatService>();
 builder.Services.AddTransient<IAnalyticsService, AnalyticsService>();
+builder.Services.AddTransient<ILandlordAnalyticsService, LandlordAnalyticsService>();
 
 
 // Configure database

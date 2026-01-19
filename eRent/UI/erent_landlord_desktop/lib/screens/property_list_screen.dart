@@ -3,7 +3,9 @@ import 'package:erent_landlord_desktop/layouts/master_screen.dart';
 import 'package:erent_landlord_desktop/model/property.dart';
 import 'package:erent_landlord_desktop/model/search_result.dart';
 import 'package:erent_landlord_desktop/providers/property_provider.dart';
+import 'package:erent_landlord_desktop/providers/user_provider.dart';
 import 'package:erent_landlord_desktop/screens/property_details_screen.dart';
+import 'package:erent_landlord_desktop/screens/property_edit_screen.dart';
 import 'package:erent_landlord_desktop/utils/base_pagination.dart';
 import 'package:erent_landlord_desktop/utils/base_table.dart';
 import 'package:erent_landlord_desktop/utils/base_textfield.dart';
@@ -27,6 +29,8 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
   int _pageSize = 5;
   final List<int> _pageSizeOptions = [5, 10, 20, 50];
 
+  int? get _landlordId => UserProvider.currentUser?.id;
+
   Future<void> _performSearch({int? page, int? pageSize}) async {
     final int pageToFetch = page ?? _currentPage;
     final int pageSizeToUse = pageSize ?? _pageSize;
@@ -34,6 +38,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
     final filter = {
       if (titleController.text.isNotEmpty) 'title': titleController.text,
       if (selectedIsActive != null) 'isActive': selectedIsActive,
+      if (_landlordId != null) 'landlordId': _landlordId,
       'page': pageToFetch,
       'pageSize': pageSizeToUse,
       'includeTotalCount': true,
@@ -59,7 +64,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
           children: [
             Icon(
               property.isActive ? Icons.warning_amber_rounded : Icons.check_circle_outline,
-              color: property.isActive ? Colors.orange : const Color(0xFF5B9BD5),
+              color: property.isActive ? Colors.red : const Color(0xFFFFB84D),
               size: 24,
             ),
             const SizedBox(width: 12),
@@ -89,7 +94,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: property.isActive ? Colors.red : const Color(0xFF5B9BD5),
+              backgroundColor: property.isActive ? Colors.red : const Color(0xFFFFB84D),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -222,6 +227,32 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
     }
   }
 
+  void _navigateToAddProperty() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PropertyEditScreen(),
+        settings: const RouteSettings(name: 'PropertyEditScreen'),
+      ),
+    );
+    if (result == true) {
+      await _performSearch(page: 0);
+    }
+  }
+
+  void _navigateToEditProperty(Property property) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PropertyEditScreen(property: property),
+        settings: const RouteSettings(name: 'PropertyEditScreen'),
+      ),
+    );
+    if (result == true) {
+      await _performSearch();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -234,7 +265,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
   @override
   Widget build(BuildContext context) {
     return MasterScreen(
-      title: 'Properties Management',
+      title: 'My Properties',
       child: Center(
         child: Column(
           children: [
@@ -284,7 +315,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
           ),
           const SizedBox(width: 12),
           ElevatedButton(
-            onPressed: _performSearch,
+            onPressed: () => _performSearch(page: 0),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.grey[800],
               foregroundColor: Colors.white,
@@ -342,6 +373,33 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
               ],
             ),
           ),
+          const SizedBox(width: 12),
+          ElevatedButton(
+            onPressed: _navigateToAddProperty,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFFB84D),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.add_rounded, size: 18),
+                SizedBox(width: 8),
+                Text(
+                  "Add Property",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -360,17 +418,16 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
         children: [
           BaseTable(
             icon: Icons.home_outlined,
-            title: 'Properties',
+            title: 'My Properties',
             width: 1400,
             height: 423,
             columnWidths: const [
-              270, // Title
+              220, // Title
               130, // Property Type
               140, // City
-              150, // Landlord
               160, // Price/Month
               115, // Status
-              200, // Actions
+              280, // Actions
             ],
             columns: const [
               DataColumn(
@@ -388,12 +445,6 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
               DataColumn(
                 label: Text(
                   'City',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-              ),
-              DataColumn(
-                label: Text(
-                  'Landlord',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
@@ -444,14 +495,6 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                             ),
                             DataCell(
                               Text(
-                                e.landlordName.isNotEmpty ? e.landlordName : 'N/A',
-                                style: const TextStyle(fontSize: 15),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            DataCell(
-                              Text(
                                 '${e.pricePerMonth.toStringAsFixed(2)} BAM',
                                 style: const TextStyle(fontSize: 15),
                               ),
@@ -465,7 +508,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                         ? Icons.check_circle
                                         : Icons.cancel,
                                     color: e.isActive
-                                        ? const Color(0xFF5B9BD5)
+                                        ? const Color(0xFFFFB84D)
                                         : Colors.grey[400],
                                     size: 20,
                                   ),
@@ -476,7 +519,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
                                       color: e.isActive
-                                          ? const Color(0xFF5B9BD5)
+                                          ? const Color(0xFFFFB84D)
                                           : Colors.grey[600],
                                     ),
                                   ),
@@ -511,16 +554,46 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                           height: 36,
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                                            color: const Color(0xFFFFB84D).withOpacity(0.1),
                                             borderRadius: BorderRadius.circular(8),
                                             border: Border.all(
-                                              color: const Color(0xFF5B9BD5).withOpacity(0.3),
+                                              color: const Color(0xFFFFB84D).withOpacity(0.3),
                                               width: 1,
                                             ),
                                           ),
                                           child: const Icon(
                                             Icons.visibility_outlined,
-                                            color: Color(0xFF5B9BD5),
+                                            color: Color(0xFFFFB84D),
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Edit Button
+                                  Tooltip(
+                                    message: "Edit Property",
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(8),
+                                        onTap: () => _navigateToEditProperty(e),
+                                        child: Container(
+                                          width: 36,
+                                          height: 36,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(
+                                              color: Colors.blue.withOpacity(0.3),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.edit_outlined,
+                                            color: Colors.blue,
                                             size: 18,
                                           ),
                                         ),
@@ -576,7 +649,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                       .toList(),
             emptyIcon: Icons.home,
             emptyText: 'No properties found.',
-            emptySubtext: 'Try adjusting your search criteria.',
+            emptySubtext: 'Add your first property to get started.',
           ),
           const SizedBox(height: 30),
           BasePagination(

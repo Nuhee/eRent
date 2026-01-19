@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:erent_landlord_desktop/layouts/master_screen.dart';
-import 'package:erent_landlord_desktop/model/analytics.dart';
-import 'package:erent_landlord_desktop/providers/analytics_provider.dart';
+import 'package:erent_landlord_desktop/model/landlord_analytics.dart';
+import 'package:erent_landlord_desktop/providers/landlord_analytics_provider.dart';
+import 'package:erent_landlord_desktop/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -13,7 +14,7 @@ class AnalyticsScreen extends StatefulWidget {
 }
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProviderStateMixin {
-  Analytics? analytics;
+  LandlordAnalytics? analytics;
   bool isLoading = true;
   String? errorMessage;
   late TabController _tabController;
@@ -21,7 +22,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 7, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
     _loadAnalytics();
   }
 
@@ -33,8 +34,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
 
   Future<void> _loadAnalytics() async {
     try {
-      final provider = context.read<AnalyticsProvider>();
-      final data = await provider.getAnalytics();
+      final landlordId = UserProvider.currentUser?.id;
+      if (landlordId == null) {
+        setState(() {
+          isLoading = false;
+          errorMessage = "User not authenticated. Please login again.";
+        });
+        return;
+      }
+      final provider = context.read<LandlordAnalyticsProvider>();
+      final data = await provider.getLandlordAnalytics(landlordId);
       setState(() {
         analytics = data;
         isLoading = false;
@@ -51,7 +60,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     return MasterScreen(
-      title: 'Business Analytics',
+      title: 'My Business Analytics',
       child: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorMessage != null
@@ -98,16 +107,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
                           child: TabBar(
                             controller: _tabController,
                             isScrollable: true,
-                            labelColor: const Color(0xFF5B9BD5),
+                            labelColor: const Color(0xFFFFB84D),
                             unselectedLabelColor: Colors.grey[600],
-                            indicatorColor: const Color(0xFF5B9BD5),
+                            indicatorColor: const Color(0xFFFFB84D),
                             indicatorWeight: 3,
                             tabs: const [
                               Tab(text: 'Overview', icon: Icon(Icons.dashboard_rounded, size: 20)),
                               Tab(text: 'Revenue', icon: Icon(Icons.attach_money_rounded, size: 20)),
                               Tab(text: 'Rents', icon: Icon(Icons.receipt_long_rounded, size: 20)),
                               Tab(text: 'Properties', icon: Icon(Icons.home_rounded, size: 20)),
-                              Tab(text: 'Users', icon: Icon(Icons.people_rounded, size: 20)),
                               Tab(text: 'Reviews', icon: Icon(Icons.star_rounded, size: 20)),
                               Tab(text: 'Growth', icon: Icon(Icons.trending_up_rounded, size: 20)),
                             ],
@@ -122,7 +130,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
                               _buildRevenueSection(),
                               _buildRentsSection(),
                               _buildPropertiesSection(),
-                              _buildUsersSection(),
                               _buildReviewsSection(),
                               _buildGrowthTrendsSection(),
                             ],
@@ -140,9 +147,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionHeader(
-            'Key Metrics Overview',
+            'My Key Metrics',
             Icons.dashboard_rounded,
-            'These are the most important metrics at a glance. Hover over each metric for more details.',
+            'Overview of your business performance. These metrics show revenue, properties, and rents for your listings only.',
           ),
           const SizedBox(height: 20),
           Row(
@@ -152,8 +159,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
                   'Total Revenue',
                   '${analytics!.totalRevenue.toStringAsFixed(2)} BAM',
                   Icons.attach_money_rounded,
-                  const Color(0xFF5B9BD5),
-                  'Total revenue from all paid rents since the beginning. This represents the cumulative income from completed rental transactions.',
+                  const Color(0xFFFFB84D),
+                  'Total revenue from all paid rents for your properties since the beginning. This represents your cumulative income from completed rental transactions.',
                 ),
               ),
               const SizedBox(width: 16),
@@ -163,7 +170,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
                   '${analytics!.monthlyRevenue.toStringAsFixed(2)} BAM',
                   Icons.trending_up_rounded,
                   Colors.green,
-                  'Revenue generated from paid rents in the current month. This helps track recent business performance.',
+                  'Revenue generated from paid rents for your properties in the current month. This helps track your recent business performance.',
                 ),
               ),
               const SizedBox(width: 16),
@@ -172,8 +179,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
                   'Total Properties',
                   analytics!.totalProperties.toString(),
                   Icons.home_rounded,
-                  Colors.orange,
-                  'Total number of properties in the system, including both active and inactive listings.',
+                  const Color(0xFFFFB84D),
+                  'Total number of your properties, including both active and inactive listings.',
                 ),
               ),
               const SizedBox(width: 16),
@@ -183,7 +190,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
                   analytics!.totalRents.toString(),
                   Icons.receipt_long_rounded,
                   Colors.purple,
-                  'Total number of rental transactions created in the system, regardless of their status.',
+                  'Total number of rental transactions for your properties, regardless of their status.',
                 ),
               ),
             ],
@@ -213,21 +220,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
               const SizedBox(width: 16),
               Expanded(
                 child: _buildMetricCard(
-                  'Total Users',
-                  analytics!.totalUsers.toString(),
-                  Icons.people_rounded,
-                  Colors.indigo,
-                  'Total number of registered users in the system.',
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildMetricCard(
                   'Average Rating',
                   '${analytics!.averageRating.toStringAsFixed(2)} / 5.0',
                   Icons.star_rounded,
                   Colors.amber,
-                  'Average rating across all reviews. Higher ratings indicate better user satisfaction.',
+                  'Average rating across all reviews for your properties. Higher ratings indicate better tenant satisfaction.',
                 ),
               ),
             ],
@@ -304,7 +301,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
           _buildSectionHeader(
             'Revenue Analytics',
             Icons.attach_money_rounded,
-            'Detailed analysis of revenue generation, including breakdowns by property type, city, and monthly trends.',
+            'Detailed analysis of your revenue generation, including breakdowns by property type, city, and monthly trends.',
           ),
           const SizedBox(height: 20),
           Row(
@@ -361,7 +358,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
           _buildSectionHeader(
             'Rent Analytics',
             Icons.receipt_long_rounded,
-            'Comprehensive analysis of rental transactions, including status distribution, rental types, and occupancy metrics.',
+            'Comprehensive analysis of rental transactions for your properties, including status distribution, rental types, and occupancy metrics.',
           ),
           const SizedBox(height: 20),
           Row(
@@ -459,7 +456,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
           _buildSectionHeader(
             'Property Analytics',
             Icons.home_rounded,
-            'Analysis of property inventory, including distribution by type, city, and status.',
+            'Analysis of your property inventory, including distribution by type, city, and status.',
           ),
           const SizedBox(height: 20),
           Row(
@@ -508,81 +505,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildUsersSection() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSectionHeader(
-            'User Analytics',
-            Icons.people_rounded,
-            'Analysis of user base, including total users, active users, and distribution by role (landlords, tenants, admins).',
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: _buildInfoCard(
-                  'Total Users',
-                  analytics!.totalUsers.toString(),
-                  Icons.people_outline_rounded,
-                  'Total number of registered users in the system.',
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildInfoCard(
-                  'Active Users',
-                  analytics!.activeUsers.toString(),
-                  Icons.check_circle_rounded,
-                  'Users with active accounts that can use the platform.',
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildInfoCard(
-                  'Landlords',
-                  analytics!.totalLandlords.toString(),
-                  Icons.person_outline_rounded,
-                  'Users with landlord role who can list and manage properties.',
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildInfoCard(
-                  'Tenants',
-                  analytics!.totalTenants.toString(),
-                  Icons.person_outline_rounded,
-                  'Regular users (tenants) who can browse and rent properties.',
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildInfoCard(
-                  'Admins',
-                  analytics!.totalAdmins.toString(),
-                  Icons.admin_panel_settings_rounded,
-                  'Users with administrator privileges who manage the platform.',
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildChartCard(
-            'User Growth Trend',
-            'Shows how the total number of users has grown over the last 12 months. The line represents cumulative user count.',
-            _buildUserGrowthChart(),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildReviewsSection() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -592,7 +514,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
           _buildSectionHeader(
             'Review Analytics',
             Icons.star_rounded,
-            'Analysis of user reviews and ratings, including average rating and distribution across different rating levels.',
+            'Analysis of reviews and ratings for your properties, including average rating and distribution across different rating levels.',
           ),
           const SizedBox(height: 20),
           Row(
@@ -602,7 +524,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
                   'Total Reviews',
                   analytics!.totalReviews.toString(),
                   Icons.rate_review_rounded,
-                  'Total number of reviews submitted by users for rental properties.',
+                  'Total number of reviews submitted by tenants for your rental properties.',
                 ),
               ),
               const SizedBox(width: 16),
@@ -611,7 +533,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
                   'Average Rating',
                   '${analytics!.averageRating.toStringAsFixed(2)} / 5.0',
                   Icons.star_rounded,
-                  'Average rating across all reviews. Higher ratings indicate better user satisfaction.',
+                  'Average rating across all reviews for your properties. Higher ratings indicate better tenant satisfaction.',
                 ),
               ),
             ],
@@ -676,7 +598,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
           _buildSectionHeader(
             'Growth Trends',
             Icons.trending_up_rounded,
-            'Long-term growth analysis showing how properties, rents, and users have grown over the last 12 months.',
+            'Long-term growth analysis showing how your properties and rents have grown over the last 12 months.',
           ),
           const SizedBox(height: 20),
           Row(
@@ -712,10 +634,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                color: const Color(0xFFFFB84D).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: const Color(0xFF5B9BD5), size: 20),
+              child: Icon(icon, color: const Color(0xFFFFB84D), size: 20),
             ),
             const SizedBox(width: 12),
             Text(
@@ -732,20 +654,20 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.blue[50],
+            color: Colors.orange[50],
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.blue[100]!),
+            border: Border.all(color: Colors.orange[100]!),
           ),
           child: Row(
             children: [
-              Icon(Icons.info_outline, size: 16, color: Colors.blue[700]),
+              Icon(Icons.info_outline, size: 16, color: Colors.orange[700]),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   description,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.blue[900],
+                    color: Colors.orange[900],
                   ),
                 ),
               ),
@@ -771,7 +693,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
           children: [
             Row(
               children: [
-                Icon(icon, size: 20, color: const Color(0xFF5B9BD5)),
+                Icon(icon, size: 20, color: const Color(0xFFFFB84D)),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -861,9 +783,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
       PieChartData(
         sections: analytics!.revenueByPropertyType.asMap().entries.map((entry) {
           final colors = [
-            const Color(0xFF5B9BD5),
+            const Color(0xFFFFB84D),
             Colors.green,
-            Colors.orange,
+            const Color(0xFFFFB84D),
             Colors.purple,
             Colors.red,
             Colors.teal,
@@ -938,7 +860,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
             barRods: [
               BarChartRodData(
                 toY: entry.value.revenue,
-                color: const Color(0xFF5B9BD5),
+                color: const Color(0xFFFFB84D),
                 width: 20,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
               ),
@@ -996,12 +918,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
               return FlSpot(entry.key.toDouble(), entry.value.revenue);
             }).toList(),
             isCurved: true,
-            color: const Color(0xFF5B9BD5),
+            color: const Color(0xFFFFB84D),
             barWidth: 3,
             dotData: FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
-              color: const Color(0xFF5B9BD5).withOpacity(0.1),
+              color: const Color(0xFFFFB84D).withOpacity(0.1),
             ),
           ),
         ],
@@ -1013,7 +935,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
 
   Widget _buildRentStatusChart() {
     final statusData = [
-      {'name': 'Pending', 'value': analytics!.pendingRents, 'color': Colors.orange},
+      {'name': 'Pending', 'value': analytics!.pendingRents, 'color': const Color(0xFFFFB84D)},
       {'name': 'Paid', 'value': analytics!.paidRents, 'color': Colors.green},
       {'name': 'Accepted', 'value': analytics!.acceptedRents, 'color': Colors.blue},
       {'name': 'Cancelled', 'value': analytics!.cancelledRents, 'color': Colors.red},
@@ -1133,7 +1055,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
             barRods: [
               BarChartRodData(
                 toY: entry.value.count.toDouble(),
-                color: Colors.orange,
+                color: const Color(0xFFFFB84D),
                 width: 20,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
               ),
@@ -1206,68 +1128,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildUserGrowthChart() {
-    if (analytics!.monthlyUserGrowth.isEmpty) {
-      return const Center(child: Text('No data available'));
-    }
-    final maxUsers = analytics!.monthlyUserGrowth
-        .map((e) => e.totalUsers)
-        .reduce((a, b) => a > b ? a : b);
-    return LineChart(
-      LineChartData(
-        gridData: FlGridData(show: true, drawVerticalLine: false),
-        titlesData: FlTitlesData(
-          show: true,
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                if (value.toInt() >= analytics!.monthlyUserGrowth.length) {
-                  return const Text('');
-                }
-                final month = analytics!.monthlyUserGrowth[value.toInt()].month;
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    month.substring(5),
-                    style: const TextStyle(fontSize: 10),
-                  ),
-                );
-              },
-            ),
-          ),
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          rightTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-        ),
-        borderData: FlBorderData(show: false),
-        lineBarsData: [
-          LineChartBarData(
-            spots: analytics!.monthlyUserGrowth.asMap().entries.map((entry) {
-              return FlSpot(entry.key.toDouble(), entry.value.totalUsers.toDouble());
-            }).toList(),
-            isCurved: true,
-            color: Colors.green,
-            barWidth: 3,
-            dotData: FlDotData(show: true),
-            belowBarData: BarAreaData(
-              show: true,
-              color: Colors.green.withOpacity(0.1),
-            ),
-          ),
-        ],
-        minY: 0,
-        maxY: maxUsers * 1.2,
-      ),
-    );
-  }
-
   Widget _buildRatingDistributionChart() {
     final ratingData = [
       analytics!.rating5Count,
@@ -1316,7 +1176,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
         gridData: FlGridData(show: false),
         borderData: FlBorderData(show: false),
         barGroups: ratingData.asMap().entries.map((entry) {
-          final colors = [Colors.green, Colors.lightGreen, Colors.orange, Colors.deepOrange, Colors.red];
+          final colors = [Colors.green, Colors.lightGreen, const Color(0xFFFFB84D), Colors.deepOrange, Colors.red];
           return BarChartGroupData(
             x: entry.key,
             barRods: [
@@ -1380,12 +1240,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
               return FlSpot(entry.key.toDouble(), entry.value.totalProperties.toDouble());
             }).toList(),
             isCurved: true,
-            color: Colors.orange,
+            color: const Color(0xFFFFB84D),
             barWidth: 3,
             dotData: FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
-              color: Colors.orange.withOpacity(0.1),
+              color: const Color(0xFFFFB84D).withOpacity(0.1),
             ),
           ),
         ],
