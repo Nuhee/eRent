@@ -1,17 +1,17 @@
 import 'dart:ui';
-import 'package:erent_desktop/screens/analytics_screen.dart';
+import 'package:erent_landlord_desktop/screens/analytics_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:erent_desktop/providers/city_provider.dart';
-import 'package:erent_desktop/providers/country_provider.dart';
-import 'package:erent_desktop/providers/user_provider.dart';
-import 'package:erent_desktop/providers/gender_provider.dart';
-import 'package:erent_desktop/providers/review_provider.dart';
-import 'package:erent_desktop/providers/property_type_provider.dart';
-import 'package:erent_desktop/providers/amenity_provider.dart';
-import 'package:erent_desktop/providers/property_provider.dart';
-import 'package:erent_desktop/providers/rent_provider.dart';
-import 'package:erent_desktop/providers/analytics_provider.dart';
-import 'package:erent_desktop/providers/auth_provider.dart';
+import 'package:erent_landlord_desktop/providers/city_provider.dart';
+import 'package:erent_landlord_desktop/providers/country_provider.dart';
+import 'package:erent_landlord_desktop/providers/user_provider.dart';
+import 'package:erent_landlord_desktop/providers/gender_provider.dart';
+import 'package:erent_landlord_desktop/providers/review_provider.dart';
+import 'package:erent_landlord_desktop/providers/property_type_provider.dart';
+import 'package:erent_landlord_desktop/providers/amenity_provider.dart';
+import 'package:erent_landlord_desktop/providers/property_provider.dart';
+import 'package:erent_landlord_desktop/providers/rent_provider.dart';
+import 'package:erent_landlord_desktop/providers/analytics_provider.dart';
+import 'package:erent_landlord_desktop/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 
 
@@ -65,9 +65,9 @@ class MyApp extends StatelessWidget {
       title: 'eRent',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF5B9BD5), // Soft blue
-          primary: const Color(0xFF5B9BD5),
-          secondary: const Color(0xFF7AB8CC), // Softer teal-blue
+          seedColor: const Color(0xFFF59E0B), // Warm amber/orange
+          primary: const Color(0xFFF59E0B),
+          secondary: const Color(0xFFF97316), // Orange
         ),
         useMaterial3: true,
       ),
@@ -86,7 +86,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
-final TextEditingController usernameController = TextEditingController(text: "desktop");
+final TextEditingController usernameController = TextEditingController(text: "landlord");
       final TextEditingController passwordController = TextEditingController(text: "test");
   bool _isPasswordVisible = false;
   bool _isLoading = false;
@@ -188,9 +188,9 @@ final TextEditingController usernameController = TextEditingController(text: "de
                                     Row(
                                       children: [
                                         Icon(
-                                          Icons.dashboard_rounded,
+                                          Icons.home_work_rounded,
                                           size: 48,
-                                          color: const Color(0xFF5B9BD5),
+                                          color: const Color(0xFFF59E0B),
                                         ),
                                         const SizedBox(width: 16),
                                         Column(
@@ -211,11 +211,11 @@ final TextEditingController usernameController = TextEditingController(text: "de
                                               style: TextStyle(
                                                 fontSize: 52,
                                                 fontWeight: FontWeight.bold,
-                                                color: const Color(0xFF5B9BD5),
+                                                color: const Color(0xFFF59E0B),
                                                 letterSpacing: 1,
                                                 shadows: [
                                                   Shadow(
-                                                    color: const Color(0xFF5B9BD5).withOpacity(0.5),
+                                                    color: const Color(0xFFF59E0B).withOpacity(0.5),
                                                     offset: const Offset(0, 0),
                                                     blurRadius: 20,
                                                   ),
@@ -233,8 +233,8 @@ final TextEditingController usernameController = TextEditingController(text: "de
                                       decoration: BoxDecoration(
                                         gradient: const LinearGradient(
                                           colors: [
-                                            Color(0xFF5B9BD5),
-                                            Color(0xFF7AB8CC),
+                                            Color(0xFFF59E0B),
+                                            Color(0xFFF97316),
                                           ],
                                         ),
                                         borderRadius: BorderRadius.circular(2),
@@ -242,7 +242,7 @@ final TextEditingController usernameController = TextEditingController(text: "de
                                     ),
                                     const SizedBox(height: 32),
                                     Text(
-                                      "Your gateway to finding\nperfect rental properties",
+                                      "Manage your properties\nand grow your rental business",
                                       style: TextStyle(
                                         fontSize: 18,
                                         color: Colors.white.withOpacity(0.9),
@@ -301,13 +301,13 @@ final TextEditingController usernameController = TextEditingController(text: "de
                                       Row(
                                         children: [
                                           Icon(
-                                            Icons.dashboard_rounded,
-                                            color: const Color(0xFF5B9BD5),
+                                            Icons.business_rounded,
+                                            color: const Color(0xFFF59E0B),
                                             size: 32,
                                           ),
                                           const SizedBox(width: 12),
                                           Text(
-                                            "Admin Portal",
+                                            "Landlord Portal",
                                             style: TextStyle(
                                               fontSize: 36,
                                               fontWeight: FontWeight.bold,
@@ -319,7 +319,7 @@ final TextEditingController usernameController = TextEditingController(text: "de
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
-                                        "Sign in to access your dashboard",
+                                        "Sign in to manage your properties",
                                         style: TextStyle(
                                           fontSize: 16,
                                           color: Colors.grey[600],
@@ -355,7 +355,7 @@ final TextEditingController usernameController = TextEditingController(text: "de
                                       hintText: "Enter your username",
                                       prefixIcon: Icon(
                                         Icons.person_outline,
-                                        color: const Color(0xFF5B9BD5),
+                                        color: const Color(0xFFF59E0B),
                                       ),
                                       filled: true,
                                       fillColor: Colors.grey[50],
@@ -374,7 +374,7 @@ final TextEditingController usernameController = TextEditingController(text: "de
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: const BorderSide(
-                                          color: Color(0xFF5B9BD5),
+                                          color: Color(0xFFF59E0B),
                                           width: 2,
                                         ),
                                       ),
@@ -412,7 +412,7 @@ final TextEditingController usernameController = TextEditingController(text: "de
                                       hintText: "Enter your password",
                                       prefixIcon: Icon(
                                         Icons.lock_outline,
-                                        color: const Color(0xFF5B9BD5),
+                                        color: const Color(0xFFF59E0B),
                                       ),
                                       suffixIcon: IconButton(
                                         icon: Icon(
@@ -445,7 +445,7 @@ final TextEditingController usernameController = TextEditingController(text: "de
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: const BorderSide(
-                                          color: Color(0xFF5B9BD5),
+                                          color: Color(0xFFF59E0B),
                                           width: 2,
                                         ),
                                       ),
@@ -476,8 +476,8 @@ final TextEditingController usernameController = TextEditingController(text: "de
                                     decoration: BoxDecoration(
                                       gradient: const LinearGradient(
                                         colors: [
-                                          Color(0xFF5B9BD5),
-                                          Color(0xFF7AB8CC),
+                                          Color(0xFFF59E0B),
+                                          Color(0xFFF97316),
                                         ],
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
@@ -485,7 +485,7 @@ final TextEditingController usernameController = TextEditingController(text: "de
                                       borderRadius: BorderRadius.circular(12),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: const Color(0xFF5B9BD5).withOpacity(0.4),
+                                          color: const Color(0xFFF59E0B).withOpacity(0.4),
                                           spreadRadius: 0,
                                           blurRadius: 15,
                                           offset: const Offset(0, 6),
@@ -559,15 +559,15 @@ final TextEditingController usernameController = TextEditingController(text: "de
       final user = await userProvider.authenticate(username, password);
 
       if (user != null) {
-        // Check if user has admin role (roleId = 1)
-        bool hasAdminRole = user.roles.any((role) => role.id == 1);
+        // Check if user has landlord role (roleId = 3)
+        bool hasLandlordRole = user.roles.any((role) => role.id == 3);
 
         print(
           "User roles: ${user.roles.map((r) => '${r.name} (ID: ${r.id})').join(', ')}",
         );
-        print("Has admin role: $hasAdminRole");
+        print("Has landlord role: $hasLandlordRole");
 
-        if (hasAdminRole) {
+        if (hasLandlordRole) {
           if (mounted) {
             Navigator.push(
               context,
@@ -612,7 +612,7 @@ final TextEditingController usernameController = TextEditingController(text: "de
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: const Row(
           children: [
-            Icon(Icons.error_outline, color: Color(0xFF00D4AA)),
+            Icon(Icons.error_outline, color: Color(0xFFF59E0B)),
             SizedBox(width: 8),
             Text("Login Failed", style: TextStyle(color: Colors.black87)),
           ],
@@ -622,7 +622,7 @@ final TextEditingController usernameController = TextEditingController(text: "de
           TextButton(
             onPressed: () => Navigator.pop(context),
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF00D4AA),
+              foregroundColor: const Color(0xFFF59E0B),
             ),
             child: const Text("OK"),
           ),
@@ -639,7 +639,7 @@ final TextEditingController usernameController = TextEditingController(text: "de
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: const Row(
           children: [
-            Icon(Icons.admin_panel_settings, color: Color(0xFF00D4AA)),
+            Icon(Icons.business_rounded, color: Color(0xFFF59E0B)),
             SizedBox(width: 8),
             Text("Access Denied", style: TextStyle(color: Colors.black87)),
           ],
@@ -649,12 +649,12 @@ final TextEditingController usernameController = TextEditingController(text: "de
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "You do not have administrator privileges.",
+              "You do not have landlord privileges.",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             SizedBox(height: 12),
             Text(
-              "This application is restricted to administrators only. Please contact your system administrator if you believe you should have access.",
+              "This application is restricted to landlords only. Please contact your system administrator if you believe you should have access.",
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],
@@ -674,7 +674,7 @@ final TextEditingController usernameController = TextEditingController(text: "de
               });
             },
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF00D4AA),
+              foregroundColor: const Color(0xFFF59E0B),
             ),
             child: const Text("OK"),
           ),
