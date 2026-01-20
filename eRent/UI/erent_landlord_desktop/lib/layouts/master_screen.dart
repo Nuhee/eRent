@@ -11,6 +11,7 @@ import 'package:erent_landlord_desktop/screens/amenity_list_screen.dart';
 import 'package:erent_landlord_desktop/screens/property_list_screen.dart';
 import 'package:erent_landlord_desktop/screens/rent_list_screen.dart';
 import 'package:erent_landlord_desktop/screens/analytics_screen.dart';
+import 'package:erent_landlord_desktop/screens/profile_screen.dart';
 
 class MasterScreen extends StatefulWidget {
   const MasterScreen({
@@ -355,6 +356,14 @@ class _MasterScreenState extends State<MasterScreen>
             const SizedBox(height: 5),
             _modernDrawerTile(
               context,
+              icon: Icons.person_outline,
+              activeIcon: Icons.person_rounded,
+              label: 'My Profile',
+              screen: const ProfileScreen(),
+            ),
+            const SizedBox(height: 5),
+            _modernDrawerTile(
+              context,
               icon: Icons.rate_review_outlined,
               activeIcon: Icons.rate_review,
               label: 'Reviews',
@@ -513,6 +522,10 @@ Widget _modernDrawerTile(
     isSelected =
         currentRoute == 'PropertyListScreen' ||
         currentRoute == 'PropertyDetailsScreen';
+  } else if (label == 'My Profile') {
+    isSelected =
+        currentRoute == 'ProfileScreen' ||
+        currentRoute == 'ProfileEditScreen';
   } else if (label == 'Rents') {
     isSelected =
         currentRoute == 'RentListScreen' ||
