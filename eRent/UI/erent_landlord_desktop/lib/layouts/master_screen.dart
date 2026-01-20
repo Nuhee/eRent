@@ -339,18 +339,18 @@ class _MasterScreenState extends State<MasterScreen>
             const SizedBox(height: 8),
             _modernDrawerTile(
               context,
-              icon: Icons.home_outlined,
-              activeIcon: Icons.home_rounded,
-              label: 'Properties',
-              screen: const PropertyListScreen(),
-            ),
-            const SizedBox(height: 5),
-            _modernDrawerTile(
-              context,
               icon: Icons.receipt_long_outlined,
               activeIcon: Icons.receipt_long_rounded,
               label: 'Rents',
               screen: const RentListScreen(),
+            ),
+            const SizedBox(height: 5),
+            _modernDrawerTile(
+              context,
+              icon: Icons.home_outlined,
+              activeIcon: Icons.home_rounded,
+              label: 'Properties',
+              screen: const PropertyListScreen(),
             ),
             const SizedBox(height: 5),
             _modernDrawerTile(

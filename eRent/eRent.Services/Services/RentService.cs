@@ -82,6 +82,12 @@ namespace eRent.Services.Services
                 query = query.Where(x => x.UserId == search.UserId.Value);
             }
 
+            // Filter by landlord's properties
+            if (search.LandlordId.HasValue)
+            {
+                query = query.Where(x => x.Property != null && x.Property.LandlordId == search.LandlordId.Value);
+            }
+
             if (search.IsDailyRental.HasValue)
             {
                 query = query.Where(x => x.IsDailyRental == search.IsDailyRental.Value);
