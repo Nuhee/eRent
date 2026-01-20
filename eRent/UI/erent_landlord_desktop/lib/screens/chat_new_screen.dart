@@ -86,7 +86,6 @@ class _ChatNewScreenState extends State<ChatNewScreen> {
         _filteredUsers = _users.where((user) {
           return user.firstName.toLowerCase().contains(lowerQuery) ||
               user.lastName.toLowerCase().contains(lowerQuery) ||
-              user.email.toLowerCase().contains(lowerQuery) ||
               user.username.toLowerCase().contains(lowerQuery);
         }).toList();
       });
@@ -203,7 +202,7 @@ class _ChatNewScreenState extends State<ChatNewScreen> {
         controller: _searchController,
         onChanged: _filterUsers,
         decoration: InputDecoration(
-          hintText: 'Search users by name, email, or username...',
+          hintText: 'Search users by name or username...',
           hintStyle: TextStyle(color: Colors.grey[400]),
           prefixIcon: Icon(Icons.search_rounded, color: Colors.grey[400]),
           suffixIcon: _searchController.text.isNotEmpty
@@ -327,7 +326,7 @@ class _ChatNewScreenState extends State<ChatNewScreen> {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          Navigator.pushReplacement(
+          Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => ChatConversationScreen(
@@ -425,24 +424,6 @@ class _ChatNewScreenState extends State<ChatNewScreen> {
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.grey[600],
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Icon(Icons.email_outlined, size: 14, color: Colors.grey[400]),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            user.email,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,

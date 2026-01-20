@@ -16,11 +16,12 @@ class ChatListScreen extends StatefulWidget {
   State<ChatListScreen> createState() => _ChatListScreenState();
 }
 
-class _ChatListScreenState extends State<ChatListScreen> {
+class _ChatListScreenState extends State<ChatListScreen> with WidgetsBindingObserver {
   late ChatProvider chatProvider;
   List<Conversation> _conversations = [];
   bool _isLoading = true;
   int _unreadCount = 0;
+  bool _hasLoadedOnce = false;
 
   User? get currentUser => UserProvider.currentUser;
 
@@ -28,7 +29,22 @@ class _ChatListScreenState extends State<ChatListScreen> {
   void initState() {
     super.initState();
     chatProvider = Provider.of<ChatProvider>(context, listen: false);
+    WidgetsBinding.instance.addObserver(this);
     _loadConversations();
+    _hasLoadedOnce = true;
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _hasLoadedOnce && mounted) {
+      _loadConversations();
+    }
   }
 
   Future<void> _loadConversations() async {
@@ -308,8 +324,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          Navigator.push(
+        onTap: () async {
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => ChatConversationScreen(
@@ -319,7 +335,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
               ),
               settings: const RouteSettings(name: 'ChatConversationScreen'),
             ),
-          ).then((_) => _loadConversations());
+          );
+          // Refresh when returning from conversation
+          if (mounted) {
+            _loadConversations();
+          }
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
