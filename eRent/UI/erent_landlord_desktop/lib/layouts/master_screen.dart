@@ -2,12 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:erent_landlord_desktop/main.dart';
 import 'package:erent_landlord_desktop/providers/user_provider.dart';
-import 'package:erent_landlord_desktop/screens/country_list_screen.dart';
-import 'package:erent_landlord_desktop/screens/city_list_screen.dart';
-import 'package:erent_landlord_desktop/screens/review_list_screen.dart';
-import 'package:erent_landlord_desktop/screens/users_list_screen.dart';
-import 'package:erent_landlord_desktop/screens/property_type_list_screen.dart';
-import 'package:erent_landlord_desktop/screens/amenity_list_screen.dart';
 import 'package:erent_landlord_desktop/screens/property_list_screen.dart';
 import 'package:erent_landlord_desktop/screens/rent_list_screen.dart';
 import 'package:erent_landlord_desktop/screens/analytics_screen.dart';
@@ -323,7 +317,7 @@ class _MasterScreenState extends State<MasterScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Analytics Section (First as requested)
+            // Analytics & Reports Section
             _buildSectionHeader('Analytics & Reports', Icons.analytics_outlined),
             const SizedBox(height: 8),
             _modernDrawerTile(
@@ -360,62 +354,6 @@ class _MasterScreenState extends State<MasterScreen>
               activeIcon: Icons.person_rounded,
               label: 'My Profile',
               screen: const ProfileScreen(),
-            ),
-            const SizedBox(height: 5),
-            _modernDrawerTile(
-              context,
-              icon: Icons.rate_review_outlined,
-              activeIcon: Icons.rate_review,
-              label: 'Reviews',
-              screen: ReviewListScreen(),
-            ),
-            const SizedBox(height: 20),
-            
-            // Configuration Section
-            _buildSectionHeader('Configuration', Icons.settings_outlined),
-            const SizedBox(height: 8),
-            _modernDrawerTile(
-              context,
-              icon: Icons.flag_outlined,
-              activeIcon: Icons.flag_rounded,
-              label: 'Countries',
-              screen: CountryListScreen(),
-            ),
-            const SizedBox(height: 5),
-            _modernDrawerTile(
-              context,
-              icon: Icons.location_city_outlined,
-              activeIcon: Icons.location_city_rounded,
-              label: 'Cities',
-              screen: CityListScreen(),
-            ),
-            const SizedBox(height: 5),
-            _modernDrawerTile(
-              context,
-              icon: Icons.category_outlined,
-              activeIcon: Icons.category,
-              label: 'Property Types',
-              screen: const PropertyTypeListScreen(),
-            ),
-            const SizedBox(height: 5),
-            _modernDrawerTile(
-              context,
-              icon: Icons.star_outlined,
-              activeIcon: Icons.star,
-              label: 'Amenities',
-              screen: const AmenityListScreen(),
-            ),
-            const SizedBox(height: 20),
-            
-            // User Management Section
-            _buildSectionHeader('User Management', Icons.people_outlined),
-            const SizedBox(height: 8),
-            _modernDrawerTile(
-              context,
-              icon: Icons.people_outlined,
-              activeIcon: Icons.people_rounded,
-              label: 'Users',
-              screen: const UsersListScreen(),
             ),
           ],
         ),
@@ -489,39 +427,11 @@ Widget _modernDrawerTile(
   // Get the current screen type from the route
   bool isSelected = false;
 
-  if (label == 'Cities') {
-    isSelected =
-        currentRoute == 'CityListScreen' ||
-        currentRoute == 'CityDetailsScreen' ||
-        currentRoute == 'CityEditScreen';
-  } else if (label == 'Reviews') {
-    isSelected =
-        currentRoute == 'ReviewListScreen' ||
-        currentRoute == 'ReviewDetailsScreen';
-  } else if (label == 'Countries') {
-    isSelected =
-        currentRoute == 'CountryListScreen' ||
-        currentRoute == 'CountryDetailsScreen' ||
-        currentRoute == 'CountryEditScreen';
-  } else if (label == 'Users') {
-    isSelected =
-        currentRoute == 'UsersListScreen' ||
-        currentRoute == 'UsersDetailsScreen' ||
-        currentRoute == 'UsersEditScreen';
-  } else if (label == 'Property Types') {
-    isSelected =
-        currentRoute == 'PropertyTypeListScreen' ||
-        currentRoute == 'PropertyTypeDetailsScreen' ||
-        currentRoute == 'PropertyTypeEditScreen';
-  } else if (label == 'Amenities') {
-    isSelected =
-        currentRoute == 'AmenityListScreen' ||
-        currentRoute == 'AmenityDetailsScreen' ||
-        currentRoute == 'AmenityEditScreen';
-  } else if (label == 'Properties') {
+  if (label == 'Properties') {
     isSelected =
         currentRoute == 'PropertyListScreen' ||
-        currentRoute == 'PropertyDetailsScreen';
+        currentRoute == 'PropertyDetailsScreen' ||
+        currentRoute == 'PropertyEditScreen';
   } else if (label == 'My Profile') {
     isSelected =
         currentRoute == 'ProfileScreen' ||
