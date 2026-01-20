@@ -12,7 +12,7 @@ using eRent.Services.Database;
 namespace eRent.Services.Migrations
 {
     [DbContext(typeof(eRentDbContext))]
-    [Migration("20260116093859_init")]
+    [Migration("20260120110153_init")]
     partial class init
     {
         /// <inheritdoc />
