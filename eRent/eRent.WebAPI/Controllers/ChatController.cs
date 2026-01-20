@@ -3,6 +3,7 @@ using eRent.Model.Responses;
 using eRent.Model.SearchObjects;
 using eRent.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace eRent.WebAPI.Controllers
@@ -48,6 +49,22 @@ namespace eRent.WebAPI.Controllers
                 return NotFound();
 
             return Ok();
+        }
+
+        [HttpGet("conversations/{userId}")]
+        public async Task<ActionResult<List<ConversationResponse>>> GetConversations(int userId)
+        {
+            return await _chatService.GetConversationsAsync(userId);
+        }
+
+        [HttpGet("conversation/{userId}/{otherUserId}")]
+        public async Task<ActionResult<PagedResult<ChatResponse>>> GetConversationMessages(
+            int userId, 
+            int otherUserId, 
+            [FromQuery] int page = 0, 
+            [FromQuery] int pageSize = 50)
+        {
+            return await _chatService.GetConversationMessagesAsync(userId, otherUserId, page, pageSize);
         }
     }
 } 

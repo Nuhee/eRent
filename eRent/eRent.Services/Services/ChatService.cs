@@ -6,6 +6,7 @@ using eRent.Services.Interfaces;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -205,6 +206,70 @@ namespace eRent.Services.Services
 
             // Reload the entity with includes after update
             return await GetByIdAsync(entity.Id);
+        }
+
+        public async Task<List<ConversationResponse>> GetConversationsAsync(int userId)
+        {
+            // Get all unique users that the current user has chatted with
+            var conversations = await _context.Chats
+                .Where(c => c.SenderId == userId || c.ReceiverId == userId)
+                .GroupBy(c => c.SenderId == userId ? c.ReceiverId : c.SenderId)
+                .Select(g => new
+                {
+                    OtherUserId = g.Key,
+                    LastMessage = g.OrderByDescending(c => c.CreatedAt).First(),
+                    UnreadCount = g.Count(c => c.ReceiverId == userId && !c.IsRead)
+                })
+                .ToListAsync();
+
+            // Get user details for each conversation
+            var userIds = conversations.Select(c => c.OtherUserId).ToList();
+            var users = await _context.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToDictionaryAsync(u => u.Id);
+
+            var result = conversations.Select(c => new ConversationResponse
+            {
+                UserId = c.OtherUserId,
+                UserName = users.ContainsKey(c.OtherUserId) 
+                    ? $"{users[c.OtherUserId].FirstName} {users[c.OtherUserId].LastName}" 
+                    : "Unknown User",
+                UserPicture = users.ContainsKey(c.OtherUserId) ? users[c.OtherUserId].Picture : null,
+                LastMessage = c.LastMessage.Message.Length > 50 
+                    ? c.LastMessage.Message.Substring(0, 50) + "..." 
+                    : c.LastMessage.Message,
+                LastMessageAt = c.LastMessage.CreatedAt,
+                UnreadCount = c.UnreadCount,
+                IsLastMessageFromMe = c.LastMessage.SenderId == userId
+            })
+            .OrderByDescending(c => c.LastMessageAt)
+            .ToList();
+
+            return result;
+        }
+
+        public async Task<PagedResult<ChatResponse>> GetConversationMessagesAsync(int userId, int otherUserId, int page = 0, int pageSize = 50)
+        {
+            var query = _context.Chats
+                .Include(c => c.Sender)
+                .Include(c => c.Receiver)
+                .Where(c => 
+                    (c.SenderId == userId && c.ReceiverId == otherUserId) ||
+                    (c.SenderId == otherUserId && c.ReceiverId == userId));
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(c => c.CreatedAt)
+                .Skip(page * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<ChatResponse>
+            {
+                Items = items.Select(MapToResponse).ToList(),
+                TotalCount = totalCount
+            };
         }
     }
 } 

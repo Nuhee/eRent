@@ -6,6 +6,7 @@ import 'package:erent_landlord_desktop/screens/property_list_screen.dart';
 import 'package:erent_landlord_desktop/screens/rent_list_screen.dart';
 import 'package:erent_landlord_desktop/screens/analytics_screen.dart';
 import 'package:erent_landlord_desktop/screens/profile_screen.dart';
+import 'package:erent_landlord_desktop/screens/chat_list_screen.dart';
 
 class MasterScreen extends StatefulWidget {
   const MasterScreen({
@@ -350,6 +351,14 @@ class _MasterScreenState extends State<MasterScreen>
             const SizedBox(height: 5),
             _modernDrawerTile(
               context,
+              icon: Icons.chat_bubble_outline,
+              activeIcon: Icons.chat_bubble_rounded,
+              label: 'Messages',
+              screen: const ChatListScreen(),
+            ),
+            const SizedBox(height: 5),
+            _modernDrawerTile(
+              context,
               icon: Icons.person_outline,
               activeIcon: Icons.person_rounded,
               label: 'My Profile',
@@ -442,6 +451,11 @@ Widget _modernDrawerTile(
         currentRoute == 'RentDetailsScreen';
   } else if (label == 'Business Analytics') {
     isSelected = currentRoute == 'AnalyticsScreen';
+  } else if (label == 'Messages') {
+    isSelected =
+        currentRoute == 'ChatListScreen' ||
+        currentRoute == 'ChatConversationScreen' ||
+        currentRoute == 'ChatNewScreen';
   }
 
   return Container(
