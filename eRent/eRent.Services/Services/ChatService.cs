@@ -53,7 +53,8 @@ namespace eRent.Services.Services
 
         protected override async Task BeforeInsert(Chat entity, ChatUpsertRequest request)
         {
-            entity.CreatedAt = DateTime.Now;
+            // Use UTC time for Docker compatibility
+            entity.CreatedAt = DateTime.UtcNow;
             entity.IsRead = false;
             await Task.CompletedTask;
         }
@@ -66,7 +67,8 @@ namespace eRent.Services.Services
                 return false;
 
             chat.IsRead = true;
-            chat.ReadAt = DateTime.Now;
+            // Use UTC time for Docker compatibility
+            chat.ReadAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return true;
         }
@@ -90,7 +92,8 @@ namespace eRent.Services.Services
             foreach (var message in unreadMessages)
             {
                 message.IsRead = true;
-                message.ReadAt = DateTime.Now;
+                // Use UTC time for Docker compatibility
+                message.ReadAt = DateTime.UtcNow;
             }
 
             await _context.SaveChangesAsync();

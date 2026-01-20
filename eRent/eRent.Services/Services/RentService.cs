@@ -123,7 +123,8 @@ namespace eRent.Services.Services
                 query = query.Where(x => x.IsActive == search.IsActive.Value);
             }
 
-            return query;
+            // Order by ID descending so newest rents appear first
+            return query.OrderByDescending(x => x.Id);
         }
 
         protected RentResponse MapToResponse(Rent entity)
