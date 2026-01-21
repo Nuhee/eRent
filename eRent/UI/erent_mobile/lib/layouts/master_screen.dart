@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:erent_mobile/providers/user_provider.dart';
 import 'package:erent_mobile/screens/home_screen.dart';
-import 'package:erent_mobile/screens/chat_screen.dart';
+import 'package:erent_mobile/screens/chat_list_screen.dart';
 import 'package:erent_mobile/screens/rents_screen.dart';
 import 'package:erent_mobile/screens/profile_screen.dart';
 
@@ -241,7 +241,7 @@ class _MasterScreenState extends State<MasterScreen>
                 physics: const BouncingScrollPhysics(),
                 children: const [
                   HomeScreen(),
-                  ChatScreen(),
+                  ChatListScreen(),
                   RentsScreen(),
                   ProfileScreen(),
                 ],

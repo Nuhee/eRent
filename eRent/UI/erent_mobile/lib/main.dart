@@ -9,6 +9,7 @@ import 'package:erent_mobile/providers/city_provider.dart';
 import 'package:erent_mobile/providers/gender_provider.dart';
 import 'package:erent_mobile/providers/review_provider.dart';
 import 'package:erent_mobile/providers/user_provider.dart';
+import 'package:erent_mobile/providers/chat_provider.dart';
 import 'package:erent_mobile/screens/register_screen.dart';
 
 void main() async {
@@ -28,6 +29,7 @@ void main() async {
         ChangeNotifierProvider<ReviewProvider>(create: (_) => ReviewProvider()),
         ChangeNotifierProvider<CityProvider>(create: (_) => CityProvider()),
         ChangeNotifierProvider<GenderProvider>(create: (_) => GenderProvider()),
+        ChangeNotifierProvider<ChatProvider>(create: (_) => ChatProvider()),
       ],
       child: const MyApp(),
     ),
