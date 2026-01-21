@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:erent_mobile/providers/user_provider.dart';
-import 'package:erent_mobile/screens/profile_screen.dart';
 import 'package:erent_mobile/screens/home_screen.dart';
 import 'package:erent_mobile/screens/chat_screen.dart';
 import 'package:erent_mobile/screens/rents_screen.dart';
+import 'package:erent_mobile/screens/profile_screen.dart';
 
 class MasterScreen extends StatefulWidget {
   const MasterScreen({super.key, required this.child, required this.title});
@@ -285,43 +285,6 @@ class _MasterScreenState extends State<MasterScreen>
   }
 
   Widget _buildHeaderIcon() {
-    final user = UserProvider.currentUser;
-    final isProfilePage = _selectedIndex == 3;
-
-    if (isProfilePage && user?.picture != null && user!.picture!.isNotEmpty) {
-      ImageProvider? imageProvider = ProfileScreen.getUserImageProvider(user.picture);
-
-      return Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.white,
-            width: 3,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: CircleAvatar(
-          backgroundColor: Colors.white,
-          backgroundImage: imageProvider,
-          child: imageProvider == null
-              ? const Icon(
-                  Icons.person_rounded,
-                  color: Color(0xFF5B9BD5),
-                  size: 28,
-                )
-              : null,
-        ),
-      );
-    }
-
     return Container(
       width: 50,
       height: 50,
