@@ -131,6 +131,56 @@ class _RegisterScreenState extends State<RegisterScreen>
     }
   }
 
+  void _fillDemoData() {
+    if (_cities.isEmpty || _genders.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please wait for data to load..."),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      firstNameController.text = "John";
+      lastNameController.text = "Doe";
+      emailController.text = "john.doe@example.com";
+      usernameController.text = "johndoe";
+      passwordController.text = "test";
+      confirmPasswordController.text = "test";
+      phoneController.text = "+1234567890";
+      
+      // Select first gender if available
+      if (_genders.isNotEmpty) {
+        _selectedGender = _genders.first;
+      }
+      
+      // Select first city if available
+      if (_cities.isNotEmpty) {
+        _selectedCity = _cities.first;
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white, size: 20),
+            SizedBox(width: 8),
+            Text("Demo data filled successfully!"),
+          ],
+        ),
+        backgroundColor: const Color(0xFF10B981),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
@@ -178,6 +228,24 @@ class _RegisterScreenState extends State<RegisterScreen>
             ),
           ],
         ),
+        actions: [
+          Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              onPressed: _fillDemoData,
+              icon: const Icon(
+                Icons.auto_fix_high_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+              tooltip: "Fill Demo Data",
+            ),
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -252,271 +320,290 @@ class _RegisterScreenState extends State<RegisterScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Profile Picture Section
-                        Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF5B9BD5).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.person_add_rounded,
-                                color: Color(0xFF5B9BD5),
-                                size: 28,
-                              ),
+                        // Profile Picture Section - Improved Design
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: const Color(0xFF5B9BD5).withOpacity(0.2),
+                              width: 1,
                             ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              "Profile Picture",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1F2937),
-                                letterSpacing: -0.3,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            // Image Display
-                            Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[50],
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: const Color(0xFF5B9BD5).withOpacity(0.3),
-                                  width: 3,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFF5B9BD5).withOpacity(0.1),
-                                    spreadRadius: 0,
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(
+                                      Icons.person_add_rounded,
+                                      color: Color(0xFF5B9BD5),
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Text(
+                                    "Profile Picture",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF1F2937),
+                                      letterSpacing: -0.3,
+                                    ),
                                   ),
                                 ],
                               ),
-                              child: _pictureBase64 != null
-                                  ? ClipOval(
-                                      child: Image.memory(
-                                        base64Decode(_pictureBase64!),
-                                        fit: BoxFit.cover,
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return _buildImagePlaceholder();
-                                        },
+                              const SizedBox(height: 24),
+                              // Image Display
+                              GestureDetector(
+                                onTap: _pickImage,
+                                child: Container(
+                                  width: 150,
+                                  height: 150,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: const Color(0xFF5B9BD5).withOpacity(0.3),
+                                      width: 3,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF5B9BD5).withOpacity(0.15),
+                                        spreadRadius: 0,
+                                        blurRadius: 16,
+                                        offset: const Offset(0, 6),
                                       ),
-                                    )
-                                  : _buildImagePlaceholder(),
-                            ),
-                            const SizedBox(height: 20),
-                            // Image Selection Buttons
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          Color(0xFF5B9BD5),
-                                          Color(0xFF7AB8CC),
+                                    ],
+                                  ),
+                                  child: _pictureBase64 != null
+                                      ? ClipRRect(
+                                          borderRadius: BorderRadius.circular(17),
+                                          child: Image.memory(
+                                            base64Decode(_pictureBase64!),
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            errorBuilder: (context, error, stackTrace) {
+                                              return _buildImagePlaceholder();
+                                            },
+                                          ),
+                                        )
+                                      : _buildImagePlaceholder(),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              // Image Selection Buttons
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            Color(0xFF5B9BD5),
+                                            Color(0xFF7AB8CC),
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color(0xFF5B9BD5).withOpacity(0.3),
+                                            spreadRadius: 0,
+                                            blurRadius: 10,
+                                            offset: const Offset(0, 4),
+                                          ),
                                         ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
                                       ),
-                                      borderRadius: BorderRadius.circular(14),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: const Color(0xFF5B9BD5).withOpacity(0.4),
-                                          spreadRadius: 0,
-                                          blurRadius: 12,
-                                          offset: const Offset(0, 6),
+                                      child: ElevatedButton.icon(
+                                        onPressed: _pickImage,
+                                        icon: const Icon(Icons.photo_library_rounded, size: 18),
+                                        label: const Text(
+                                          "Select Photo",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
-                                      ],
-                                    ),
-                                    child: ElevatedButton.icon(
-                                      onPressed: _pickImage,
-                                      icon: const Icon(Icons.photo_library_rounded, size: 18),
-                                      label: const Text(
-                                        "Select",
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shadowColor: Colors.transparent,
+                                          foregroundColor: Colors.white,
+                                          padding: EdgeInsets.zero,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          elevation: 0,
                                         ),
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.transparent,
-                                        shadowColor: Colors.transparent,
-                                        foregroundColor: Colors.white,
-                                        padding: EdgeInsets.zero,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(14),
-                                        ),
-                                        elevation: 0,
                                       ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: OutlinedButton.icon(
-                                    onPressed: () {
-                                      setState(() {
-                                        _image = null;
-                                        _pictureBase64 = null;
-                                      });
-                                    },
-                                    icon: const Icon(Icons.clear_rounded, size: 18),
-                                    label: const Text(
-                                      "Clear",
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: Colors.grey[700],
-                                      side: BorderSide(
+                                  const SizedBox(width: 12),
+                                  Container(
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
                                         color: Colors.grey[300]!,
-                                        width: 2,
-                                      ),
-                                      padding: EdgeInsets.zero,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(14),
+                                        width: 1.5,
                                       ),
                                     ),
+                                    child: IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _image = null;
+                                          _pictureBase64 = null;
+                                        });
+                                      },
+                                      icon: const Icon(
+                                        Icons.clear_rounded,
+                                        size: 20,
+                                        color: Colors.grey,
+                                      ),
+                                      tooltip: "Clear",
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 32),
-                        const Divider(),
                         const SizedBox(height: 32),
 
                         // Personal Information Section
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF5B9BD5).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF5B9BD5).withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: const Color(0xFF5B9BD5).withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(
+                                  Icons.person_outline_rounded,
+                                  color: Color(0xFF5B9BD5),
+                                  size: 20,
+                                ),
                               ),
-                              child: const Icon(
-                                Icons.person_outline_rounded,
+                              const SizedBox(width: 12),
+                              const Text(
+                                "Personal Information",
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1F2937),
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // First Name field
+                        TextField(
+                          controller: firstNameController,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFF1F2937),
+                          ),
+                          decoration: InputDecoration(
+                            labelText: "First Name",
+                            hintText: "Enter first name",
+                            prefixIcon: const Icon(
+                              Icons.person_outline,
+                              color: Color(0xFF5B9BD5),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide(
+                                color: Colors.grey[300]!,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide(
+                                color: Colors.grey[300]!,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
                                 color: Color(0xFF5B9BD5),
-                                size: 20,
+                                width: 2,
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            const Text(
-                              "Personal Information",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1F2937),
-                                letterSpacing: -0.3,
-                              ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 18,
                             ),
-                          ],
+                          ),
                         ),
                         const SizedBox(height: 20),
 
-                        // First Name and Last Name row
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: firstNameController,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Color(0xFF1F2937),
-                                ),
-                                decoration: InputDecoration(
-                                  labelText: "First Name",
-                                  hintText: "Enter first name",
-                                  prefixIcon: const Icon(
-                                    Icons.person_outline,
-                                    color: Color(0xFF5B9BD5),
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[50],
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(
-                                      color: Colors.grey[300]!,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(
-                                      color: Colors.grey[300]!,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xFF5B9BD5),
-                                      width: 2,
-                                    ),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 18,
-                                  ),
-                                ),
+                        // Last Name field
+                        TextField(
+                          controller: lastNameController,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFF1F2937),
+                          ),
+                          decoration: InputDecoration(
+                            labelText: "Last Name",
+                            hintText: "Enter last name",
+                            prefixIcon: const Icon(
+                              Icons.person_outline,
+                              color: Color(0xFF5B9BD5),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide(
+                                color: Colors.grey[300]!,
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: TextField(
-                                controller: lastNameController,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Color(0xFF1F2937),
-                                ),
-                                decoration: InputDecoration(
-                                  labelText: "Last Name",
-                                  hintText: "Enter last name",
-                                  prefixIcon: const Icon(
-                                    Icons.person_outline,
-                                    color: Color(0xFF5B9BD5),
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[50],
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(
-                                      color: Colors.grey[300]!,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(
-                                      color: Colors.grey[300]!,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xFF5B9BD5),
-                                      width: 2,
-                                    ),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 18,
-                                  ),
-                                ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide(
+                                color: Colors.grey[300]!,
                               ),
                             ),
-                          ],
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF5B9BD5),
+                                width: 2,
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 18,
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 20),
 
@@ -766,37 +853,46 @@ class _RegisterScreenState extends State<RegisterScreen>
                           ),
                         ),
                         const SizedBox(height: 32),
-                        const Divider(),
-                        const SizedBox(height: 32),
-
+                        
                         // Additional Information Section
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF5B9BD5).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.info_outline_rounded,
-                                color: Color(0xFF5B9BD5),
-                                size: 20,
-                              ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF5B9BD5).withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: const Color(0xFF5B9BD5).withOpacity(0.2),
+                              width: 1,
                             ),
-                            const SizedBox(width: 12),
-                            const Text(
-                              "Additional Information",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1F2937),
-                                letterSpacing: -0.3,
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(
+                                  Icons.info_outline_rounded,
+                                  color: Color(0xFF5B9BD5),
+                                  size: 20,
+                                ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 12),
+                              const Text(
+                                "Additional Information",
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1F2937),
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
 
                         // Gender dropdown
                         DropdownButtonFormField<Gender>(
@@ -900,7 +996,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                             });
                           },
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 36),
 
                         // Register button
                         Container(
@@ -914,7 +1010,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
                                 color: const Color(0xFF5B9BD5).withOpacity(0.4),
@@ -934,7 +1030,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(16),
                               ),
                               padding: EdgeInsets.zero,
                             ),
@@ -952,6 +1048,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 : const Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
+                                      Icon(
+                                        Icons.person_add_rounded,
+                                        size: 22,
+                                        color: Colors.white,
+                                      ),
+                                      SizedBox(width: 10),
                                       Text(
                                         "Create Account",
                                         style: TextStyle(
@@ -1146,24 +1248,32 @@ class _RegisterScreenState extends State<RegisterScreen>
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: const Color(0xFF5B9BD5).withOpacity(0.1),
-            shape: BoxShape.circle,
+            borderRadius: BorderRadius.circular(16),
           ),
           child: const Icon(
             Icons.person_rounded,
-            size: 40,
+            size: 48,
             color: Color(0xFF5B9BD5),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Text(
-          "Add Photo",
+          "Tap to add",
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: Colors.grey[600],
+            color: Colors.grey[700],
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          "profile photo",
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey[500],
           ),
         ),
       ],
