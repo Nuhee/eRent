@@ -307,33 +307,43 @@ class BookingDetailsScreen extends StatelessWidget {
 
   Widget _buildSummaryRow(String label, String value, {bool isStatus = false}) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: isStatus ? 16 : 14,
-            fontWeight: isStatus ? FontWeight.bold : FontWeight.w500,
-            color: isStatus ? const Color(0xFF1F2937) : Colors.grey[700],
+        Expanded(
+          flex: 2,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: isStatus ? 16 : 14,
+              fontWeight: isStatus ? FontWeight.bold : FontWeight.w500,
+              color: isStatus ? const Color(0xFF1F2937) : Colors.grey[700],
+            ),
           ),
         ),
-        Container(
-          padding: isStatus ? const EdgeInsets.symmetric(horizontal: 12, vertical: 6) : null,
-          decoration: isStatus
-              ? BoxDecoration(
-                  color: const Color(0xFFFFB84D).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: const Color(0xFFFFB84D).withOpacity(0.3),
-                  ),
-                )
-              : null,
-          child: Text(
-            value,
-            style: TextStyle(
-              fontSize: isStatus ? 14 : 14,
-              fontWeight: FontWeight.bold,
-              color: isStatus ? const Color(0xFFFFB84D) : const Color(0xFF1F2937),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 3,
+          child: Container(
+            padding: isStatus ? const EdgeInsets.symmetric(horizontal: 12, vertical: 6) : null,
+            decoration: isStatus
+                ? BoxDecoration(
+                    color: const Color(0xFFFFB84D).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: const Color(0xFFFFB84D).withOpacity(0.3),
+                    ),
+                  )
+                : null,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: isStatus ? 14 : 14,
+                fontWeight: FontWeight.bold,
+                color: isStatus ? const Color(0xFFFFB84D) : const Color(0xFF1F2937),
+              ),
+              textAlign: TextAlign.right,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),

@@ -79,6 +79,24 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
           ),
         ),
         centerTitle: false,
+        actions: [
+          Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              onPressed: _fillDemoData,
+              icon: const Icon(
+                Icons.auto_fix_high_rounded,
+                color: primaryColor,
+                size: 24,
+              ),
+              tooltip: "Fill Demo Data",
+            ),
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(
@@ -761,6 +779,39 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
         backgroundColor: const Color(0xFFF59E0B),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  void _fillDemoData() {
+    final formState = formKey.currentState;
+    if (formState == null) return;
+
+    formState.fields['name']?.didChange(_getUserFullName().isNotEmpty ? _getUserFullName() : 'John Doe');
+    formState.fields['address']?.didChange('123 Main Street');
+    formState.fields['city']?.didChange('New York');
+    formState.fields['state']?.didChange('NY');
+    formState.fields['country']?.didChange('United States');
+    formState.fields['pincode']?.didChange('10001');
+
+    // Validate the form after filling
+    formState.save();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white, size: 20),
+            SizedBox(width: 8),
+            Text("Demo data filled successfully!"),
+          ],
+        ),
+        backgroundColor: const Color(0xFF10B981),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
