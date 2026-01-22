@@ -168,9 +168,15 @@ class _PropertyLocationScreenState extends State<PropertyLocationScreen> {
                     ),
                     children: [
                       TileLayer(
-                        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                         userAgentPackageName: 'com.erent.mobile',
                         maxZoom: 19,
+                        subdomains: const ['a', 'b', 'c'],
+                        tileProvider: NetworkTileProvider(
+                          headers: {
+                            'User-Agent': 'eRent Mobile App/1.0 (com.erent.mobile)',
+                          },
+                        ),
                       ),
                       MarkerLayer(
                         markers: [
