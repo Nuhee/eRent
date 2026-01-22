@@ -150,7 +150,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
               Expanded(
                 child: _buildMetricCard(
                   'Total Revenue',
-                  '${analytics!.totalRevenue.toStringAsFixed(2)} BAM',
+                  '€${analytics!.totalRevenue.toStringAsFixed(2)}',
                   Icons.attach_money_rounded,
                   const Color(0xFF5B9BD5),
                   'Total revenue from all paid rents since the beginning. This represents the cumulative income from completed rental transactions.',
@@ -160,7 +160,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
               Expanded(
                 child: _buildMetricCard(
                   'Monthly Revenue',
-                  '${analytics!.monthlyRevenue.toStringAsFixed(2)} BAM',
+                  '€${analytics!.monthlyRevenue.toStringAsFixed(2)}',
                   Icons.trending_up_rounded,
                   Colors.green,
                   'Revenue generated from paid rents in the current month. This helps track recent business performance.',
@@ -312,7 +312,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
               Expanded(
                 child: _buildInfoCard(
                   'Average Rent Price',
-                  '${analytics!.averageRentPrice.toStringAsFixed(2)} BAM',
+                  '€${analytics!.averageRentPrice.toStringAsFixed(2)}',
                   Icons.calculate_rounded,
                   'The average price of all paid rental transactions. This helps understand pricing trends and market positioning.',
                 ),

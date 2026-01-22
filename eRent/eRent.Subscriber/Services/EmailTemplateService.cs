@@ -85,7 +85,7 @@ namespace eRent.Subscriber.Services
                 </div>
                 <div class='info-row'>
                     <span class='label'>Total Price: </span>
-                    <span class='value'><strong style='color: #667eea; font-size: 18px;'> {rent.TotalPrice:F2} BAM</strong></span>
+                    <span class='value'><strong style='color: #667eea; font-size: 18px;'>€{rent.TotalPrice:F2}</strong></span>
                 </div>
             </div>
 
@@ -155,7 +155,7 @@ namespace eRent.Subscriber.Services
                 </div>
                 <div class='info-row'>
                     <span class='label'>Total Price: </span>
-                    <span class='value'><strong>{rent.TotalPrice:F2} BAM</strong></span>
+                    <span class='value'><strong>€{rent.TotalPrice:F2}</strong></span>
                 </div>
             </div>
 
@@ -234,7 +234,7 @@ namespace eRent.Subscriber.Services
                 </div>
                 <div class='info-row'>
                     <span class='label'>Total Price: </span>
-                    <span class='value'><strong style='color: #4facfe; font-size: 18px;'>{rent.TotalPrice:F2} BAM</strong></span>
+                    <span class='value'><strong style='color: #4facfe; font-size: 18px;'>€{rent.TotalPrice:F2}</strong></span>
                 </div>
             </div>
 
@@ -306,7 +306,7 @@ namespace eRent.Subscriber.Services
                 </div>
                 <div class='info-row'>
                     <span class='label'>Total Price: </span>
-                    <span class='value'><strong> {rent.TotalPrice:F2} BAM</strong></span>
+                    <span class='value'><strong> €{rent.TotalPrice:F2}</strong></span>
                 </div>
             </div>
 
@@ -381,7 +381,7 @@ namespace eRent.Subscriber.Services
                 </div>
                 <div class='info-row'>
                     <span class='label'>Total Amount Received: </span>
-                    <span class='value'><strong style='color: #11998e; font-size: 18px;'>{rent.TotalPrice:F2} BAM</strong></span>
+                    <span class='value'><strong style='color: #11998e; font-size: 18px;'>€{rent.TotalPrice:F2}</strong></span>
                 </div>
             </div>
 
@@ -438,7 +438,7 @@ namespace eRent.Subscriber.Services
                 </div>
                 <div class='info-row'>
                     <span class='label'>Total Price: </span>
-                    <span class='value'><strong> {rent.TotalPrice:F2} BAM</strong></span>
+                    <span class='value'><strong> €{rent.TotalPrice:F2}</strong></span>
                 </div>
             </div>
             

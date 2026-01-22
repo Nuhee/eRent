@@ -469,7 +469,7 @@ class _RentDetailsScreenState extends State<RentDetailsScreen> {
               const SizedBox(height: 20),
               _buildInfoRow(
                 label: 'Total Price',
-                value: '${_currentRent.totalPrice.toStringAsFixed(2)} BAM',
+                value: '€${_currentRent.totalPrice.toStringAsFixed(2)}',
                 icon: Icons.attach_money_outlined,
                 valueColor: const Color(0xFFFFB84D),
               ),

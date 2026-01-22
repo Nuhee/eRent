@@ -378,7 +378,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      '\$${_property!.pricePerMonth.toStringAsFixed(0)}/mo',
+                      '€${_property!.pricePerMonth.toStringAsFixed(0)}/mo',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -389,7 +389,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                   if (_property!.allowDailyRental && _property!.pricePerDay != null) ...[
                     const SizedBox(height: 4),
                     Text(
-                      '\$${_property!.pricePerDay!.toStringAsFixed(0)}/day',
+                      '€${_property!.pricePerDay!.toStringAsFixed(0)}/day',
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 13,

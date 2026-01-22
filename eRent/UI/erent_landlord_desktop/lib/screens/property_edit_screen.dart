@@ -788,7 +788,7 @@ class _PropertyEditScreenState extends State<PropertyEditScreen> {
       children: [
         _buildTextField(
           controller: _pricePerMonthController,
-          label: 'Price per Month (BAM) *',
+          label: 'Price per Month (€) *',
           hint: 'Enter monthly price',
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
@@ -819,7 +819,7 @@ class _PropertyEditScreenState extends State<PropertyEditScreen> {
           const SizedBox(height: 16),
           _buildTextField(
             controller: _pricePerDayController,
-            label: 'Price per Day (BAM) *',
+            label: 'Price per Day (€) *',
             hint: 'Enter daily price',
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],

@@ -813,7 +813,7 @@ class _RentDetailsScreenState extends State<RentDetailsScreen> {
                 ),
               ),
               Text(
-                '\$${_rent!.totalPrice.toStringAsFixed(2)}',
+                '€${_rent!.totalPrice.toStringAsFixed(2)}',
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

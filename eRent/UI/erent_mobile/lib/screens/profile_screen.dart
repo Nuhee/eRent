@@ -440,7 +440,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ],
                             ),
                             child: Text(
-                              '\$${property.pricePerMonth.toStringAsFixed(0)}/mo',
+                              '€${property.pricePerMonth.toStringAsFixed(0)}/mo',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,

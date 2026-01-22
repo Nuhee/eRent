@@ -180,7 +180,7 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
           ),
           const SizedBox(height: 20),
           Text(
-            '\$${widget.price.toStringAsFixed(2)}',
+            '€${widget.price.toStringAsFixed(2)}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 48,
@@ -511,7 +511,7 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
     try {
       final data = await _createPaymentIntent(
         amount: (widget.price * 100).round().toString(),
-        currency: 'USD',
+        currency: 'EUR',
         name: formData['name'] ?? 'User',
         address: formData['address'] ?? '',
         pin: formData['pincode'] ?? '',

@@ -495,7 +495,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                             ),
                             DataCell(
                               Text(
-                                '${e.pricePerMonth.toStringAsFixed(2)} BAM',
+                                '€${e.pricePerMonth.toStringAsFixed(2)}',
                                 style: const TextStyle(fontSize: 15),
                               ),
                             ),

@@ -308,7 +308,7 @@ class _RentsListScreenState extends State<RentsListScreen> with WidgetsBindingOb
                   Icon(Icons.attach_money_rounded, size: 16, color: Colors.grey[600]),
                   const SizedBox(width: 6),
                   Text(
-                    '\$${rent.totalPrice.toStringAsFixed(2)}',
+                    '€${rent.totalPrice.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

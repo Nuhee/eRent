@@ -315,7 +315,7 @@ class _RentListScreenState extends State<RentListScreen> {
                             ),
                             DataCell(
                               Text(
-                                '${e.totalPrice.toStringAsFixed(2)} BAM',
+                                '€${e.totalPrice.toStringAsFixed(2)}',
                                 style: const TextStyle(fontSize: 15),
                               ),
                             ),

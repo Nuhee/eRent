@@ -195,7 +195,7 @@ class RentDetailsScreen extends StatelessWidget {
               const SizedBox(height: 20),
               _buildInfoRow(
                 label: 'Total Price',
-                value: '${rent.totalPrice.toStringAsFixed(2)} BAM',
+                value: '€${rent.totalPrice.toStringAsFixed(2)}',
                 icon: Icons.attach_money_outlined,
               ),
             ],

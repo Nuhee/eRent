@@ -623,14 +623,14 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
           const SizedBox(height: 16),
           _buildInfoRow(
             label: 'Price per Month',
-            value: '${widget.property.pricePerMonth.toStringAsFixed(2)} BAM',
+            value: '€${widget.property.pricePerMonth.toStringAsFixed(2)}',
             icon: Icons.attach_money_outlined,
           ),
           if (widget.property.allowDailyRental && widget.property.pricePerDay != null) ...[
             const SizedBox(height: 16),
             _buildInfoRow(
               label: 'Price per Day',
-              value: '${widget.property.pricePerDay!.toStringAsFixed(2)} BAM',
+              value: '€${widget.property.pricePerDay!.toStringAsFixed(2)}',
               icon: Icons.calendar_today_outlined,
             ),
           ],

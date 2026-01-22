@@ -472,7 +472,7 @@ class _PropertyBookingScreenState extends State<PropertyBookingScreen> {
                       Expanded(
                         child: _buildRentalTypeOption(
                           title: 'Monthly',
-                          price: '\$${widget.property.pricePerMonth.toStringAsFixed(0)}/mo',
+                          price: '€${widget.property.pricePerMonth.toStringAsFixed(0)}/mo',
                           isSelected: !_isDailyRental,
                           onTap: () => _onRentalTypeChanged(false),
                         ),
@@ -483,7 +483,7 @@ class _PropertyBookingScreenState extends State<PropertyBookingScreen> {
                           child: _buildRentalTypeOption(
                             title: 'Daily',
                             price: widget.property.pricePerDay != null
-                                ? '\$${widget.property.pricePerDay!.toStringAsFixed(0)}/day'
+                                ? '€${widget.property.pricePerDay!.toStringAsFixed(0)}/day'
                                 : 'N/A',
                             isSelected: _isDailyRental,
                             onTap: () => _onRentalTypeChanged(true),
@@ -731,7 +731,7 @@ class _PropertyBookingScreenState extends State<PropertyBookingScreen> {
                           ),
                         ),
                         Text(
-                          '\$${_calculatedPrice.toStringAsFixed(2)}',
+                          '€${_calculatedPrice.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
