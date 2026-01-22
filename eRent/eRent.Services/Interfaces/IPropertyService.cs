@@ -6,5 +6,6 @@ namespace eRent.Services.Interfaces
 {
     public interface IPropertyService : ICRUDService<PropertyResponse, PropertySearchObject, PropertyUpsertRequest, PropertyUpsertRequest>
     {
+        Task<List<PropertyResponse>> GetRecommendedPropertiesAsync(int userId, int count = 5);
     }
 }

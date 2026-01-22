@@ -5,6 +5,9 @@ using eRent.Services.Database;
 using eRent.Services.Interfaces;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.ML;
+using Microsoft.ML.Data;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +17,22 @@ namespace eRent.Services.Services
 {
     public class PropertyService : BaseCRUDService<PropertyResponse, PropertySearchObject, Property, PropertyUpsertRequest, PropertyUpsertRequest>, IPropertyService
     {
+        private static MLContext _mlContext = null;
+        private static object _mlLock = new object();
+        private static ITransformer? _model = null;
+
         public PropertyService(eRentDbContext context, IMapper mapper) : base(context, mapper)
         {
+            if (_mlContext == null)
+            {
+                lock (_mlLock)
+                {
+                    if (_mlContext == null)
+                    {
+                        _mlContext = new MLContext();
+                    }
+                }
+            }
         }
 
         public override async Task<PagedResult<PropertyResponse>> GetAsync(PropertySearchObject search)
@@ -353,6 +370,355 @@ namespace eRent.Services.Services
             {
                 throw new InvalidOperationException("PricePerDay must be provided and greater than 0 when AllowDailyRental is true.");
             }
+        }
+
+        public async Task<List<PropertyResponse>> GetRecommendedPropertiesAsync(int userId, int count = 5)
+        {
+            if (_model == null)
+            {
+                // Fallback: recommend using heuristic approach
+                return await RecommendHeuristic(userId, count);
+            }
+
+            var predictionEngine = _mlContext.Model.CreatePredictionEngine<FeedbackEntry, PropertyScorePrediction>(_model);
+
+            // Get properties user has rented before
+            var userRents = await _context.Rents
+                .Include(r => r.Property)
+                .Where(r => r.UserId == userId && r.IsActive)
+                .ToListAsync();
+            
+            var usedPropertyIds = userRents
+                .Select(r => r.PropertyId)
+                .Distinct()
+                .ToList();
+
+            // Get properties user has reviewed positively (rating >= 4)
+            var userReviews = await _context.ReviewRents
+                .Include(rr => rr.Rent)
+                .ThenInclude(r => r.Property)
+                .Where(rr => rr.UserId == userId && rr.Rating >= 4 && rr.IsActive)
+                .ToListAsync();
+            
+            var highlyRatedPropertyIds = userReviews
+                .Select(rr => rr.Rent.PropertyId)
+                .Distinct()
+                .ToList();
+
+            // Get preferred property types from user's past experiences
+            var userRentsWithProperty = await _context.Rents
+                .Include(r => r.Property)
+                .Where(r => r.UserId == userId && r.IsActive)
+                .ToListAsync();
+            
+            var reviewedRentIds = await _context.ReviewRents
+                .Where(rr => rr.UserId == userId && rr.Rating >= 4 && rr.IsActive)
+                .Select(rr => rr.RentId)
+                .ToListAsync();
+            
+            var reviewedRents = await _context.Rents
+                .Include(r => r.Property)
+                .Where(r => reviewedRentIds.Contains(r.Id) && r.IsActive)
+                .ToListAsync();
+            
+            var preferredPropertyTypeIds = userRentsWithProperty
+                .Union(reviewedRents)
+                .Select(r => r.Property.PropertyTypeId)
+                .Distinct()
+                .ToList();
+
+            // Get preferred amenities from user's past positive reviews
+            var preferredAmenityIds = new List<int>();
+            foreach (var review in userReviews)
+            {
+                var property = await _context.Properties
+                    .Include(p => p.PropertyAmenities)
+                    .FirstOrDefaultAsync(p => p.Id == review.Rent.PropertyId);
+                
+                if (property != null && property.PropertyAmenities.Any())
+                {
+                    preferredAmenityIds.AddRange(property.PropertyAmenities.Select(pa => pa.AmenityId));
+                }
+            }
+            preferredAmenityIds = preferredAmenityIds.Distinct().ToList();
+
+            // Get candidate properties that user hasn't rented
+            var candidateProperties = await _context.Properties
+                .Include(x => x.PropertyType)
+                .Include(x => x.City)
+                .Include(x => x.Landlord)
+                .Include(x => x.PropertyAmenities)
+                    .ThenInclude(pa => pa.Amenity)
+                .Include(x => x.PropertyImages)
+                .Where(p => p.IsActive && !usedPropertyIds.Contains(p.Id))
+                .ToListAsync();
+
+            if (!candidateProperties.Any())
+            {
+                // If all properties have been rented, include them but still prioritize preferred types/amenities
+                candidateProperties = await _context.Properties
+                    .Include(x => x.PropertyType)
+                    .Include(x => x.City)
+                    .Include(x => x.Landlord)
+                    .Include(x => x.PropertyAmenities)
+                        .ThenInclude(pa => pa.Amenity)
+                    .Include(x => x.PropertyImages)
+                    .Where(p => p.IsActive)
+                    .ToListAsync();
+            }
+
+            if (!candidateProperties.Any())
+            {
+                return new List<PropertyResponse>();
+            }
+
+            // Score all candidates
+            var scored = candidateProperties
+                .Select(p => new
+                {
+                    Property = p,
+                    MLScore = predictionEngine.Predict(new FeedbackEntry
+                    {
+                        UserId = (uint)userId,
+                        PropertyId = (uint)p.Id
+                    }).Score,
+                    // Boost score if property type is preferred
+                    TypeBoost = preferredPropertyTypeIds.Contains(p.PropertyTypeId) ? 0.5f : 0f,
+                    // Boost score if property was highly rated
+                    RatingBoost = highlyRatedPropertyIds.Contains(p.Id) ? 0.3f : 0f,
+                    // Boost score based on matching amenities
+                    AmenityBoost = p.PropertyAmenities != null && p.PropertyAmenities.Any() 
+                        ? (float)p.PropertyAmenities.Count(pa => preferredAmenityIds.Contains(pa.AmenityId)) / Math.Max(preferredAmenityIds.Count, 1) * 0.4f
+                        : 0f
+                })
+                .Select(x => new
+                {
+                    x.Property,
+                    FinalScore = x.MLScore + x.TypeBoost + x.RatingBoost + x.AmenityBoost
+                })
+                .OrderByDescending(x => x.FinalScore)
+                .Take(count)
+                .Select(x => MapToResponse(x.Property))
+                .ToList();
+
+            return scored;
+        }
+
+        private async Task<List<PropertyResponse>> RecommendHeuristic(int userId, int count)
+        {
+            // Get properties user has rented before
+            var userRents = await _context.Rents
+                .Include(r => r.Property)
+                .Where(r => r.UserId == userId && r.IsActive)
+                .ToListAsync();
+            
+            var usedPropertyIds = userRents
+                .Select(r => r.PropertyId)
+                .Distinct()
+                .ToList();
+
+            // Get highly rated properties (rating >= 4) from user's reviews
+            var userReviews = await _context.ReviewRents
+                .Include(rr => rr.Rent)
+                .ThenInclude(r => r.Property)
+                .Where(rr => rr.UserId == userId && rr.Rating >= 4 && rr.IsActive)
+                .ToListAsync();
+            
+            var highlyRatedPropertyIds = userReviews
+                .Select(rr => rr.Rent.PropertyId)
+                .Distinct()
+                .ToList();
+
+            // Get preferred property types
+            var userRentsWithProperty = await _context.Rents
+                .Include(r => r.Property)
+                .Where(r => r.UserId == userId && r.IsActive)
+                .ToListAsync();
+            
+            var reviewedRentIds = await _context.ReviewRents
+                .Where(rr => rr.UserId == userId && rr.Rating >= 4 && rr.IsActive)
+                .Select(rr => rr.RentId)
+                .ToListAsync();
+            
+            var reviewedRents = await _context.Rents
+                .Include(r => r.Property)
+                .Where(r => reviewedRentIds.Contains(r.Id) && r.IsActive)
+                .ToListAsync();
+            
+            var preferredPropertyTypeIds = userRentsWithProperty
+                .Union(reviewedRents)
+                .Select(r => r.Property.PropertyTypeId)
+                .Distinct()
+                .ToList();
+
+            // Get preferred amenities from positive reviews
+            var preferredAmenityIds = new List<int>();
+            foreach (var review in userReviews)
+            {
+                var property = await _context.Properties
+                    .Include(p => p.PropertyAmenities)
+                    .FirstOrDefaultAsync(p => p.Id == review.Rent.PropertyId);
+                
+                if (property != null && property.PropertyAmenities.Any())
+                {
+                    preferredAmenityIds.AddRange(property.PropertyAmenities.Select(pa => pa.AmenityId));
+                }
+            }
+            preferredAmenityIds = preferredAmenityIds.Distinct().ToList();
+
+            // Find properties in preferred types with preferred amenities that user hasn't rented
+            var candidateProperties = await _context.Properties
+                .Include(x => x.PropertyType)
+                .Include(x => x.City)
+                .Include(x => x.Landlord)
+                .Include(x => x.PropertyAmenities)
+                    .ThenInclude(pa => pa.Amenity)
+                .Include(x => x.PropertyImages)
+                .Where(p => p.IsActive)
+                .ToListAsync();
+
+            if (!candidateProperties.Any())
+            {
+                return new List<PropertyResponse>();
+            }
+
+            // Prioritize new properties in preferred types with preferred amenities
+            var newProperties = candidateProperties
+                .Where(p => !usedPropertyIds.Contains(p.Id) 
+                    && preferredPropertyTypeIds.Contains(p.PropertyTypeId)
+                    && p.PropertyAmenities != null 
+                    && p.PropertyAmenities.Any(pa => preferredAmenityIds.Contains(pa.AmenityId)))
+                .ToList();
+
+            List<Property> recommendedProperties;
+
+            if (newProperties.Any())
+            {
+                var random = new Random();
+                recommendedProperties = newProperties
+                    .OrderBy(x => random.Next())
+                    .Take(count)
+                    .ToList();
+            }
+            else
+            {
+                // Fallback to any new property in preferred types, or highly rated property
+                var fallbackProperties = candidateProperties
+                    .Where(p => (!usedPropertyIds.Contains(p.Id) && preferredPropertyTypeIds.Contains(p.PropertyTypeId))
+                        || highlyRatedPropertyIds.Contains(p.Id))
+                    .ToList();
+
+                if (fallbackProperties.Any())
+                {
+                    var random = new Random();
+                    recommendedProperties = fallbackProperties
+                        .OrderBy(x => random.Next())
+                        .Take(count)
+                        .ToList();
+                }
+                else
+                {
+                    // Final fallback: any new property
+                    var finalFallback = candidateProperties
+                        .Where(p => !usedPropertyIds.Contains(p.Id))
+                        .ToList();
+                    
+                    if (finalFallback.Any())
+                    {
+                        var random = new Random();
+                        recommendedProperties = finalFallback
+                            .OrderBy(x => random.Next())
+                            .Take(count)
+                            .ToList();
+                    }
+                    else
+                    {
+                        // Last resort: any property
+                        var random = new Random();
+                        recommendedProperties = candidateProperties
+                            .OrderBy(x => random.Next())
+                            .Take(count)
+                            .ToList();
+                    }
+                }
+            }
+
+            return recommendedProperties.Select(MapToResponse).ToList();
+        }
+
+        // Train recommender using Matrix Factorization on (User, Property) implicit feedback
+        public static void TrainRecommenderAtStartup(IServiceProvider serviceProvider)
+        {
+            lock (_mlLock)
+            {
+                if (_mlContext == null)
+                {
+                    _mlContext = new MLContext();
+                }
+                using var scope = serviceProvider.CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<eRentDbContext>();
+
+                // Build implicit feedback dataset from rents (users booking properties)
+                var positiveEntries = db.Rents
+                    .Where(r => r.IsActive && (r.RentStatusId == 4 || r.RentStatusId == 5)) // Accepted or Paid
+                    .Select(r => new FeedbackEntry
+                    {
+                        UserId = (uint)r.UserId,
+                        PropertyId = (uint)r.PropertyId,
+                        Label = 1f
+                    })
+                    .ToList();
+
+                // Add positive feedback from highly rated reviews
+                var positiveReviewEntries = db.ReviewRents
+                    .Where(rr => rr.Rating >= 4 && rr.IsActive)
+                    .Include(rr => rr.Rent)
+                    .Select(rr => new FeedbackEntry
+                    {
+                        UserId = (uint)rr.UserId,
+                        PropertyId = (uint)rr.Rent.PropertyId,
+                        Label = 1.5f // Higher weight for highly rated properties
+                    })
+                    .ToList();
+
+                positiveEntries.AddRange(positiveReviewEntries);
+
+                if (!positiveEntries.Any())
+                {
+                    _model = null;
+                    return;
+                }
+
+                var trainData = _mlContext.Data.LoadFromEnumerable(positiveEntries);
+                var options = new Microsoft.ML.Trainers.MatrixFactorizationTrainer.Options
+                {
+                    MatrixColumnIndexColumnName = nameof(FeedbackEntry.UserId),
+                    MatrixRowIndexColumnName = nameof(FeedbackEntry.PropertyId),
+                    LabelColumnName = nameof(FeedbackEntry.Label),
+                    LossFunction = Microsoft.ML.Trainers.MatrixFactorizationTrainer.LossFunctionType.SquareLossOneClass,
+                    Alpha = 0.01,
+                    Lambda = 0.025,
+                    NumberOfIterations = 50,
+                    C = 0.00001
+                };
+
+                var estimator = _mlContext.Recommendation().Trainers.MatrixFactorization(options);
+                _model = estimator.Fit(trainData);
+            }
+        }
+
+        private class FeedbackEntry
+        {
+            [KeyType(count: 100000)]
+            public uint UserId { get; set; }
+            [KeyType(count: 100000)]
+            public uint PropertyId { get; set; }
+            public float Label { get; set; }
+        }
+
+        private class PropertyScorePrediction
+        {
+            public float Score { get; set; }
         }
     }
 }

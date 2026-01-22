@@ -24,5 +24,13 @@ namespace eRent.WebAPI.Controllers
         {
             return await base.GetById(id);
         }
+
+        [HttpGet("recommended/{userId}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<List<PropertyResponse>>> GetRecommendedProperties(int userId, [FromQuery] int count = 5)
+        {
+            var properties = await ((IPropertyService)_service).GetRecommendedPropertiesAsync(userId, count);
+            return Ok(properties);
+        }
     }
 }
