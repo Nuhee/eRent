@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:erent_mobile/model/property.dart';
 import 'package:erent_mobile/model/review.dart';
 import 'package:erent_mobile/providers/property_provider.dart';
@@ -26,6 +27,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   bool _isLoadingReviews = true;
   int _currentImageIndex = 0;
   final PageController _imagePageController = PageController();
+  final Map<int, Uint8List> _imageCache = {};
 
   @override
   void initState() {
@@ -48,9 +50,25 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
     try {
       final property = await propertyProvider.getById(widget.propertyId);
 
-      if (mounted) {
+      if (mounted && property != null) {
+        // Pre-decode and cache all images
+        final imageCache = <int, Uint8List>{};
+        if (property.images.isNotEmpty) {
+          for (var image in property.images) {
+            if (image.imageData.isNotEmpty) {
+              try {
+                imageCache[image.id] = base64Decode(image.imageData);
+              } catch (e) {
+                // If decoding fails, skip this image
+              }
+            }
+          }
+        }
+
         setState(() {
           _property = property;
+          _imageCache.clear();
+          _imageCache.addAll(imageCache);
           _isLoadingProperty = false;
         });
       }
@@ -185,22 +203,29 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
             },
             itemBuilder: (context, index) {
               final image = _property!.images[index];
-              ImageProvider? imageProvider;
-              if (image.imageData.isNotEmpty) {
-                try {
-                  final bytes = base64Decode(image.imageData);
-                  imageProvider = MemoryImage(bytes);
-                } catch (_) {
-                  imageProvider = null;
-                }
-              }
+              final cachedBytes = _imageCache[image.id];
 
-              return imageProvider != null
-                  ? Image(image: imageProvider, fit: BoxFit.cover)
-                  : Container(
+              if (cachedBytes != null) {
+                return Image.memory(
+                  cachedBytes,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                  cacheWidth: null,
+                  cacheHeight: null,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
                       color: Colors.grey[200],
                       child: Icon(Icons.image_rounded, size: 64, color: Colors.grey[400]),
                     );
+                  },
+                );
+              }
+
+              return Container(
+                color: Colors.grey[200],
+                child: Icon(Icons.image_rounded, size: 64, color: Colors.grey[400]),
+              );
             },
           ),
         ),
@@ -805,7 +830,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                 Icon(Icons.home_work_rounded, color: Colors.white, size: 24),
                 SizedBox(width: 12),
                 Text(
-                  'Rent Now',
+                  'Book Now',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
