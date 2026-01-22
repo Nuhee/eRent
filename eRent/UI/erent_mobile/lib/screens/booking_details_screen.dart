@@ -227,7 +227,7 @@ class BookingDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // Back to Home Button
+            // View My Bookings Button
             SizedBox(
               width: double.infinity,
               height: 56,
@@ -244,9 +244,9 @@ class BookingDetailsScreen extends StatelessWidget {
                   elevation: 4,
                   shadowColor: const Color(0xFF5B9BD5).withOpacity(0.4),
                 ),
-                icon: const Icon(Icons.home_rounded, size: 24),
+                icon: const Icon(Icons.home_work_rounded, size: 24),
                 label: const Text(
-                  'Back to Home',
+                  'View My Bookings',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

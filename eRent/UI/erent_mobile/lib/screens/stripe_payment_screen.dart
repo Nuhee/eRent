@@ -10,7 +10,6 @@ import 'package:intl/intl.dart';
 import 'package:erent_mobile/model/property.dart';
 import 'package:erent_mobile/providers/user_provider.dart';
 import 'package:erent_mobile/providers/rent_provider.dart';
-import 'package:erent_mobile/screens/booking_details_screen.dart';
 
 class StripePaymentScreen extends StatefulWidget {
   final Property property;
@@ -18,6 +17,7 @@ class StripePaymentScreen extends StatefulWidget {
   final DateTime endDate;
   final bool isDailyRental;
   final double price;
+  final int rentId; // Rent ID to update after payment
 
   const StripePaymentScreen({
     super.key,
@@ -26,6 +26,7 @@ class StripePaymentScreen extends StatefulWidget {
     required this.endDate,
     required this.isDailyRental,
     required this.price,
+    required this.rentId,
   });
 
   @override
@@ -660,21 +661,13 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
         print('Demo mode: Skipping Stripe payment sheet presentation');
       }
 
-      // Create rent request after successful payment
-      final rent = await _createRentRequest();
+      // Mark rent as paid after successful payment
+      final rentProvider = Provider.of<RentProvider>(context, listen: false);
+      await rentProvider.pay(widget.rentId);
 
       if (mounted) {
-        // Navigate to booking details screen
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => BookingDetailsScreen(
-              rentId: rent.id,
-              property: widget.property,
-              startDate: widget.startDate,
-              endDate: widget.endDate,
-            ),
-          ),
-        );
+        // Navigate back to rent details
+        Navigator.of(context).pop(true);
       }
     } on stripe.StripeException catch (e) {
       setState(() => _isLoading = false);
@@ -691,20 +684,12 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
       if (errorMessage.contains('canceled') || errorMessage.contains('user canceled')) {
         _showInfoSnackbar('Payment was canceled');
       } else {
-        // For demo: if Stripe fails, still create rent request (for testing)
+        // For demo: if Stripe fails, still mark as paid (for testing)
         try {
-          final rent = await _createRentRequest();
+          final rentProvider = Provider.of<RentProvider>(context, listen: false);
+          await rentProvider.pay(widget.rentId);
           if (mounted) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => BookingDetailsScreen(
-                  rentId: rent.id,
-                  property: widget.property,
-                  startDate: widget.startDate,
-                  endDate: widget.endDate,
-                ),
-              ),
-            );
+            Navigator.of(context).pop(true);
           }
         } catch (rentError) {
           _showErrorSnackbar('Payment failed: ${e.toString()}');
@@ -713,29 +698,6 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
     }
   }
 
-  Future<dynamic> _createRentRequest() async {
-    try {
-      final rentProvider = Provider.of<RentProvider>(context, listen: false);
-      final user = UserProvider.currentUser;
-      
-      if (user == null) {
-        throw Exception('User not logged in');
-      }
-      
-      final request = {
-        'propertyId': widget.property.id,
-        'userId': user.id,
-        'startDate': widget.startDate.toIso8601String(),
-        'endDate': widget.endDate.toIso8601String(),
-        'isDailyRental': widget.isDailyRental,
-      };
-
-      final rent = await rentProvider.insert(request);
-      return rent;
-    } catch (e) {
-      throw Exception('Failed to create rent request: $e');
-    }
-  }
 
   void _showErrorSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(

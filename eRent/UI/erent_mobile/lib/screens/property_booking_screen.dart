@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:erent_mobile/model/property.dart';
 import 'package:erent_mobile/providers/rent_provider.dart';
 import 'package:erent_mobile/providers/user_provider.dart';
-import 'package:erent_mobile/screens/stripe_payment_screen.dart';
+import 'package:erent_mobile/screens/booking_details_screen.dart';
 import 'package:provider/provider.dart';
 
 class PropertyBookingScreen extends StatefulWidget {
@@ -21,6 +21,7 @@ class PropertyBookingScreen extends StatefulWidget {
 class _PropertyBookingScreenState extends State<PropertyBookingScreen> {
   late RentProvider rentProvider;
   late UserProvider userProvider;
+  bool _isLoading = false;
 
   bool _isDailyRental = false;
   DateTime? _startDate;
@@ -257,7 +258,7 @@ class _PropertyBookingScreenState extends State<PropertyBookingScreen> {
     _checkForConflicts();
   }
 
-  void _onPayNow() {
+  Future<void> _onPayNow() async {
     if (_startDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -313,19 +314,57 @@ class _PropertyBookingScreenState extends State<PropertyBookingScreen> {
       return;
     }
 
-    // Navigate to payment screen
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => StripePaymentScreen(
-          property: widget.property,
-          startDate: _startDate!,
-          endDate: endDate,
-          isDailyRental: _isDailyRental,
-          price: _calculatedPrice,
-        ),
-      ),
-    );
+    // Create rent request directly (without payment)
+    setState(() => _isLoading = true);
+
+    try {
+      final user = UserProvider.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please log in to create a booking'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      final request = {
+        'propertyId': widget.property.id,
+        'userId': user.id,
+        'startDate': _startDate!.toIso8601String(),
+        'endDate': endDate.toIso8601String(),
+        'isDailyRental': _isDailyRental,
+      };
+
+      final rent = await rentProvider.insert(request);
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+        // Navigate to booking details screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BookingDetailsScreen(
+              rentId: rent.id,
+              property: widget.property,
+              startDate: _startDate!,
+              endDate: endDate,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error creating booking: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -707,12 +746,12 @@ class _PropertyBookingScreenState extends State<PropertyBookingScreen> {
               const SizedBox(height: 12),
             ],
 
-            // Pay Now Button
+            // Book Now Button
             SizedBox(
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: _onPayNow,
+                onPressed: _isLoading ? null : _onPayNow,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF5B9BD5),
                   foregroundColor: Colors.white,
@@ -722,21 +761,30 @@ class _PropertyBookingScreenState extends State<PropertyBookingScreen> {
                   elevation: 4,
                   shadowColor: const Color(0xFF5B9BD5).withOpacity(0.4),
                 ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.payment_rounded, size: 24),
-                    SizedBox(width: 12),
-                    Text(
-                      'Pay Now',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.home_work_rounded, size: 24),
+                          SizedBox(width: 12),
+                          Text(
+                            'Book Now',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ],

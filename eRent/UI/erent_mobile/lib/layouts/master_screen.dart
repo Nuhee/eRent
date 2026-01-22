@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:erent_mobile/providers/user_provider.dart';
 import 'package:erent_mobile/screens/home_screen.dart';
 import 'package:erent_mobile/screens/chat_list_screen.dart';
-import 'package:erent_mobile/screens/rents_screen.dart';
+import 'package:erent_mobile/screens/rents_list_screen.dart';
 import 'package:erent_mobile/screens/profile_screen.dart';
 
 class MasterScreen extends StatefulWidget {
@@ -242,7 +242,7 @@ class _MasterScreenState extends State<MasterScreen>
                 children: const [
                   HomeScreen(),
                   ChatListScreen(),
-                  RentsScreen(),
+                  RentsListScreen(),
                   ProfileScreen(),
                 ],
               ),
