@@ -24,7 +24,7 @@ The eRent system consists of three Flutter applications:
 - **Username:** `user` (pre-filled)
 - **Password:** `test` (pre-filled)
 
-> **Note:** All login forms in the mobile app come with pre-filled test credentials for easy testing.
+> **Note:** All login forms come with pre-filled test credentials for easy testing.
 
 ## 📧 Email Notifications
 
