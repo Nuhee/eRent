@@ -6,6 +6,7 @@ import 'package:erent_mobile/model/review.dart';
 import 'package:erent_mobile/providers/property_provider.dart';
 import 'package:erent_mobile/providers/review_provider.dart';
 import 'package:erent_mobile/screens/property_location_screen.dart';
+import 'package:erent_mobile/screens/property_booking_screen.dart';
 import 'package:provider/provider.dart';
 
 class PropertyDetailsScreen extends StatefulWidget {
@@ -807,13 +808,14 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
           ),
           child: ElevatedButton(
             onPressed: () {
-              // TODO: Implement rent now functionality
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Rent Now feature coming soon!'),
-                  backgroundColor: Color(0xFF5B9BD5),
-                ),
-              );
+              if (_property != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PropertyBookingScreen(property: _property!),
+                  ),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,

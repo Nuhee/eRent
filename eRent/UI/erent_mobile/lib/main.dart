@@ -14,6 +14,7 @@ import 'package:erent_mobile/providers/property_provider.dart';
 import 'package:erent_mobile/providers/property_type_provider.dart';
 import 'package:erent_mobile/providers/country_provider.dart';
 import 'package:erent_mobile/providers/amenity_provider.dart';
+import 'package:erent_mobile/providers/rent_provider.dart';
 import 'package:erent_mobile/screens/register_screen.dart';
 
 void main() async {
@@ -38,6 +39,7 @@ void main() async {
         ChangeNotifierProvider<PropertyTypeProvider>(create: (_) => PropertyTypeProvider()),
         ChangeNotifierProvider<CountryProvider>(create: (_) => CountryProvider()),
         ChangeNotifierProvider<AmenityProvider>(create: (_) => AmenityProvider()),
+        ChangeNotifierProvider<RentProvider>(create: (_) => RentProvider()),
       ],
       child: const MyApp(),
     ),
