@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:erent_mobile/model/property.dart';
 import 'package:erent_mobile/providers/rent_provider.dart';
 import 'package:erent_mobile/providers/user_provider.dart';
+import 'package:erent_mobile/screens/stripe_payment_screen.dart';
 import 'package:provider/provider.dart';
 
 class PropertyBookingScreen extends StatefulWidget {
@@ -307,12 +308,22 @@ class _PropertyBookingScreenState extends State<PropertyBookingScreen> {
       return;
     }
 
-    // TODO: Navigate to payment screen with booking details
-    // For now, just show a message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Payment integration will be implemented next'),
-        backgroundColor: Color(0xFF5B9BD5),
+    final endDate = _endDate;
+    if (endDate == null) {
+      return;
+    }
+
+    // Navigate to payment screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => StripePaymentScreen(
+          property: widget.property,
+          startDate: _startDate!,
+          endDate: endDate,
+          isDailyRental: _isDailyRental,
+          price: _calculatedPrice,
+        ),
       ),
     );
   }
