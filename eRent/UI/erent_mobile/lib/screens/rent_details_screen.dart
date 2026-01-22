@@ -3,7 +3,11 @@ import 'package:intl/intl.dart';
 import 'package:erent_mobile/model/rent.dart';
 import 'package:erent_mobile/providers/rent_provider.dart';
 import 'package:erent_mobile/providers/property_provider.dart';
+import 'package:erent_mobile/providers/review_provider.dart';
+import 'package:erent_mobile/providers/user_provider.dart';
+import 'package:erent_mobile/model/review.dart';
 import 'package:erent_mobile/screens/stripe_payment_screen.dart';
+import 'package:erent_mobile/screens/rent_review_screen.dart';
 import 'package:provider/provider.dart';
 
 class RentDetailsScreen extends StatefulWidget {
@@ -18,15 +22,19 @@ class RentDetailsScreen extends StatefulWidget {
 class _RentDetailsScreenState extends State<RentDetailsScreen> {
   late RentProvider rentProvider;
   late PropertyProvider propertyProvider;
+  late ReviewProvider reviewProvider;
   Rent? _rent;
   bool _isLoading = true;
   bool _isProcessingAction = false;
+  bool _hasReview = false;
+  Review? _existingReview;
 
   @override
   void initState() {
     super.initState();
     rentProvider = Provider.of<RentProvider>(context, listen: false);
     propertyProvider = Provider.of<PropertyProvider>(context, listen: false);
+    reviewProvider = Provider.of<ReviewProvider>(context, listen: false);
     _loadRent();
   }
 
@@ -41,6 +49,10 @@ class _RentDetailsScreenState extends State<RentDetailsScreen> {
           _rent = rent;
           _isLoading = false;
         });
+        // Check if review exists for paid rents
+        if (_rent != null && _rent!.rentStatusId == 5) {
+          _checkForReview();
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -52,6 +64,49 @@ class _RentDetailsScreenState extends State<RentDetailsScreen> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _checkForReview() async {
+    if (_rent == null) return;
+
+    try {
+      final user = UserProvider.currentUser;
+      if (user == null) return;
+
+      final result = await reviewProvider.get(
+        filter: {
+          'rentId': _rent!.id,
+          'userId': user.id,
+          'isActive': true,
+          'retrieveAll': true,
+        },
+      );
+
+      if (mounted) {
+        setState(() {
+          _hasReview = result.items != null && result.items!.isNotEmpty;
+          _existingReview = _hasReview ? result.items!.first : null;
+        });
+      }
+    } catch (e) {
+      // Silently fail
+    }
+  }
+
+  Future<void> _navigateToReview() async {
+    if (_rent == null) return;
+
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RentReviewScreen(rent: _rent!),
+      ),
+    );
+
+    // Refresh review status if review was saved
+    if (result == true && mounted) {
+      _checkForReview();
     }
   }
 
@@ -215,6 +270,11 @@ class _RentDetailsScreenState extends State<RentDetailsScreen> {
                           // Action Card
                           _buildActionCard(),
                           const SizedBox(height: 20),
+                          // Review Card (only for paid rents)
+                          if (_rent!.rentStatusId == 5) ...[
+                            _buildReviewCard(),
+                            const SizedBox(height: 20),
+                          ],
                           // Details Card
                           _buildDetailsCard(),
                         ],
@@ -366,6 +426,38 @@ class _RentDetailsScreenState extends State<RentDetailsScreen> {
       );
     }
 
+    // Paid (5): Show status message only (review section is separate)
+    if (statusId == 5) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey[300]!),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              _getStatusMessageIcon(statusId),
+              color: Colors.grey[600],
+              size: 24,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                _getStatusMessage(statusId),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     // If no actions available, show a status message
     if (actionButtons.isEmpty) {
       return Container(
@@ -494,6 +586,181 @@ class _RentDetailsScreenState extends State<RentDetailsScreen> {
       default:
         return Icons.info_outline;
     }
+  }
+
+  Widget _buildReviewCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF5B9BD5).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.rate_review_rounded,
+                  color: Color(0xFF5B9BD5),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Your Review',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          if (_existingReview != null) ...[
+            // Show existing review
+            Row(
+              children: List.generate(5, (index) {
+                final starIndex = index + 1;
+                return Icon(
+                  starIndex <= _existingReview!.rating
+                      ? Icons.star_rounded
+                      : Icons.star_border_rounded,
+                  size: 24,
+                  color: starIndex <= _existingReview!.rating
+                      ? const Color(0xFFFFB84D)
+                      : Colors.grey[300],
+                );
+              }),
+            ),
+            if (_existingReview!.comment != null && _existingReview!.comment!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                _existingReview!.comment!,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                  height: 1.5,
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today_rounded,
+                  size: 14,
+                  color: Colors.grey[500],
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  _existingReview!.updatedAt != null
+                      ? 'Updated ${DateFormat('MMM dd, yyyy').format(_existingReview!.updatedAt!)}'
+                      : 'Posted ${DateFormat('MMM dd, yyyy').format(_existingReview!.createdAt)}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _navigateToReview,
+                icon: const Icon(Icons.edit_rounded, size: 18),
+                label: const Text('Edit Review'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF5B9BD5),
+                  side: const BorderSide(color: Color(0xFF5B9BD5)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ] else ...[
+            // No review yet - show button to write review
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[200]!),
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.rate_review_outlined,
+                    size: 48,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Share your experience',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Help others by writing a review',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[500],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: _navigateToReview,
+                icon: const Icon(Icons.rate_review_rounded, size: 20),
+                label: const Text(
+                  'Write Review',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF5B9BD5),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   Widget _buildDetailsCard() {

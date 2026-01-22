@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:erent_landlord_desktop/screens/analytics_screen.dart';
+import 'package:erent_landlord_desktop/screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:erent_landlord_desktop/providers/city_provider.dart';
 import 'package:erent_landlord_desktop/providers/country_provider.dart';
@@ -467,7 +468,43 @@ final TextEditingController usernameController = TextEditingController(text: "la
                               );
                             },
                           ),
-                          const SizedBox(height: 40),
+                          const SizedBox(height: 32),
+
+                          // Register link
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Don't have an account? ",
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 14,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const RegisterScreen(),
+                                    ),
+                                  );
+                                },
+                                style: TextButton.styleFrom(
+                                  foregroundColor: const Color(0xFFFFB84D),
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                ),
+                                child: const Text(
+                                  "Create Account",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
 
                           // Login button
                           TweenAnimationBuilder<double>(
