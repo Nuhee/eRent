@@ -477,7 +477,7 @@ class _RentDetailsScreenState extends State<RentDetailsScreen> {
       case 3:
         return 'This booking request has been rejected by the landlord.';
       case 5:
-        return 'This booking has been paid and is now active.';
+        return 'This booking has been paid and is now active. You can move-in at the start date, for more information contact the landlord via Chat through the app.';
       default:
         return 'No actions available for this status.';
     }
