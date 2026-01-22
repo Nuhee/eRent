@@ -10,6 +10,8 @@ import 'package:erent_mobile/providers/gender_provider.dart';
 import 'package:erent_mobile/providers/review_provider.dart';
 import 'package:erent_mobile/providers/user_provider.dart';
 import 'package:erent_mobile/providers/chat_provider.dart';
+import 'package:erent_mobile/providers/property_provider.dart';
+import 'package:erent_mobile/providers/property_type_provider.dart';
 import 'package:erent_mobile/screens/register_screen.dart';
 
 void main() async {
@@ -30,6 +32,8 @@ void main() async {
         ChangeNotifierProvider<CityProvider>(create: (_) => CityProvider()),
         ChangeNotifierProvider<GenderProvider>(create: (_) => GenderProvider()),
         ChangeNotifierProvider<ChatProvider>(create: (_) => ChatProvider()),
+        ChangeNotifierProvider<PropertyProvider>(create: (_) => PropertyProvider()),
+        ChangeNotifierProvider<PropertyTypeProvider>(create: (_) => PropertyTypeProvider()),
       ],
       child: const MyApp(),
     ),

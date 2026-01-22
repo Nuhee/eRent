@@ -60,6 +60,11 @@ namespace eRent.Services.Services
                 query = query.Where(x => x.RentId == search.RentId.Value);
             }
 
+            if (search.PropertyId.HasValue)
+            {
+                query = query.Where(x => x.Rent != null && x.Rent.PropertyId == search.PropertyId.Value);
+            }
+
             if (search.UserId.HasValue)
             {
                 query = query.Where(x => x.UserId == search.UserId.Value);
