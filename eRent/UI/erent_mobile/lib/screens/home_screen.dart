@@ -10,7 +10,6 @@ import 'package:erent_mobile/providers/city_provider.dart';
 import 'package:erent_mobile/providers/property_type_provider.dart';
 import 'package:erent_mobile/providers/country_provider.dart';
 import 'package:erent_mobile/providers/amenity_provider.dart';
-import 'package:erent_mobile/providers/user_provider.dart';
 import 'package:erent_mobile/screens/property_details_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -29,7 +28,6 @@ class _HomeScreenState extends State<HomeScreen> {
   late AmenityProvider amenityProvider;
 
   List<Property> _properties = [];
-  List<Property> _recommendedProperties = [];
   List<City> _cities = [];
   List<City> _filteredCities = [];
   List<PropertyType> _propertyTypes = [];
@@ -63,7 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
     amenityProvider = Provider.of<AmenityProvider>(context, listen: false);
     _loadFilters();
     _loadProperties();
-    _loadRecommendedProperties();
   }
 
   @override
@@ -162,23 +159,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       }
-    }
-  }
-
-  Future<void> _loadRecommendedProperties() async {
-    final user = UserProvider.currentUser;
-    if (user == null) return;
-
-    try {
-      final recommended = await propertyProvider.getRecommended(user.id, count: 5);
-
-      if (mounted) {
-        setState(() {
-          _recommendedProperties = recommended;
-        });
-      }
-    } catch (e) {
-      // Silently fail - recommendations are optional
     }
   }
 
@@ -351,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF5B9BD5)),
                         ),
                       )
-                    : _properties.isEmpty && _recommendedProperties.isEmpty
+                    : _properties.isEmpty
                         ? _buildEmptyState()
                         : _buildPropertiesList(),
                 
@@ -627,64 +607,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildPropertiesList() {
-    final allProperties = [
-      if (_recommendedProperties.isNotEmpty) ..._recommendedProperties,
-      ..._properties,
-    ];
-
     return ListView.separated(
       padding: const EdgeInsets.all(16),
-      itemCount: allProperties.length + (_recommendedProperties.isNotEmpty ? 1 : 0), // +1 for section header
-      separatorBuilder: (_, index) {
-        // Add extra spacing after recommended section
-        if (_recommendedProperties.isNotEmpty && index == _recommendedProperties.length) {
-          return const SizedBox(height: 24);
-        }
-        return const SizedBox(height: 16);
-      },
+      itemCount: _properties.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
-        // Show recommended section header
-        if (_recommendedProperties.isNotEmpty && index == 0) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF5B9BD5), Color(0xFF7AB8CC)],
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.star_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Recommended for You',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1F2937),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildPropertyCard(allProperties[index], isRecommended: true),
-            ],
-          );
-        }
-
-        // Adjust index for properties list (skip header)
-        final propertyIndex = _recommendedProperties.isNotEmpty ? index - 1 : index;
-        final property = allProperties[propertyIndex];
-        return _buildPropertyCard(property, isRecommended: propertyIndex < _recommendedProperties.length);
+        return _buildPropertyCard(_properties[index], isRecommended: false);
       },
     );
   }

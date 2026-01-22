@@ -372,7 +372,7 @@ namespace eRent.Services.Services
             }
         }
 
-        public async Task<List<PropertyResponse>> GetRecommendedPropertiesAsync(int userId, int count = 5)
+        public async Task<List<PropertyResponse>> GetRecommendedPropertiesAsync(int userId, int count = 1)
         {
             if (_model == null)
             {
