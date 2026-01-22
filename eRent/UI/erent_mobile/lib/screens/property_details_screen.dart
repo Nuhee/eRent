@@ -4,6 +4,7 @@ import 'package:erent_mobile/model/property.dart';
 import 'package:erent_mobile/model/review.dart';
 import 'package:erent_mobile/providers/property_provider.dart';
 import 'package:erent_mobile/providers/review_provider.dart';
+import 'package:erent_mobile/screens/property_location_screen.dart';
 import 'package:provider/provider.dart';
 
 class PropertyDetailsScreen extends StatefulWidget {
@@ -201,6 +202,64 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                       child: Icon(Icons.image_rounded, size: 64, color: Colors.grey[400]),
                     );
             },
+          ),
+        ),
+        // Location Map Button (Top Right)
+        Positioned(
+          top: 12,
+          right: 12,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PropertyLocationScreen(
+                      latitude: _property!.latitude,
+                      longitude: _property!.longitude,
+                      propertyTitle: _property!.title,
+                      address: _property!.address,
+                      cityName: _property!.cityName,
+                    ),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.map_rounded,
+                      size: 18,
+                      color: const Color(0xFF5B9BD5),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Map',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF5B9BD5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
         // Image Indicators
