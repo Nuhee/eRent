@@ -3,9 +3,13 @@ import 'dart:convert';
 import 'package:erent_mobile/model/property.dart';
 import 'package:erent_mobile/model/city.dart';
 import 'package:erent_mobile/model/property_type.dart';
+import 'package:erent_mobile/model/country.dart';
+import 'package:erent_mobile/model/amenity.dart';
 import 'package:erent_mobile/providers/property_provider.dart';
 import 'package:erent_mobile/providers/city_provider.dart';
 import 'package:erent_mobile/providers/property_type_provider.dart';
+import 'package:erent_mobile/providers/country_provider.dart';
+import 'package:erent_mobile/providers/amenity_provider.dart';
 import 'package:erent_mobile/screens/property_details_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -20,16 +24,23 @@ class _HomeScreenState extends State<HomeScreen> {
   late PropertyProvider propertyProvider;
   late CityProvider cityProvider;
   late PropertyTypeProvider propertyTypeProvider;
+  late CountryProvider countryProvider;
+  late AmenityProvider amenityProvider;
 
   List<Property> _properties = [];
   List<City> _cities = [];
+  List<City> _filteredCities = [];
   List<PropertyType> _propertyTypes = [];
+  List<Country> _countries = [];
+  List<Amenity> _amenities = [];
   bool _isLoading = true;
 
   // Filter state
   String _searchQuery = '';
+  int? _selectedCountryId;
   int? _selectedCityId;
   int? _selectedPropertyTypeId;
+  List<int> _selectedAmenityIds = [];
   double? _minPrice;
   double? _maxPrice;
   int? _minBedrooms;
@@ -46,6 +57,8 @@ class _HomeScreenState extends State<HomeScreen> {
     propertyProvider = Provider.of<PropertyProvider>(context, listen: false);
     cityProvider = Provider.of<CityProvider>(context, listen: false);
     propertyTypeProvider = Provider.of<PropertyTypeProvider>(context, listen: false);
+    countryProvider = Provider.of<CountryProvider>(context, listen: false);
+    amenityProvider = Provider.of<AmenityProvider>(context, listen: false);
     _loadFilters();
     _loadProperties();
   }
@@ -63,16 +76,33 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final citiesResult = await cityProvider.get(filter: {'isActive': true, 'retrieveAll': true});
       final propertyTypesResult = await propertyTypeProvider.get(filter: {'isActive': true, 'retrieveAll': true});
+      final countriesResult = await countryProvider.get(filter: {'isActive': true, 'retrieveAll': true});
+      final amenitiesResult = await amenityProvider.get(filter: {'isActive': true, 'retrieveAll': true});
 
       if (mounted) {
         setState(() {
           _cities = citiesResult.items ?? [];
+          _filteredCities = _cities;
           _propertyTypes = propertyTypesResult.items ?? [];
+          _countries = countriesResult.items ?? [];
+          _amenities = amenitiesResult.items ?? [];
         });
       }
     } catch (e) {
       // Silently fail - filters are optional
     }
+  }
+
+  void _onCountryChanged(int? countryId) {
+    setState(() {
+      _selectedCountryId = countryId;
+      _selectedCityId = null; // Reset city when country changes
+      if (countryId != null) {
+        _filteredCities = _cities.where((city) => city.countryId == countryId).toList();
+      } else {
+        _filteredCities = _cities;
+      }
+    });
   }
 
   Future<void> _loadProperties() async {
@@ -95,6 +125,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_selectedPropertyTypeId != null) {
         filter['propertyTypeId'] = _selectedPropertyTypeId;
       }
+      if (_selectedCountryId != null) {
+        filter['countryId'] = _selectedCountryId;
+      }
       if (_minPrice != null) {
         filter['minPricePerMonth'] = _minPrice;
       }
@@ -103,6 +136,9 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       if (_minBedrooms != null) {
         filter['minBedrooms'] = _minBedrooms;
+      }
+      if (_selectedAmenityIds.isNotEmpty) {
+        filter['amenityIds'] = _selectedAmenityIds;
       }
 
       final result = await propertyProvider.get(filter: filter);
@@ -129,11 +165,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void _clearFilters() {
     setState(() {
       _searchQuery = '';
+      _selectedCountryId = null;
       _selectedCityId = null;
       _selectedPropertyTypeId = null;
+      _selectedAmenityIds = [];
       _minPrice = null;
       _maxPrice = null;
       _minBedrooms = null;
+      _filteredCities = _cities;
       _searchController.clear();
       _minPriceController.clear();
       _maxPriceController.clear();
@@ -223,8 +262,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    if (_selectedCityId != null ||
+                    if (_selectedCountryId != null ||
+                        _selectedCityId != null ||
                         _selectedPropertyTypeId != null ||
+                        _selectedAmenityIds.isNotEmpty ||
                         _minPrice != null ||
                         _maxPrice != null ||
                         _minBedrooms != null)
@@ -249,7 +290,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: ElevatedButton(
-                        onPressed: _loadProperties,
+                        onPressed: () {
+                          if (_showFilters) {
+                            setState(() => _showFilters = false);
+                          }
+                          _loadProperties();
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
@@ -270,26 +316,79 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-                // Filters Panel
-                if (_showFilters) ...[
-                  const SizedBox(height: 16),
-                  _buildFiltersPanel(),
-                ],
               ],
             ),
           ),
 
-          // Properties List
+          // Properties List with Overlay Filters
           Expanded(
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF5B9BD5)),
+            child: Stack(
+              children: [
+                // Properties List
+                _isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF5B9BD5)),
+                        ),
+                      )
+                    : _properties.isEmpty
+                        ? _buildEmptyState()
+                        : _buildPropertiesList(),
+                
+                // Filters Overlay
+                if (_showFilters)
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.white,
+                      child: Column(
+                        children: [
+                          // Close button header
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                const Text(
+                                  'Filters',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF1F2937),
+                                  ),
+                                ),
+                                const Spacer(),
+                                IconButton(
+                                  icon: const Icon(Icons.close_rounded),
+                                  onPressed: () {
+                                    setState(() => _showFilters = false);
+                                  },
+                                  color: Colors.grey[600],
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Scrollable filters
+                          Expanded(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.all(16),
+                              child: _buildFiltersPanel(),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  )
-                : _properties.isEmpty
-                    ? _buildEmptyState()
-                    : _buildPropertiesList(),
+                  ),
+              ],
+            ),
           ),
         ],
       ),
@@ -297,27 +396,31 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildFiltersPanel() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Filter Properties',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1F2937),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Country Filter
+        DropdownButtonFormField<int>(
+            value: _selectedCountryId,
+            decoration: InputDecoration(
+              labelText: 'Country',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
+            items: [
+              const DropdownMenuItem<int>(value: null, child: Text('All Countries')),
+              ..._countries.map((country) => DropdownMenuItem<int>(
+                    value: country.id,
+                    child: Text(country.name),
+                  )),
+            ],
+            onChanged: _onCountryChanged,
           ),
-          const SizedBox(height: 16),
-          // City Filter
-          DropdownButtonFormField<int>(
+        const SizedBox(height: 16),
+        // City Filter
+        DropdownButtonFormField<int>(
             value: _selectedCityId,
             decoration: InputDecoration(
               labelText: 'City',
@@ -328,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             items: [
               const DropdownMenuItem<int>(value: null, child: Text('All Cities')),
-              ..._cities.map((city) => DropdownMenuItem<int>(
+              ..._filteredCities.map((city) => DropdownMenuItem<int>(
                     value: city.id,
                     child: Text(city.name),
                   )),
@@ -337,9 +440,9 @@ class _HomeScreenState extends State<HomeScreen> {
               setState(() => _selectedCityId = value);
             },
           ),
-          const SizedBox(height: 16),
-          // Property Type Filter
-          DropdownButtonFormField<int>(
+        const SizedBox(height: 16),
+        // Property Type Filter
+        DropdownButtonFormField<int>(
             value: _selectedPropertyTypeId,
             decoration: InputDecoration(
               labelText: 'Property Type',
@@ -359,9 +462,9 @@ class _HomeScreenState extends State<HomeScreen> {
               setState(() => _selectedPropertyTypeId = value);
             },
           ),
-          const SizedBox(height: 16),
-          // Price Range
-          Row(
+        const SizedBox(height: 16),
+        // Price Range
+        Row(
             children: [
               Expanded(
                 child: TextField(
@@ -398,9 +501,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          // Bedrooms
-          TextField(
+        const SizedBox(height: 16),
+        // Bedrooms
+        TextField(
             controller: _minBedroomsController,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
@@ -414,8 +517,53 @@ class _HomeScreenState extends State<HomeScreen> {
               _minBedrooms = value.isEmpty ? null : int.tryParse(value);
             },
           ),
-        ],
-      ),
+        const SizedBox(height: 16),
+        // Amenities Filter
+        const Text(
+            'Amenities',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1F2937),
+            ),
+          ),
+        const SizedBox(height: 8),
+        Container(
+            constraints: const BoxConstraints(maxHeight: 150),
+            child: SingleChildScrollView(
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _amenities.map((amenity) {
+                  final isSelected = _selectedAmenityIds.contains(amenity.id);
+                  return FilterChip(
+                    label: Text(amenity.name),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          _selectedAmenityIds.add(amenity.id);
+                        } else {
+                          _selectedAmenityIds.remove(amenity.id);
+                        }
+                      });
+                    },
+                    selectedColor: const Color(0xFF5B9BD5).withOpacity(0.2),
+                    checkmarkColor: const Color(0xFF5B9BD5),
+                    labelStyle: TextStyle(
+                      color: isSelected ? const Color(0xFF5B9BD5) : Colors.grey[700],
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                    side: BorderSide(
+                      color: isSelected ? const Color(0xFF5B9BD5) : Colors.grey[300]!,
+                      width: isSelected ? 1.5 : 1,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+      ],
     );
   }
 

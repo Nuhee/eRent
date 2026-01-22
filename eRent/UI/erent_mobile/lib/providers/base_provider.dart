@@ -166,9 +166,17 @@ abstract class BaseProvider<T> with ChangeNotifier {
         }
         query += '$prefix$key=$encoded';
       } else if (value is DateTime) {
-        query += '$prefix$key=${(value as DateTime).toIso8601String()}';
-      } else if (value is List || value is Map) {
-        if (value is List) value = value.asMap();
+        query += '$prefix$key=${value.toIso8601String()}';
+      } else if (value is List) {
+        // For lists, ASP.NET Core expects repeated parameters: amenityIds=1&amenityIds=2
+        for (var item in value) {
+          var encoded = item;
+          if (item is String) {
+            encoded = Uri.encodeComponent(item);
+          }
+          query += '$prefix$key=$encoded';
+        }
+      } else if (value is Map) {
         value.forEach((k, v) {
           query += getQueryString(
             {k: v},

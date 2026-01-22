@@ -23,6 +23,8 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   List<Review> _reviews = [];
   bool _isLoadingProperty = true;
   bool _isLoadingReviews = true;
+  int _currentImageIndex = 0;
+  final PageController _imagePageController = PageController();
 
   @override
   void initState() {
@@ -31,6 +33,12 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
     reviewProvider = Provider.of<ReviewProvider>(context, listen: false);
     _loadProperty();
     _loadReviews();
+  }
+
+  @override
+  void dispose() {
+    _imagePageController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadProperty() async {
@@ -164,30 +172,69 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
       );
     }
 
-    return SizedBox(
-      height: 300,
-      child: PageView.builder(
-        itemCount: _property!.images.length,
-        itemBuilder: (context, index) {
-          final image = _property!.images[index];
-          ImageProvider? imageProvider;
-          if (image.imageData.isNotEmpty) {
-            try {
-              final bytes = base64Decode(image.imageData);
-              imageProvider = MemoryImage(bytes);
-            } catch (_) {
-              imageProvider = null;
-            }
-          }
+    return Stack(
+      children: [
+        SizedBox(
+          height: 300,
+          child: PageView.builder(
+            controller: _imagePageController,
+            itemCount: _property!.images.length,
+            onPageChanged: (index) {
+              setState(() => _currentImageIndex = index);
+            },
+            itemBuilder: (context, index) {
+              final image = _property!.images[index];
+              ImageProvider? imageProvider;
+              if (image.imageData.isNotEmpty) {
+                try {
+                  final bytes = base64Decode(image.imageData);
+                  imageProvider = MemoryImage(bytes);
+                } catch (_) {
+                  imageProvider = null;
+                }
+              }
 
-          return imageProvider != null
-              ? Image(image: imageProvider, fit: BoxFit.cover)
-              : Container(
-                  color: Colors.grey[200],
-                  child: Icon(Icons.image_rounded, size: 64, color: Colors.grey[400]),
-                );
-        },
-      ),
+              return imageProvider != null
+                  ? Image(image: imageProvider, fit: BoxFit.cover)
+                  : Container(
+                      color: Colors.grey[200],
+                      child: Icon(Icons.image_rounded, size: 64, color: Colors.grey[400]),
+                    );
+            },
+          ),
+        ),
+        // Image Indicators
+        if (_property!.images.length > 1)
+          Positioned(
+            bottom: 16,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                _property!.images.length,
+                (index) => Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: _currentImageIndex == index ? 24 : 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: _currentImageIndex == index
+                        ? Colors.white
+                        : Colors.white.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(4),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 

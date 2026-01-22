@@ -74,6 +74,11 @@ namespace eRent.Services.Services
                 query = query.Where(x => x.CityId == search.CityId.Value);
             }
 
+            if (search.CountryId.HasValue)
+            {
+                query = query.Where(x => x.City != null && x.City.CountryId == search.CountryId.Value);
+            }
+
             if (search.LandlordId.HasValue)
             {
                 query = query.Where(x => x.LandlordId == search.LandlordId.Value);
@@ -112,6 +117,13 @@ namespace eRent.Services.Services
             if (search.MaxBedrooms.HasValue)
             {
                 query = query.Where(x => x.Bedrooms <= search.MaxBedrooms.Value);
+            }
+
+            if (search.AmenityIds != null && search.AmenityIds.Count > 0)
+            {
+                // Property must have ALL selected amenities (AND logic, not OR)
+                query = query.Where(x => search.AmenityIds.All(amenityId => 
+                    x.PropertyAmenities.Any(pa => pa.AmenityId == amenityId)));
             }
 
             if (search.IsActive.HasValue)
