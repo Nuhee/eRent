@@ -6,6 +6,7 @@ import 'package:erent_landlord_desktop/providers/property_provider.dart';
 import 'package:erent_landlord_desktop/providers/user_provider.dart';
 import 'package:erent_landlord_desktop/screens/property_details_screen.dart';
 import 'package:erent_landlord_desktop/screens/property_edit_screen.dart';
+import 'package:erent_landlord_desktop/screens/property_map_location_screen.dart';
 import 'package:erent_landlord_desktop/utils/base_pagination.dart';
 import 'package:erent_landlord_desktop/utils/base_table.dart';
 import 'package:erent_landlord_desktop/utils/base_textfield.dart';
@@ -530,6 +531,47 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  // Map Location Button
+                                  Tooltip(
+                                    message: "View on Map",
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(8),
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PropertyMapLocationScreen(property: e),
+                                              settings: const RouteSettings(
+                                                name: 'PropertyMapLocationScreen',
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: Container(
+                                          width: 36,
+                                          height: 36,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(
+                                              color: Colors.teal.withOpacity(0.3),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.map_outlined,
+                                            color: Colors.teal,
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
                                   // View Details Button
                                   Tooltip(
                                     message: "View Details",
