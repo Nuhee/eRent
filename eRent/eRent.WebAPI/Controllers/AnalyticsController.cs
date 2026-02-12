@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using eRent.Services.Interfaces;
 
@@ -5,6 +6,7 @@ namespace eRent.WebAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class AnalyticsController : ControllerBase
     {
         private readonly IAnalyticsService _analyticsService;

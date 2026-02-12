@@ -1,6 +1,7 @@
 using eRent.Model.Requests;
 using eRent.Model.Responses;
 using eRent.Model.SearchObjects;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using eRent.Services.Interfaces;
@@ -10,6 +11,7 @@ namespace eRent.WebAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -37,6 +39,8 @@ namespace eRent.WebAPI.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
+
         public async Task<ActionResult<UserResponse>> Create(UserUpsertRequest request)
         {
             var createdUser = await _userService.CreateAsync(request);
@@ -66,6 +70,7 @@ namespace eRent.WebAPI.Controllers
         }
 
         [HttpPost("authenticate")]
+        [AllowAnonymous]
         public async Task<ActionResult<UserResponse>> Authenticate([FromBody] UserLoginRequest request)
         {
             var user = await _userService.AuthenticateAsync(request);
