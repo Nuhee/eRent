@@ -1,5 +1,6 @@
 using eRent.Model.Requests;
 using eRent.Model.Responses;
+using eRent.Model.SearchObjects;
 using eRent.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +20,16 @@ namespace eRent.WebAPI.Controllers
         public PaymentController(IPaymentService service)
         {
             _service = service;
+        }
+
+        /// <summary>
+        /// Gets a list of payments with optional filtering.
+        /// </summary>
+        [HttpGet]
+        public async Task<ActionResult<PagedResult<PaymentResponse>>> Get([FromQuery] PaymentSearchObject search)
+        {
+            var result = await _service.GetAsync(search);
+            return Ok(result);
         }
 
         /// <summary>

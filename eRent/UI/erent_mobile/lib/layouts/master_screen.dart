@@ -3,6 +3,7 @@ import 'package:erent_mobile/providers/user_provider.dart';
 import 'package:erent_mobile/screens/home_screen.dart';
 import 'package:erent_mobile/screens/chat_list_screen.dart';
 import 'package:erent_mobile/screens/rents_list_screen.dart';
+import 'package:erent_mobile/screens/expenses_screen.dart';
 import 'package:erent_mobile/screens/profile_screen.dart';
 
 class MasterScreen extends StatefulWidget {
@@ -25,6 +26,7 @@ class _MasterScreenState extends State<MasterScreen>
     'Home',
     'Chat',
     'Rents',
+    'Expenses',
     'Profile',
   ];
 
@@ -32,6 +34,7 @@ class _MasterScreenState extends State<MasterScreen>
     Icons.home_rounded,
     Icons.chat_bubble_rounded,
     Icons.home_work_rounded,
+    Icons.receipt_long_rounded,
     Icons.person_rounded,
   ];
 
@@ -243,6 +246,7 @@ class _MasterScreenState extends State<MasterScreen>
                   HomeScreen(),
                   ChatListScreen(),
                   RentsListScreen(),
+                  ExpensesScreen(),
                   ProfileScreen(),
                 ],
               ),
@@ -274,6 +278,7 @@ class _MasterScreenState extends State<MasterScreen>
                     _buildBottomNavItem(1),
                     _buildBottomNavItem(2),
                     _buildBottomNavItem(3),
+                    _buildBottomNavItem(4),
                   ],
                 ),
               ),

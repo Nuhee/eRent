@@ -1,5 +1,6 @@
 using eRent.Model.Requests;
 using eRent.Model.Responses;
+using eRent.Model.SearchObjects;
 using eRent.Services.Database;
 using eRent.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Stripe;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace eRent.Services.Services
@@ -141,6 +143,82 @@ namespace eRent.Services.Services
             return MapToResponse(payment);
         }
 
+        public async Task<PagedResult<PaymentResponse>> GetAsync(PaymentSearchObject search)
+        {
+            var query = _context.Payments
+                .Include(p => p.Rent)
+                    .ThenInclude(r => r!.Property)
+                .Include(p => p.Rent)
+                    .ThenInclude(r => r!.User)
+                .AsQueryable();
+
+            // Filter by UserId (through the Rent -> User relationship)
+            if (search.UserId.HasValue)
+            {
+                query = query.Where(p => p.Rent != null && p.Rent.UserId == search.UserId.Value);
+            }
+
+            if (search.RentId.HasValue)
+            {
+                query = query.Where(p => p.RentId == search.RentId.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(search.Status))
+            {
+                query = query.Where(p => p.Status == search.Status);
+            }
+
+            if (search.DateFrom.HasValue)
+            {
+                query = query.Where(p => p.CreatedAt >= search.DateFrom.Value);
+            }
+
+            if (search.DateTo.HasValue)
+            {
+                query = query.Where(p => p.CreatedAt <= search.DateTo.Value);
+            }
+
+            if (search.MinAmount.HasValue)
+            {
+                query = query.Where(p => p.Amount >= search.MinAmount.Value);
+            }
+
+            if (search.MaxAmount.HasValue)
+            {
+                query = query.Where(p => p.Amount <= search.MaxAmount.Value);
+            }
+
+            // Full text search on customer name or property title
+            if (!string.IsNullOrWhiteSpace(search.FTS))
+            {
+                var fts = search.FTS.ToLower();
+                query = query.Where(p =>
+                    (p.CustomerName != null && p.CustomerName.ToLower().Contains(fts)) ||
+                    (p.Rent != null && p.Rent.Property.Title.ToLower().Contains(fts)));
+            }
+
+            // Default order by newest first
+            query = query.OrderByDescending(p => p.CreatedAt);
+
+            var result = new PagedResult<PaymentResponse>();
+
+            if (search.IncludeTotalCount)
+            {
+                result.TotalCount = await query.CountAsync();
+            }
+
+            if (!search.RetrieveAll && search.Page.HasValue && search.PageSize.HasValue)
+            {
+                query = query.Skip(search.Page.Value * search.PageSize.Value)
+                             .Take(search.PageSize.Value);
+            }
+
+            var payments = await query.ToListAsync();
+            result.Items = payments.Select(MapToResponse).ToList();
+
+            return result;
+        }
+
         private static PaymentResponse MapToResponse(Database.Payment entity)
         {
             return new PaymentResponse
@@ -162,6 +240,12 @@ namespace eRent.Services.Services
                 BillingZipCode = entity.BillingZipCode,
                 CreatedAt = entity.CreatedAt,
                 UpdatedAt = entity.UpdatedAt,
+                // Enriched fields
+                PropertyTitle = entity.Rent?.Property?.Title ?? "N/A",
+                UserId = entity.Rent?.UserId,
+                UserName = entity.Rent?.User != null
+                    ? $"{entity.Rent.User.FirstName} {entity.Rent.User.LastName}"
+                    : entity.CustomerName ?? "N/A",
             };
         }
     }

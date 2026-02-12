@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:erent_mobile/model/payment.dart';
+import 'package:erent_mobile/model/search_result.dart';
 import 'package:erent_mobile/providers/auth_provider.dart';
 import 'package:erent_mobile/providers/base_provider.dart';
 
@@ -14,6 +16,47 @@ class PaymentProvider with ChangeNotifier {
       'Content-Type': 'application/json',
       'Authorization': basicAuth,
     };
+  }
+
+  /// Fetches a paginated list of payments with optional filters.
+  Future<SearchResult<Payment>> getPayments({
+    int? userId,
+    int? rentId,
+    String? status,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+    int page = 0,
+    int pageSize = 50,
+    bool includeTotalCount = true,
+  }) async {
+    final baseUrl = BaseProvider.baseUrl;
+    final headers = _createHeaders();
+
+    final queryParams = <String, String>{};
+    if (userId != null) queryParams['UserId'] = userId.toString();
+    if (rentId != null) queryParams['RentId'] = rentId.toString();
+    if (status != null) queryParams['Status'] = status;
+    if (dateFrom != null) queryParams['DateFrom'] = dateFrom.toIso8601String();
+    if (dateTo != null) queryParams['DateTo'] = dateTo.toIso8601String();
+    queryParams['Page'] = page.toString();
+    queryParams['PageSize'] = pageSize.toString();
+    queryParams['IncludeTotalCount'] = includeTotalCount.toString();
+
+    final uri = Uri.parse('${baseUrl}Payment').replace(queryParameters: queryParams);
+
+    final response = await http.get(uri, headers: headers);
+
+    if (response.statusCode < 300) {
+      final data = jsonDecode(response.body);
+      final result = SearchResult<Payment>();
+      result.totalCount = data['totalCount'];
+      result.items = List<Payment>.from(
+        (data['items'] as List).map((e) => Payment.fromJson(e)),
+      );
+      return result;
+    } else {
+      throw Exception('Failed to load payments');
+    }
   }
 
   /// Creates a PaymentIntent via the backend API. Returns map with
