@@ -10,6 +10,7 @@ import 'package:erent_desktop/providers/property_type_provider.dart';
 import 'package:erent_desktop/providers/amenity_provider.dart';
 import 'package:erent_desktop/providers/property_provider.dart';
 import 'package:erent_desktop/providers/rent_provider.dart';
+import 'package:erent_desktop/providers/viewing_appointment_provider.dart';
 import 'package:erent_desktop/providers/analytics_provider.dart';
 import 'package:erent_desktop/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
@@ -45,6 +46,9 @@ void main() async {
         ),
         ChangeNotifierProvider<RentProvider>(
           create: (context) => RentProvider(),
+        ),
+        ChangeNotifierProvider<ViewingAppointmentProvider>(
+          create: (context) => ViewingAppointmentProvider(),
         ),
         ChangeNotifierProvider<AnalyticsProvider>(
           create: (context) => AnalyticsProvider(),

@@ -10,6 +10,7 @@ import 'package:erent_desktop/screens/property_type_list_screen.dart';
 import 'package:erent_desktop/screens/amenity_list_screen.dart';
 import 'package:erent_desktop/screens/property_list_screen.dart';
 import 'package:erent_desktop/screens/rent_list_screen.dart';
+import 'package:erent_desktop/screens/viewing_list_screen.dart';
 import 'package:erent_desktop/screens/analytics_screen.dart';
 
 class MasterScreen extends StatefulWidget {
@@ -351,6 +352,14 @@ class _MasterScreenState extends State<MasterScreen>
               activeIcon: Icons.receipt_long_rounded,
               label: 'Rents',
               screen: const RentListScreen(),
+            ),
+            const SizedBox(height: 5),
+            _modernDrawerTile(
+              context,
+              icon: Icons.calendar_today_outlined,
+              activeIcon: Icons.calendar_today_rounded,
+              label: 'Viewing Appointments',
+              screen: const ViewingListScreen(),
             ),
             const SizedBox(height: 5),
             _modernDrawerTile(
