@@ -9,6 +9,40 @@ using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using DotNetEnv;
+
+// Load .env file if it exists (for local development)
+// In Docker, environment variables are provided by docker-compose
+try
+{
+    var possibleEnvPaths = new[]
+    {
+        Path.Combine(Directory.GetCurrentDirectory(), ".env"),
+        Path.Combine(Directory.GetCurrentDirectory(), "..", ".env"),
+        Path.Combine(Directory.GetCurrentDirectory(), "..", "..", ".env"),
+    };
+
+    bool envLoaded = false;
+    foreach (var envPath in possibleEnvPaths)
+    {
+        if (File.Exists(envPath))
+        {
+            Env.Load(envPath);
+            envLoaded = true;
+            break;
+        }
+    }
+
+    if (!envLoaded)
+    {
+        Env.Load();
+    }
+}
+catch (FileNotFoundException)
+{
+    // .env file not found - this is OK in Docker environments
+    // Environment variables will be provided by docker-compose
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +67,18 @@ builder.Services.AddTransient<IPaymentService, PaymentService>();
 
 
 // Configure database
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=.;Database=eRentDb;User Id=sa;Password=QWEasd123!;TrustServerCertificate=True;Trusted_Connection=True;";
+// Try to get connection string from configuration first (Docker sets this via environment)
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// If not found or empty (local development), use Trusted_Connection (Windows Auth)
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    var sqlServer = Environment.GetEnvironmentVariable("SQL__SERVER") ?? ".";
+    var sqlDatabase = Environment.GetEnvironmentVariable("SQL__DATABASE") ?? "eRentDb";
+
+    connectionString = $"Server={sqlServer};Database={sqlDatabase};TrustServerCertificate=True;Trusted_Connection=True;";
+}
+
 builder.Services.AddDatabaseServices(connectionString);
 
 // Add configuration
