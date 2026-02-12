@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:erent_desktop/layouts/master_screen.dart';
 import 'package:erent_desktop/model/analytics.dart';
 import 'package:erent_desktop/providers/analytics_provider.dart';
+import 'package:erent_desktop/utils/admin_pdf_report.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -15,6 +16,7 @@ class AnalyticsScreen extends StatefulWidget {
 class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProviderStateMixin {
   Analytics? analytics;
   bool isLoading = true;
+  bool _isGeneratingPdf = false;
   String? errorMessage;
   late TabController _tabController;
 
@@ -45,6 +47,27 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
         isLoading = false;
         errorMessage = e.toString();
       });
+    }
+  }
+
+  Future<void> _generatePdfReport() async {
+    if (analytics == null) return;
+    setState(() => _isGeneratingPdf = true);
+    try {
+      await AdminPdfReport.generateAndPrint(analytics!);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error generating PDF: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isGeneratingPdf = false);
+      }
     }
   }
 
@@ -83,7 +106,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
                   ? const Center(child: Text('No data available'))
                   : Column(
                       children: [
-                        // Tab Bar
+                        // Tab Bar + PDF Button
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -95,21 +118,49 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
                               ),
                             ],
                           ),
-                          child: TabBar(
-                            controller: _tabController,
-                            isScrollable: true,
-                            labelColor: const Color(0xFF5B9BD5),
-                            unselectedLabelColor: Colors.grey[600],
-                            indicatorColor: const Color(0xFF5B9BD5),
-                            indicatorWeight: 3,
-                            tabs: const [
-                              Tab(text: 'Overview', icon: Icon(Icons.dashboard_rounded, size: 20)),
-                              Tab(text: 'Revenue', icon: Icon(Icons.attach_money_rounded, size: 20)),
-                              Tab(text: 'Rents', icon: Icon(Icons.receipt_long_rounded, size: 20)),
-                              Tab(text: 'Properties', icon: Icon(Icons.home_rounded, size: 20)),
-                              Tab(text: 'Users', icon: Icon(Icons.people_rounded, size: 20)),
-                              Tab(text: 'Reviews', icon: Icon(Icons.star_rounded, size: 20)),
-                              Tab(text: 'Growth', icon: Icon(Icons.trending_up_rounded, size: 20)),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TabBar(
+                                  controller: _tabController,
+                                  isScrollable: true,
+                                  labelColor: const Color(0xFF5B9BD5),
+                                  unselectedLabelColor: Colors.grey[600],
+                                  indicatorColor: const Color(0xFF5B9BD5),
+                                  indicatorWeight: 3,
+                                  tabs: const [
+                                    Tab(text: 'Overview', icon: Icon(Icons.dashboard_rounded, size: 20)),
+                                    Tab(text: 'Revenue', icon: Icon(Icons.attach_money_rounded, size: 20)),
+                                    Tab(text: 'Rents', icon: Icon(Icons.receipt_long_rounded, size: 20)),
+                                    Tab(text: 'Properties', icon: Icon(Icons.home_rounded, size: 20)),
+                                    Tab(text: 'Users', icon: Icon(Icons.people_rounded, size: 20)),
+                                    Tab(text: 'Reviews', icon: Icon(Icons.star_rounded, size: 20)),
+                                    Tab(text: 'Growth', icon: Icon(Icons.trending_up_rounded, size: 20)),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                child: ElevatedButton.icon(
+                                  onPressed: _isGeneratingPdf ? null : _generatePdfReport,
+                                  icon: _isGeneratingPdf
+                                      ? const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                        )
+                                      : const Icon(Icons.picture_as_pdf_rounded, size: 18),
+                                  label: Text(_isGeneratingPdf ? 'Generating...' : 'Download PDF'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF5B9BD5),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
