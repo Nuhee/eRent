@@ -18,8 +18,11 @@ namespace eRent.Services.Services
     {
         private static readonly string[] StatusNames = { "Pending", "Approved", "Rejected", "Cancelled", "Completed" };
 
-        public ViewingAppointmentService(eRentDbContext context, IMapper mapper) : base(context, mapper)
+        private readonly INotificationService _notificationService;
+
+        public ViewingAppointmentService(eRentDbContext context, IMapper mapper, INotificationService notificationService) : base(context, mapper)
         {
+            _notificationService = notificationService;
         }
 
         public override async Task<ViewingAppointmentResponse> CreateAsync(ViewingAppointmentUpsertRequest request)
@@ -67,6 +70,23 @@ namespace eRent.Services.Services
                     .ThenInclude(p => p.Landlord)
                 .Include(x => x.Tenant)
                 .FirstAsync(x => x.Id == entity.Id);
+
+            // In-app notification to landlord
+            try
+            {
+                if (saved.Property != null)
+                {
+                    var tenantName = saved.Tenant != null ? $"{saved.Tenant.FirstName} {saved.Tenant.LastName}" : "A tenant";
+                    await _notificationService.CreateNotificationAsync(
+                        saved.Property.LandlordId,
+                        "New Viewing Request",
+                        $"{tenantName} has requested to view \"{saved.Property.Title}\" on {saved.AppointmentDate:dd MMM yyyy, HH:mm}.",
+                        5, // ViewingCreated
+                        saved.Id,
+                        "ViewingAppointment");
+                }
+            }
+            catch (Exception ex) { Console.WriteLine($"Notification error: {ex.Message}"); }
 
             return MapToResponse(saved);
         }
@@ -178,6 +198,21 @@ namespace eRent.Services.Services
             entity.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
+
+            // In-app notification to tenant
+            try
+            {
+                var propertyTitle = entity.Property?.Title ?? "a property";
+                await _notificationService.CreateNotificationAsync(
+                    entity.TenantId,
+                    "Viewing Approved",
+                    $"Your viewing request for \"{propertyTitle}\" on {entity.AppointmentDate:dd MMM yyyy, HH:mm} has been approved!",
+                    6, // ViewingApproved
+                    entity.Id,
+                    "ViewingAppointment");
+            }
+            catch (Exception ex) { Console.WriteLine($"Notification error: {ex.Message}"); }
+
             return MapToResponse(entity);
         }
 
@@ -202,6 +237,21 @@ namespace eRent.Services.Services
             entity.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
+
+            // In-app notification to tenant
+            try
+            {
+                var propertyTitle = entity.Property?.Title ?? "a property";
+                await _notificationService.CreateNotificationAsync(
+                    entity.TenantId,
+                    "Viewing Rejected",
+                    $"Your viewing request for \"{propertyTitle}\" on {entity.AppointmentDate:dd MMM yyyy, HH:mm} has been rejected.",
+                    7, // ViewingRejected
+                    entity.Id,
+                    "ViewingAppointment");
+            }
+            catch (Exception ex) { Console.WriteLine($"Notification error: {ex.Message}"); }
+
             return MapToResponse(entity);
         }
 
@@ -225,6 +275,24 @@ namespace eRent.Services.Services
             entity.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
+
+            // In-app notification to landlord
+            try
+            {
+                if (entity.Property != null)
+                {
+                    var tenantName = entity.Tenant != null ? $"{entity.Tenant.FirstName} {entity.Tenant.LastName}" : "Tenant";
+                    await _notificationService.CreateNotificationAsync(
+                        entity.Property.LandlordId,
+                        "Viewing Cancelled",
+                        $"{tenantName} cancelled the viewing for \"{entity.Property.Title}\" on {entity.AppointmentDate:dd MMM yyyy, HH:mm}.",
+                        8, // ViewingCancelled
+                        entity.Id,
+                        "ViewingAppointment");
+                }
+            }
+            catch (Exception ex) { Console.WriteLine($"Notification error: {ex.Message}"); }
+
             return MapToResponse(entity);
         }
 

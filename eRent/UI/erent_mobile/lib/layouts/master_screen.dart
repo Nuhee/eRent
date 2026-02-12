@@ -1,10 +1,14 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:erent_mobile/providers/user_provider.dart';
+import 'package:erent_mobile/providers/notification_provider.dart';
 import 'package:erent_mobile/screens/home_screen.dart';
 import 'package:erent_mobile/screens/chat_list_screen.dart';
 import 'package:erent_mobile/screens/rents_list_screen.dart';
 import 'package:erent_mobile/screens/expenses_screen.dart';
 import 'package:erent_mobile/screens/profile_screen.dart';
+import 'package:erent_mobile/screens/notifications_screen.dart';
 
 class MasterScreen extends StatefulWidget {
   const MasterScreen({super.key, required this.child, required this.title});
@@ -18,6 +22,8 @@ class MasterScreen extends StatefulWidget {
 class _MasterScreenState extends State<MasterScreen>
     with SingleTickerProviderStateMixin {
   int _selectedIndex = 0;
+  int _unreadNotifications = 0;
+  Timer? _notificationTimer;
   late PageController _pageController;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -50,13 +56,31 @@ class _MasterScreenState extends State<MasterScreen>
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
     _animationController.forward();
+    _loadUnreadCount();
+    _notificationTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _loadUnreadCount(),
+    );
   }
 
   @override
   void dispose() {
+    _notificationTimer?.cancel();
     _pageController.dispose();
     _animationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadUnreadCount() async {
+    final user = UserProvider.currentUser;
+    if (user == null) return;
+    try {
+      final provider = Provider.of<NotificationProvider>(context, listen: false);
+      final count = await provider.getUnreadCount(user.id);
+      if (mounted && count != _unreadNotifications) {
+        setState(() => _unreadNotifications = count);
+      }
+    } catch (_) {}
   }
 
   void _onItemTapped(int index) {
@@ -202,6 +226,73 @@ class _MasterScreenState extends State<MasterScreen>
                         ],
                       ),
                     ),
+                    // Notification Bell
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const NotificationsScreen(),
+                              ),
+                            );
+                            _loadUnreadCount();
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                const Icon(
+                                  Icons.notifications_rounded,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                                if (_unreadNotifications > 0)
+                                  Positioned(
+                                    right: -6,
+                                    top: -6,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFE53E3E),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      constraints: const BoxConstraints(
+                                        minWidth: 18,
+                                        minHeight: 18,
+                                      ),
+                                      child: Text(
+                                        _unreadNotifications > 99
+                                            ? '99+'
+                                            : _unreadNotifications.toString(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     // Logout Button
                     Container(
                       decoration: BoxDecoration(

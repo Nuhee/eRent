@@ -65,6 +65,7 @@ builder.Services.AddTransient<IAnalyticsService, AnalyticsService>();
 builder.Services.AddTransient<ILandlordAnalyticsService, LandlordAnalyticsService>();
 builder.Services.AddTransient<IPaymentService, PaymentService>();
 builder.Services.AddTransient<IViewingAppointmentService, ViewingAppointmentService>();
+builder.Services.AddTransient<INotificationService, NotificationService>();
 
 
 // Configure database

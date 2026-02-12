@@ -25,6 +25,7 @@ namespace eRent.Services.Database
         public DbSet<ReviewRent> ReviewRents { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<ViewingAppointment> ViewingAppointments { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -228,6 +229,16 @@ namespace eRent.Services.Database
                 .WithMany()
                 .HasForeignKey(va => va.TenantId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // Configure Notification entity relationships
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany()
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => new { n.UserId, n.IsRead });
 
             // Seed initial data
             modelBuilder.SeedData();

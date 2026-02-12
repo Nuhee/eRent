@@ -17,6 +17,7 @@ import 'package:erent_mobile/providers/amenity_provider.dart';
 import 'package:erent_mobile/providers/rent_provider.dart';
 import 'package:erent_mobile/providers/payment_provider.dart';
 import 'package:erent_mobile/providers/viewing_appointment_provider.dart';
+import 'package:erent_mobile/providers/notification_provider.dart';
 import 'package:erent_mobile/screens/register_screen.dart';
 
 void main() async {
@@ -48,6 +49,7 @@ void main() async {
         ChangeNotifierProvider<RentProvider>(create: (_) => RentProvider()),
         ChangeNotifierProvider<PaymentProvider>(create: (_) => PaymentProvider()),
         ChangeNotifierProvider<ViewingAppointmentProvider>(create: (_) => ViewingAppointmentProvider()),
+        ChangeNotifierProvider<NotificationProvider>(create: (_) => NotificationProvider()),
       ],
       child: const MyApp(),
     ),

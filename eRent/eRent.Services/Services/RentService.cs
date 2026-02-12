@@ -15,16 +15,44 @@ namespace eRent.Services.Services
 {
     public class RentService : BaseCRUDService<RentResponse, RentSearchObject, Rent, RentUpsertRequest, RentUpsertRequest>, IRentService
     {
-        public RentService(eRentDbContext context, IMapper mapper) : base(context, mapper)
+        private readonly INotificationService _notificationService;
+
+        public RentService(eRentDbContext context, IMapper mapper, INotificationService notificationService) : base(context, mapper)
         {
+            _notificationService = notificationService;
         }
 
         public override async Task<RentResponse> CreateAsync(RentUpsertRequest request)
         {
             var result = await base.CreateAsync(request);
             
-            // Send notification after successful creation
+            // Send RabbitMQ notification after successful creation
             await SendRentNotificationAsync(result.Id, "Pending");
+
+            // Send in-app notification to landlord
+            try
+            {
+                var rent = await _context.Rents
+                    .Include(r => r.Property)
+                    .Include(r => r.User)
+                    .FirstOrDefaultAsync(r => r.Id == result.Id);
+
+                if (rent?.Property != null)
+                {
+                    var tenantName = rent.User != null ? $"{rent.User.FirstName} {rent.User.LastName}" : "A tenant";
+                    await _notificationService.CreateNotificationAsync(
+                        rent.Property.LandlordId,
+                        "New Rent Request",
+                        $"{tenantName} has requested to rent \"{rent.Property.Title}\".",
+                        0, // RentCreated
+                        rent.Id,
+                        "Rent");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to create in-app notification: {ex.Message}");
+            }
             
             return result;
         }
@@ -379,8 +407,25 @@ namespace eRent.Services.Services
 
             await _context.SaveChangesAsync();
             
-            // Send notification
+            // Send RabbitMQ notification
             await SendRentNotificationAsync(entity.Id, "Cancelled");
+
+            // In-app notification to landlord
+            try
+            {
+                if (entity.Property != null)
+                {
+                    var tenantName = entity.User != null ? $"{entity.User.FirstName} {entity.User.LastName}" : "Tenant";
+                    await _notificationService.CreateNotificationAsync(
+                        entity.Property.LandlordId,
+                        "Rent Cancelled",
+                        $"{tenantName} cancelled the rent for \"{entity.Property.Title}\".",
+                        3, // RentCancelled
+                        entity.Id,
+                        "Rent");
+                }
+            }
+            catch (Exception ex) { Console.WriteLine($"Notification error: {ex.Message}"); }
             
             return MapToResponse(entity);
         }
@@ -407,8 +452,22 @@ namespace eRent.Services.Services
 
             await _context.SaveChangesAsync();
             
-            // Send notification
+            // Send RabbitMQ notification
             await SendRentNotificationAsync(entity.Id, "Rejected");
+
+            // In-app notification to tenant
+            try
+            {
+                var propertyTitle = entity.Property?.Title ?? "a property";
+                await _notificationService.CreateNotificationAsync(
+                    entity.UserId,
+                    "Rent Rejected",
+                    $"Your rent request for \"{propertyTitle}\" has been rejected.",
+                    2, // RentRejected
+                    entity.Id,
+                    "Rent");
+            }
+            catch (Exception ex) { Console.WriteLine($"Notification error: {ex.Message}"); }
             
             return MapToResponse(entity);
         }
@@ -451,8 +510,22 @@ namespace eRent.Services.Services
 
             await _context.SaveChangesAsync();
             
-            // Send notification
+            // Send RabbitMQ notification
             await SendRentNotificationAsync(entity.Id, "Accepted");
+
+            // In-app notification to tenant
+            try
+            {
+                var propertyTitle = entity.Property?.Title ?? "a property";
+                await _notificationService.CreateNotificationAsync(
+                    entity.UserId,
+                    "Rent Accepted",
+                    $"Your rent request for \"{propertyTitle}\" has been accepted! You can now proceed with payment.",
+                    1, // RentAccepted
+                    entity.Id,
+                    "Rent");
+            }
+            catch (Exception ex) { Console.WriteLine($"Notification error: {ex.Message}"); }
             
             return MapToResponse(entity);
         }
@@ -479,8 +552,25 @@ namespace eRent.Services.Services
 
             await _context.SaveChangesAsync();
             
-            // Send notification
+            // Send RabbitMQ notification
             await SendRentNotificationAsync(entity.Id, "Paid");
+
+            // In-app notification to landlord
+            try
+            {
+                if (entity.Property != null)
+                {
+                    var tenantName = entity.User != null ? $"{entity.User.FirstName} {entity.User.LastName}" : "Tenant";
+                    await _notificationService.CreateNotificationAsync(
+                        entity.Property.LandlordId,
+                        "Payment Received",
+                        $"{tenantName} has paid for the rent of \"{entity.Property.Title}\".",
+                        4, // RentPaid
+                        entity.Id,
+                        "Rent");
+                }
+            }
+            catch (Exception ex) { Console.WriteLine($"Notification error: {ex.Message}"); }
             
             return MapToResponse(entity);
         }

@@ -1,13 +1,17 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'package:provider/provider.dart';
 import 'package:erent_landlord_desktop/main.dart';
 import 'package:erent_landlord_desktop/providers/user_provider.dart';
+import 'package:erent_landlord_desktop/providers/notification_provider.dart';
 import 'package:erent_landlord_desktop/screens/property_list_screen.dart';
 import 'package:erent_landlord_desktop/screens/rent_list_screen.dart';
 import 'package:erent_landlord_desktop/screens/analytics_screen.dart';
 import 'package:erent_landlord_desktop/screens/profile_screen.dart';
 import 'package:erent_landlord_desktop/screens/chat_list_screen.dart';
 import 'package:erent_landlord_desktop/screens/viewing_requests_screen.dart';
+import 'package:erent_landlord_desktop/screens/notifications_screen.dart';
 
 class MasterScreen extends StatefulWidget {
   const MasterScreen({
@@ -28,6 +32,8 @@ class _MasterScreenState extends State<MasterScreen>
     with SingleTickerProviderStateMixin {
   AnimationController? _animationController;
   Animation<double>? _slideAnimation;
+  int _unreadNotifications = 0;
+  Timer? _notificationTimer;
 
   @override
   void initState() {
@@ -42,12 +48,30 @@ class _MasterScreenState extends State<MasterScreen>
         curve: Curves.easeOutCubic,
       ),
     );
+    _loadUnreadCount();
+    _notificationTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _loadUnreadCount(),
+    );
   }
 
   @override
   void dispose() {
+    _notificationTimer?.cancel();
     _animationController?.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadUnreadCount() async {
+    final user = UserProvider.currentUser;
+    if (user == null) return;
+    try {
+      final provider = Provider.of<NotificationProvider>(context, listen: false);
+      final count = await provider.getUnreadCount(user.id);
+      if (mounted && count != _unreadNotifications) {
+        setState(() => _unreadNotifications = count);
+      }
+    } catch (_) {}
   }
 
   String _getUserInitials(String? firstName, String? lastName) {
@@ -144,6 +168,66 @@ class _MasterScreenState extends State<MasterScreen>
           ],
         ),
         actions: [
+          // Notification Bell
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            child: IconButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NotificationsScreen(),
+                    settings: const RouteSettings(name: 'NotificationsScreen'),
+                  ),
+                );
+              },
+              icon: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFB84D).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.notifications_rounded,
+                      color: Color(0xFFFFB84D),
+                      size: 20,
+                    ),
+                  ),
+                  if (_unreadNotifications > 0)
+                    Positioned(
+                      right: -2,
+                      top: -2,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFE53E3E),
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Text(
+                          _unreadNotifications > 99
+                              ? '99+'
+                              : _unreadNotifications.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              tooltip: 'Notifications',
+            ),
+          ),
           // Profile Info in Header
           Container(
             margin: const EdgeInsets.only(right: 16),
@@ -360,6 +444,14 @@ class _MasterScreenState extends State<MasterScreen>
             const SizedBox(height: 5),
             _modernDrawerTile(
               context,
+              icon: Icons.notifications_outlined,
+              activeIcon: Icons.notifications_rounded,
+              label: 'Notifications',
+              screen: const NotificationsScreen(),
+            ),
+            const SizedBox(height: 5),
+            _modernDrawerTile(
+              context,
               icon: Icons.chat_bubble_outline,
               activeIcon: Icons.chat_bubble_rounded,
               label: 'Messages',
@@ -462,6 +554,8 @@ Widget _modernDrawerTile(
     isSelected = currentRoute == 'ViewingRequestsScreen';
   } else if (label == 'Business Analytics') {
     isSelected = currentRoute == 'AnalyticsScreen';
+  } else if (label == 'Notifications') {
+    isSelected = currentRoute == 'NotificationsScreen';
   } else if (label == 'Messages') {
     isSelected =
         currentRoute == 'ChatListScreen' ||
