@@ -19,15 +19,8 @@ namespace eRent.WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAnalytics()
         {
-            try
-            {
-                var analytics = await _analyticsService.GetAnalyticsAsync();
-                return Ok(analytics);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while fetching analytics.", error = ex.Message });
-            }
+            var analytics = await _analyticsService.GetAnalyticsAsync();
+            return Ok(analytics);
         }
     }
 }
