@@ -7,7 +7,10 @@ import 'package:erent_mobile/providers/property_provider.dart';
 import 'package:erent_mobile/providers/review_provider.dart';
 import 'package:erent_mobile/screens/property_location_screen.dart';
 import 'package:erent_mobile/screens/property_booking_screen.dart';
+import 'package:erent_mobile/providers/viewing_appointment_provider.dart';
+import 'package:erent_mobile/providers/user_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class PropertyDetailsScreen extends StatefulWidget {
   final int propertyId;
@@ -778,7 +781,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
 
   Widget _buildRentButton() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -791,60 +794,536 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
       ),
       child: SafeArea(
         top: false,
-        child: Container(
-          height: 56,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF5B9BD5), Color(0xFF7AB8CC)],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF5B9BD5).withOpacity(0.4),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: ElevatedButton(
-            onPressed: () {
-              if (_property != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PropertyBookingScreen(property: _property!),
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              padding: EdgeInsets.zero,
-              elevation: 0,
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.home_work_rounded, color: Colors.white, size: 24),
-                SizedBox(width: 12),
-                Text(
-                  'Book Now',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
+        child: Row(
+          children: [
+            // Schedule Viewing Button
+            Expanded(
+              flex: 1,
+              child: Container(
+                height: 52,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: const Color(0xFF5B9BD5),
+                    width: 1.5,
                   ),
                 ),
-              ],
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_property != null) {
+                      _showScheduleViewingSheet();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    padding: EdgeInsets.zero,
+                    elevation: 0,
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.calendar_today_rounded,
+                          color: Color(0xFF5B9BD5), size: 18),
+                      SizedBox(width: 6),
+                      Text(
+                        'Schedule Viewing',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF5B9BD5),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 12),
+            // Book Now Button
+            Expanded(
+              flex: 1,
+              child: Container(
+                height: 52,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF5B9BD5), Color(0xFF7AB8CC)],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF5B9BD5).withOpacity(0.4),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_property != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              PropertyBookingScreen(property: _property!),
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    padding: EdgeInsets.zero,
+                    elevation: 0,
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.home_work_rounded,
+                          color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        'Book Now',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  void _showScheduleViewingSheet() {
+    DateTime? selectedDate;
+    TimeOfDay? selectedTime;
+    final noteController = TextEditingController();
+    bool isSubmitting = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final endTime = selectedDate != null && selectedTime != null
+                ? TimeOfDay(
+                    hour: (selectedTime!.hour + 2) % 24,
+                    minute: selectedTime!.minute)
+                : null;
+
+            return Container(
+              margin: const EdgeInsets.only(top: 60),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 24,
+                  right: 24,
+                  top: 16,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Handle bar
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Title
+                      const Row(
+                        children: [
+                          Icon(Icons.calendar_today_rounded,
+                              color: Color(0xFF5B9BD5), size: 24),
+                          SizedBox(width: 10),
+                          Text(
+                            'Schedule a Viewing',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1F2937),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Select your preferred date and time for a 2-hour property viewing.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Date Picker
+                      Text(
+                        'Select Date',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      InkWell(
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate:
+                                DateTime.now().add(const Duration(days: 1)),
+                            firstDate:
+                                DateTime.now().add(const Duration(days: 1)),
+                            lastDate:
+                                DateTime.now().add(const Duration(days: 90)),
+                            builder: (context, child) {
+                              return Theme(
+                                data: Theme.of(context).copyWith(
+                                  colorScheme: const ColorScheme.light(
+                                    primary: Color(0xFF5B9BD5),
+                                  ),
+                                ),
+                                child: child!,
+                              );
+                            },
+                          );
+                          if (picked != null) {
+                            setSheetState(() => selectedDate = picked);
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey[300]!),
+                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.grey[50],
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.date_range_rounded,
+                                  color: selectedDate != null
+                                      ? const Color(0xFF5B9BD5)
+                                      : Colors.grey[400],
+                                  size: 20),
+                              const SizedBox(width: 12),
+                              Text(
+                                selectedDate != null
+                                    ? DateFormat('EEEE, MMMM d, y')
+                                        .format(selectedDate!)
+                                    : 'Tap to select a date',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: selectedDate != null
+                                      ? const Color(0xFF1F2937)
+                                      : Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Time Picker
+                      Text(
+                        'Select Start Time',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      InkWell(
+                        onTap: () async {
+                          final picked = await showTimePicker(
+                            context: context,
+                            initialTime: const TimeOfDay(hour: 10, minute: 0),
+                            builder: (context, child) {
+                              return Theme(
+                                data: Theme.of(context).copyWith(
+                                  colorScheme: const ColorScheme.light(
+                                    primary: Color(0xFF5B9BD5),
+                                  ),
+                                ),
+                                child: child!,
+                              );
+                            },
+                          );
+                          if (picked != null) {
+                            setSheetState(() => selectedTime = picked);
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey[300]!),
+                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.grey[50],
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.access_time_rounded,
+                                  color: selectedTime != null
+                                      ? const Color(0xFF5B9BD5)
+                                      : Colors.grey[400],
+                                  size: 20),
+                              const SizedBox(width: 12),
+                              Text(
+                                selectedTime != null
+                                    ? '${selectedTime!.format(context)}'
+                                    : 'Tap to select a time',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: selectedTime != null
+                                      ? const Color(0xFF1F2937)
+                                      : Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Show selected slot
+                      if (selectedDate != null && selectedTime != null) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF5B9BD5).withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color:
+                                  const Color(0xFF5B9BD5).withOpacity(0.2),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.event_available_rounded,
+                                  color: Color(0xFF5B9BD5), size: 20),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  '${DateFormat('MMM d, y').format(selectedDate!)} \u2022 ${selectedTime!.format(context)} - ${endTime!.format(context)}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF5B9BD5),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+
+                      // Note field
+                      Text(
+                        'Note (optional)',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: noteController,
+                        maxLines: 3,
+                        maxLength: 500,
+                        decoration: InputDecoration(
+                          hintText: 'Any special requests or questions...',
+                          hintStyle: TextStyle(color: Colors.grey[400]),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                                color: Color(0xFF5B9BD5), width: 1.5),
+                          ),
+                          contentPadding: const EdgeInsets.all(14),
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Submit Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF5B9BD5), Color(0xFF7AB8CC)],
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: ElevatedButton(
+                            onPressed: (selectedDate != null &&
+                                    selectedTime != null &&
+                                    !isSubmitting)
+                                ? () async {
+                                    setSheetState(
+                                        () => isSubmitting = true);
+                                    try {
+                                      final user =
+                                          UserProvider.currentUser;
+                                      if (user == null) {
+                                        throw Exception(
+                                            'You must be logged in.');
+                                      }
+
+                                      final appointmentDate = DateTime(
+                                        selectedDate!.year,
+                                        selectedDate!.month,
+                                        selectedDate!.day,
+                                        selectedTime!.hour,
+                                        selectedTime!.minute,
+                                      );
+
+                                      final viewingProvider = Provider.of<
+                                              ViewingAppointmentProvider>(
+                                          context,
+                                          listen: false);
+
+                                      await viewingProvider.insert({
+                                        'propertyId': _property!.id,
+                                        'tenantId': user.id,
+                                        'appointmentDate':
+                                            appointmentDate
+                                                .toIso8601String(),
+                                        'tenantNote': noteController.text
+                                                .trim()
+                                                .isNotEmpty
+                                            ? noteController.text.trim()
+                                            : null,
+                                      });
+
+                                      if (mounted) {
+                                        Navigator.pop(context);
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Row(
+                                              children: [
+                                                Icon(Icons.check_circle,
+                                                    color: Colors.white),
+                                                SizedBox(width: 8),
+                                                Expanded(
+                                                  child: Text(
+                                                      'Viewing request submitted! The landlord will review your request.'),
+                                                ),
+                                              ],
+                                            ),
+                                            backgroundColor:
+                                                Color(0xFF4CAF50),
+                                            duration:
+                                                Duration(seconds: 3),
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                                'Failed to submit request: ${e.toString().replaceAll('Exception: ', '')}'),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    } finally {
+                                      setSheetState(
+                                          () => isSubmitting = false);
+                                    }
+                                  }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              disabledBackgroundColor:
+                                  Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              padding: EdgeInsets.zero,
+                              elevation: 0,
+                            ),
+                            child: isSubmitting
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      valueColor:
+                                          AlwaysStoppedAnimation<Color>(
+                                              Colors.white),
+                                    ),
+                                  )
+                                : const Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.send_rounded,
+                                          color: Colors.white, size: 20),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Request Viewing',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

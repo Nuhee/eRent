@@ -15,6 +15,7 @@ import 'package:erent_landlord_desktop/providers/rent_provider.dart';
 import 'package:erent_landlord_desktop/providers/landlord_analytics_provider.dart';
 import 'package:erent_landlord_desktop/providers/auth_provider.dart';
 import 'package:erent_landlord_desktop/providers/chat_provider.dart';
+import 'package:erent_landlord_desktop/providers/viewing_appointment_provider.dart';
 import 'package:provider/provider.dart';
 
 
@@ -57,6 +58,9 @@ void main() async {
         ),
         ChangeNotifierProvider<ChatProvider>(
           create: (context) => ChatProvider(),
+        ),
+        ChangeNotifierProvider<ViewingAppointmentProvider>(
+          create: (context) => ViewingAppointmentProvider(),
         ),
       ],
       child: const MyApp(),

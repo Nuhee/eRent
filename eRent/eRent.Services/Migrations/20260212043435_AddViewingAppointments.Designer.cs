@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using eRent.Services.Database;
 
@@ -11,9 +12,11 @@ using eRent.Services.Database;
 namespace eRent.Services.Migrations
 {
     [DbContext(typeof(eRentDbContext))]
-    partial class eRentDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260212043435_AddViewingAppointments")]
+    partial class AddViewingAppointments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

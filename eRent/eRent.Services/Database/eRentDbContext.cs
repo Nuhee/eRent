@@ -24,7 +24,7 @@ namespace eRent.Services.Database
         public DbSet<RentStatus> RentStatuses { get; set; }
         public DbSet<ReviewRent> ReviewRents { get; set; }
         public DbSet<Payment> Payments { get; set; }
-    
+        public DbSet<ViewingAppointment> ViewingAppointments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -214,6 +214,19 @@ namespace eRent.Services.Database
                 .HasOne(p => p.Rent)
                 .WithMany()
                 .HasForeignKey(p => p.RentId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Configure ViewingAppointment entity relationships
+            modelBuilder.Entity<ViewingAppointment>()
+                .HasOne(va => va.Property)
+                .WithMany()
+                .HasForeignKey(va => va.PropertyId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ViewingAppointment>()
+                .HasOne(va => va.Tenant)
+                .WithMany()
+                .HasForeignKey(va => va.TenantId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             // Seed initial data
